@@ -10,11 +10,11 @@ set(TextC_src_files
 )
 add_library(TextC ${TextC_src_files})
 
-install(TARGETS TextC EXPORT gfxConfig
+install(TARGETS TextC EXPORT gfxplusplusConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(EXPORT gfxConfig DESTINATION share/glades/cmake)
+install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
 
-export(TARGETS TextC FILE gfxConfig.cmake)
+export(TARGETS TextC FILE gfxplusplusConfig.cmake)

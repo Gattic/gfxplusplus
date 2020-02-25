@@ -16,8 +16,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "GraphScatter.h"
-#include "../../GFXUtilities/point2.h"
-#include "../../GItems/RUColors.h"
+#include "../GFXUtilities/point2.h"
+#include "../GItems/RUColors.h"
 #include "RUGraph.h"
 
 GraphScatter::GraphScatter(RUGraph* newParent, SDL_Color newColor, int pointSz)

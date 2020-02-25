@@ -14,9 +14,11 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GRAPHSCATTER_H
-#define _GRAPHSCATTER_H
+#ifndef _RUGRAPHLINE
+#define _RUGRAPHLINE
 
+#include "../GItems/RUColors.h"
+#include "Graphable.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <pthread.h>
@@ -25,27 +27,15 @@
 #include <string>
 #include <vector>
 
-#include "../../GItems/RUColors.h"
-#include "Graphable.h"
-
 class RUGraph;
 class Point2;
 
-class GraphScatter : public Graphable
+class GraphLine : public Graphable
 {
-private:
-	void drawPoint(SDL_Renderer*, int, int, int = 0);
-	void drawPointOutline(SDL_Renderer*, int, int, int = 0);
-	int pointSize;
-
 public:
 	// constructors & destructor
-	GraphScatter(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, int = 4);
-	~GraphScatter();
-
-	void setPointSize(int);
-	int getPointSize(int);
-
+	GraphLine(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	~GraphLine();
 	virtual void draw(SDL_Renderer*);
 	virtual std::string getType() const;
 };

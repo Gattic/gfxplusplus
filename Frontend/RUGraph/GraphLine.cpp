@@ -15,8 +15,8 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "GraphLine.h"
-#include "../../GFXUtilities/point2.h"
-#include "../../GItems/RUColors.h"
+#include "../GFXUtilities/point2.h"
+#include "../GItems/RUColors.h"
 #include "RUGraph.h"
 
 GraphLine::GraphLine(RUGraph* newParent, SDL_Color newColor) : Graphable(newParent, newColor)
