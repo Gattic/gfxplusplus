@@ -23,70 +23,74 @@
 #include "../GUI/Text/RULabel.h"
 #include "object.h"
 
-bool Graphics::running = true;
-int Graphics::width = 0;
-int Graphics::height = 0;
-float Graphics::hunterZolomon = 1.0f;
-int Graphics::renderStatus = _2D;
-
-int32_t Graphics::frames = 0;
-bool Graphics::rotate = false;
-bool Graphics::move = false;
-int32_t Graphics::now = 0;
-int32_t Graphics::then = SDL_GetTicks();
-
-// for mouse
-int Graphics::mouseX = 0;
-int Graphics::mouseY = 0;
-
-// for key presses
-bool Graphics::CTRLPressed = false;
-bool Graphics::ALTPressed = false;
-bool Graphics::spacePressed = false;
-bool Graphics::fPressed = false;
-bool Graphics::uPressed = false;
-bool Graphics::qPressed = false;
-bool Graphics::gPressed = false;
-bool Graphics::rPressed = false;
-bool Graphics::lPressed = false;
-bool Graphics::upPressed = false;
-bool Graphics::downPressed = false;
-bool Graphics::leftPressed = false;
-bool Graphics::rightPressed = false;
-
-SDL_Window* Graphics::window = NULL;
-SDL_GLContext Graphics::context;
-SDL_Renderer* Graphics::renderer = NULL;
-
-GItem* Graphics::focusedItem = NULL;
-GPanel* Graphics::focusedPanel = NULL;
-
-RULabel* Graphics::fpsLabel = NULL;
-
-Quaternion Graphics::roll(0.0f, 1.0f, 0.0f, 0.0f);
-Quaternion Graphics::pitch(0.0f, 0.0f, 1.0f, 0.0f);
-Quaternion Graphics::yaw(0.0f, 0.0f, 0.0f, 1.0f);
-std::vector<Object*> Graphics::objects;
-unsigned int Graphics::cObjIndex = -1;
-
-int Graphics::init(int newWidth, int newHeight, int newRenderStatus)
+gfxpp::gfxpp()
 {
+	width = 800;
+	height = 600;
+	renderStatus = _2D;
+
+	errorFlag = initHelper(true, "gfxplusplus");
+}
+
+gfxpp::gfxpp(std::string newTitle, int newRenderStatus, bool fullScreenMode, int newWidth,
+			 int newHeight)
+{
+	renderStatus = newRenderStatus;
 	width = newWidth;
 	height = newHeight;
-	renderStatus = newRenderStatus;
 
-	return initHelper(false);
+	errorFlag = initHelper(fullScreenMode, newTitle);
 }
 
-int Graphics::init(int newRenderStatus)
+int gfxpp::getErrorFlag() const
 {
-	renderStatus = newRenderStatus;
-
-	return initHelper(true);
+	return errorFlag;
 }
 
-int Graphics::initHelper(bool fullscreenMode)
+int gfxpp::initHelper(bool fullscreenMode, std::string title)
 {
+	running = false;
+	hunterZolomon = 1.0f;
+	renderStatus = _2D;
+
+	frames = 0;
+	rotate = false;
+	move = false;
+	now = 0;
+	then = SDL_GetTicks();
+
+	// for mouse
+	mouseX = 0;
+	mouseY = 0;
+
+	// for key presses
+	CTRLPressed = false;
+	ALTPressed = false;
+	spacePressed = false;
+	fPressed = false;
+	uPressed = false;
+	qPressed = false;
+	gPressed = false;
+	rPressed = false;
+	lPressed = false;
+	upPressed = false;
+	downPressed = false;
+	leftPressed = false;
+	rightPressed = false;
+
+	window = NULL;
+	renderer = NULL;
+
+	focusedItem = NULL;
+	focusedPanel = NULL;
+
+	fpsLabel = NULL;
+
+	roll = Quaternion(0.0f, 1.0f, 0.0f, 0.0f);
+	pitch = Quaternion(0.0f, 0.0f, 1.0f, 0.0f);
+	yaw = Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
+	cObjIndex = -1;
+
 	// Initialize SDL
 	int sdlStatus = SDL_Init(SDL_INIT_VIDEO);
 	if (sdlStatus < 0)
@@ -100,7 +104,7 @@ int Graphics::initHelper(bool fullscreenMode)
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	if (fullscreenMode)
 	{
-		window = SDL_CreateWindow("gfxplusplus", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+		window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 								  getWidth(), getHeight(),
 								  SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP);
 
@@ -136,7 +140,7 @@ int Graphics::initHelper(bool fullscreenMode)
 	return 0;
 }
 
-int Graphics::init2D()
+int gfxpp::init2D()
 {
 	// Create a new renderer; -1 loads the default video driver we need
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -169,7 +173,7 @@ int Graphics::init2D()
 	return 0;
 }
 
-void Graphics::init3D()
+void gfxpp::init3D()
 {
 	// Create a new context
 	context = SDL_GL_CreateContext(window);
@@ -181,7 +185,7 @@ void Graphics::init3D()
 	glShadeModel(GL_SMOOTH);
 }
 
-void Graphics::run()
+void gfxpp::run()
 {
 	if (renderStatus == _2D)
 	{
@@ -204,7 +208,7 @@ void Graphics::run()
 		// Graphics::addBMP("graphics/xorgate.bmp");
 		// Graphics::addGradient(800/2, 600/2, 500);
 		// Graphics::addBasis();
-		Graphics::addCube();
+		addCube();
 	}
 
 	// the display loop
@@ -212,7 +216,7 @@ void Graphics::run()
 	finish();
 }
 
-void Graphics::display()
+void gfxpp::display()
 {
 	running = true;
 	frames = 0;
@@ -399,7 +403,7 @@ void Graphics::display()
 
 				// Events for the focused panel
 				if (focusedPanel)
-					focusedPanel->processSubItemEvents(NULL, NULL, event, mouseX, mouseY);
+					focusedPanel->processSubItemEvents(this, NULL, NULL, event, mouseX, mouseY);
 			}
 			else if (renderStatus == _3D)
 			{
@@ -595,7 +599,7 @@ void Graphics::display()
 	}
 }
 
-void Graphics::changeRenderStatus(int newRenderStatus)
+void gfxpp::changeRenderStatus(int newRenderStatus)
 {
 	if (renderStatus != newRenderStatus)
 	{
@@ -620,8 +624,8 @@ void Graphics::changeRenderStatus(int newRenderStatus)
 		else if (renderStatus == _3D)
 		{
 			init3D();
-			Graphics::addBasis();
-			Graphics::addCube();
+			addBasis();
+			addCube();
 		}
 
 		// switch the type
@@ -638,7 +642,7 @@ void Graphics::changeRenderStatus(int newRenderStatus)
 }
 
 // UPDATE FUNCTION
-void Graphics::clean2D()
+void gfxpp::clean2D()
 {
 	// clean up the componenets
 	focusedItem = NULL;
@@ -660,7 +664,7 @@ void Graphics::clean2D()
 	}
 }
 
-void Graphics::clean3D()
+void gfxpp::clean3D()
 {
 	// gui
 	std::vector<Object*>::iterator itr = objects.begin();
@@ -675,7 +679,7 @@ void Graphics::clean3D()
 	SDL_GL_DeleteContext(context);
 }
 
-void Graphics::finish()
+void gfxpp::finish()
 {
 	running = false;
 	if (renderStatus == _2D)

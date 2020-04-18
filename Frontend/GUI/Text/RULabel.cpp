@@ -43,7 +43,7 @@ std::string RULabel::getType() const
 	return "RULabel";
 }
 
-void RULabel::onMouseDown(GPanel* cPanel, int eventX, int eventY)
+void RULabel::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUTextComponent: onMouseDown(%d, %d);\n", eventX, eventY);
 }

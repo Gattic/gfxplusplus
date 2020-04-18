@@ -255,7 +255,7 @@ void RUScrollbar::updateBackground(SDL_Renderer* renderer)
 	//
 }
 
-void RUScrollbar::onMouseDown(GPanel* cPanel, int eventX, int eventY)
+void RUScrollbar::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUScrollbar: onMouseDown(%d, %d);\n", eventX, eventY);
 	if (eventY <= arrowSpace)
@@ -266,7 +266,7 @@ void RUScrollbar::onMouseDown(GPanel* cPanel, int eventX, int eventY)
 	drawUpdate = true;
 }
 
-void RUScrollbar::onMouseWheel(GPanel* cPanel, int eventX, int eventY, int scrollType)
+void RUScrollbar::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY, int scrollType)
 {
 	// printf("RUScrollbar: onMouseWheel(%d);\n", scrollType);
 

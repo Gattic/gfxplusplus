@@ -218,7 +218,7 @@ void RUDropdown::setOptionChangedListener(void (GPanel::*f)(int))
 	OptionChangedListener = f;
 }
 
-void RUDropdown::onMouseDown(GPanel* cPanel, int eventX, int eventY)
+void RUDropdown::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUDropdown: onMouseDown(%d, %d);\n", eventX, eventY);
 
@@ -274,7 +274,7 @@ void RUDropdown::onMouseDown(GPanel* cPanel, int eventX, int eventY)
 	}*/
 }
 
-void RUDropdown::onMouseWheel(GPanel* cPanel, int eventX, int eventY, int scrollType)
+void RUDropdown::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY, int scrollType)
 {
 	// printf("RUDropdown: onMouseWheel(%d);\n", scrollType);
 

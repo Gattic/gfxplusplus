@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 
+class gfxpp;
 class GPanel;
 class Graphable;
 class Point2;
@@ -42,7 +43,7 @@ private:
 
 protected:
 	// events
-	virtual void onMouseDown(GPanel*, int, int);
+	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 
 public:
 	static const int MODE_CIRCLES = 0;

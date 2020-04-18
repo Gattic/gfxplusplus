@@ -15,10 +15,11 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "GPanel.h"
-#include "../../include/Backend/Networking/main.h"
 #include "../GFXUtilities/EventTracker.h"
+#include "../GUI/RUMsgBox.h"
 #include "../GUI/Text/RUTextComponent.h"
 #include "../Graphics/graphics.h"
+#include "Backend/Networking/main.h"
 #include "GItem.h"
 #include "GLayout.h"
 #include "Mini/RUBackgroundComponent.h"
@@ -35,33 +36,33 @@ GPanel::GPanel(const std::string& newName, int newWidth, int newHeight)
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 }
 
-void GPanel::onShow()
+void GPanel::onShow(gfxpp* cGfx)
 {
 	focus = true;
-	Graphics::focusedPanel = this;
+	cGfx->focusedPanel = this;
 }
 
-void GPanel::onHide()
+void GPanel::onHide(gfxpp* cGfx)
 {
 	focus = false;
 }
 
-void GPanel::show()
+void GPanel::show(gfxpp* cGfx)
 {
-	onShow();
+	onShow(cGfx);
 }
 
-void GPanel::hide()
+void GPanel::hide(gfxpp* cGfx)
 {
-	onHide();
+	onHide(cGfx);
 }
 
-void GPanel::hover()
+void GPanel::hover(gfxpp* cGfx)
 {
 	//
 }
 
-void GPanel::unhover()
+void GPanel::unhover(gfxpp* cGfx)
 {
 	//
 }
@@ -117,9 +118,12 @@ void GPanel::calculateSubItemPositions(std::pair<int, int> parentOffset)
 	}
 }
 
-void GPanel::processSubItemEvents(EventTracker* eventsStatus, GPanel* parentPanel, SDL_Event event,
-								  int mouseX, int mouseY)
+void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* parentPanel,
+								  SDL_Event event, int mouseX, int mouseY)
 {
+	if (!cGfx)
+		return;
+
 	if (!focus)
 		return;
 
@@ -130,7 +134,7 @@ void GPanel::processSubItemEvents(EventTracker* eventsStatus, GPanel* parentPane
 		if (!cItem)
 			continue;
 
-		EventTracker* eventsStatus = cItem->processEvents(this, event, mouseX, mouseY);
+		EventTracker* eventsStatus = cItem->processEvents(cGfx, this, event, mouseX, mouseY);
 		if (eventsStatus->hovered)
 			hovered = true;
 		delete eventsStatus;
@@ -238,4 +242,15 @@ void GPanel::updateBackground(SDL_Renderer* renderer)
 std::string GPanel::getType() const
 {
 	return "GPanel";
+}
+
+void GPanel::MsgBox(std::string title, std::string msg, int type)
+{
+	// Type = Message Box, ConfirmBox, or InputBox
+	RUMsgBox* newMsgBox = new RUMsgBox(this, title, msg, type);
+
+	newMsgBox->setX((getWidth() / 2.0f) - (newMsgBox->getWidth() / 2.0f));
+	newMsgBox->setY((getHeight() / 2.0f) - (newMsgBox->getHeight() / 2.0f));
+	newMsgBox->setName(title + ":" + msg);
+	addSubItem(newMsgBox, GItem::Z_BACK);
 }

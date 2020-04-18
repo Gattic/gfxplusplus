@@ -38,7 +38,7 @@ void RUComponent::calculateSubItemPositions(std::pair<int, int> parentOffset)
 	}
 }
 
-void RUComponent::processSubItemEvents(EventTracker* eventsStatus, GPanel* parentPanel,
+void RUComponent::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* parentPanel,
 									   SDL_Event event, int mouseX, int mouseY)
 {
 	if (!eventsStatus)
@@ -58,7 +58,7 @@ void RUComponent::processSubItemEvents(EventTracker* eventsStatus, GPanel* paren
 	for (unsigned int i = 0; i < subitems.size(); ++i)
 	{
 		EventTracker* subEventsStatus =
-			subitems[i]->processEvents(parentPanel, event, mouseX, mouseY);
+			subitems[i]->processEvents(cGfx, parentPanel, event, mouseX, mouseY);
 		if (subEventsStatus->hovered)
 			eventsStatus->hovered = true;
 
@@ -127,12 +127,12 @@ void RUComponent::updateBackgroundHelper(SDL_Renderer* renderer)
 		subitems[i]->updateBackgroundHelper(renderer);
 }
 
-void RUComponent::hover()
+void RUComponent::hover(gfxpp* cGfx)
 {
 	//
 }
 
-void RUComponent::unhover()
+void RUComponent::unhover(gfxpp* cGfx)
 {
 	//
 }

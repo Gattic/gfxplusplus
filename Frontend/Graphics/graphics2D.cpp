@@ -18,11 +18,8 @@
 #include "../GItems/GItem.h"
 #include "../GItems/GLayout.h"
 #include "../GItems/RUComponent.h"
-#include "../GUI/RUMsgBox.h"
 
-std::vector<GItem*> Graphics::guiElements; // < RUComponent || GLayout* >
-
-unsigned int Graphics::RGBfromHue(double hue, int8_t* r, int8_t* g, int8_t* b)
+unsigned int gfxpp::RGBfromHue(double hue, int8_t* r, int8_t* g, int8_t* b)
 {
 	int h = int(hue * 256 * 6);
 	int x = h % 0x100;
@@ -61,7 +58,7 @@ unsigned int Graphics::RGBfromHue(double hue, int8_t* r, int8_t* g, int8_t* b)
 	return (*r) + ((*g) << 8) + ((*b) << 16);
 }
 
-void Graphics::addGradient(int x, int y, int size)
+void gfxpp::addGradient(int x, int y, int size)
 {
 	// check the renderer
 	if (!renderer)
@@ -90,7 +87,7 @@ void Graphics::addGradient(int x, int y, int size)
 	}*/
 }
 
-void Graphics::addItem(GItem* newItem)
+void gfxpp::addItem(GItem* newItem)
 {
 	if (!newItem)
 		return;
@@ -122,7 +119,7 @@ void Graphics::addItem(GItem* newItem)
 }
 
 // Unique ID for each item, but names may be the same.
-void Graphics::removeItem(int itemID)
+void gfxpp::removeItem(int itemID)
 {
 	if (!itemID)
 		return;
@@ -138,7 +135,7 @@ void Graphics::removeItem(int itemID)
 }
 
 // Unique ID for each item, but names may be the same.
-GItem* Graphics::getItemByID(int itemID)
+GItem* gfxpp::getItemByID(int itemID)
 {
 	for (unsigned int i = 0; i < guiElements.size(); ++i)
 	{
@@ -148,7 +145,7 @@ GItem* Graphics::getItemByID(int itemID)
 	return NULL;
 }
 
-void Graphics::setFocus(GItem* newFocusedItem)
+void gfxpp::setFocus(GItem* newFocusedItem)
 {
 	if (!newFocusedItem)
 		return;
@@ -164,26 +161,12 @@ void Graphics::setFocus(GItem* newFocusedItem)
 	focusedItem->setFocus();
 }
 
-int Graphics::getWidth()
+int gfxpp::getWidth() const
 {
 	return width;
 }
 
-int Graphics::getHeight()
+int gfxpp::getHeight() const
 {
 	return height;
-}
-
-void Graphics::MsgBox(std::string title, std::string msg, int type)
-{
-	if (!focusedPanel)
-		return;
-
-	// Type = Message Box, ConfirmBox, or InputBox
-	RUMsgBox* newMsgBox = new RUMsgBox(focusedPanel, title, msg, type);
-
-	newMsgBox->setX((focusedPanel->getWidth() / 2.0f) - (newMsgBox->getWidth() / 2.0f));
-	newMsgBox->setY((focusedPanel->getHeight() / 2.0f) - (newMsgBox->getHeight() / 2.0f));
-	newMsgBox->setName(title + ":" + msg);
-	focusedPanel->addSubItem(newMsgBox, GItem::Z_BACK);
 }

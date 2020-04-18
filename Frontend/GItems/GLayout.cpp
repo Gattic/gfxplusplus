@@ -40,12 +40,12 @@ int GLayout::getLayoutType() const
 	return layoutType;
 }
 
-void GLayout::hover()
+void GLayout::hover(gfxpp* cGfx)
 {
 	//
 }
 
-void GLayout::unhover()
+void GLayout::unhover(gfxpp* cGfx)
 {
 	//
 }

@@ -171,7 +171,7 @@ void GItem::addSubItem(GItem* newItem, int newZIndex)
 	drawUpdate = true;
 }
 
-void GItem::removeItem(int itemID)
+void GItem::removeItem(gfxpp* cGfx, int itemID)
 {
 	if (!itemID)
 		return;
@@ -181,13 +181,13 @@ void GItem::removeItem(int itemID)
 		if (subitems[i]->getID() == itemID)
 		{
 			subitems.erase(subitems.begin() + i); // Remove item from this layout
-			Graphics::removeItem(itemID);		  // Remove from master vector of GUI items
+			cGfx->removeItem(itemID);			  // Remove from master vector of GUI items
 			break;
 		}
 	}
 }
 
-void GItem::removeItem(const std::string& itemName)
+void GItem::removeItem(gfxpp* cGfx, const std::string& itemName)
 {
 	if (itemName == "")
 		return;
@@ -196,8 +196,8 @@ void GItem::removeItem(const std::string& itemName)
 	{
 		if (subitems[i]->getName() == itemName)
 		{
-			subitems.erase(subitems.begin() + i);		// Remove item from this layout
-			Graphics::removeItem(subitems[i]->getID()); // Remove from master vector of GUI items
+			subitems.erase(subitems.begin() + i);   // Remove item from this layout
+			cGfx->removeItem(subitems[i]->getID()); // Remove from master vector of GUI items
 			break;
 		}
 	}
@@ -217,9 +217,14 @@ void GItem::clearItems(unsigned int numToSave)
 	drawUpdate = true;
 }
 
-EventTracker* GItem::processEvents(GPanel* parentPanel, SDL_Event event, int mouseX, int mouseY)
+EventTracker* GItem::processEvents(gfxpp* cGfx, GPanel* parentPanel, SDL_Event event, int mouseX,
+								   int mouseY)
 {
 	EventTracker* eventsStatus = new EventTracker();
+
+	if (!cGfx)
+		return eventsStatus;
+
 	if (!parentPanel)
 		return eventsStatus;
 
@@ -227,7 +232,7 @@ EventTracker* GItem::processEvents(GPanel* parentPanel, SDL_Event event, int mou
 		return eventsStatus;
 
 	//
-	processSubItemEvents(eventsStatus, parentPanel, event, mouseX, mouseY);
+	processSubItemEvents(cGfx, eventsStatus, parentPanel, event, mouseX, mouseY);
 
 	// Dont want to toggle dropdowns all the time
 	bool dropdownToggle = (getType() == "RUDropdown");
@@ -239,16 +244,16 @@ EventTracker* GItem::processEvents(GPanel* parentPanel, SDL_Event event, int mou
 
 	//
 	if (event.type == SDL_MOUSEBUTTONDOWN)
-		onMouseDownHelper(eventsStatus, parentPanel, mouseX, mouseY, dropdownToggle);
+		onMouseDownHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, dropdownToggle);
 	else if (event.type == SDL_MOUSEBUTTONUP)
-		onMouseUpHelper(eventsStatus, parentPanel, mouseX, mouseY, dropdownToggle);
+		onMouseUpHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, dropdownToggle);
 	else if (event.type == SDL_MOUSEMOTION)
 	{
-		onMouseMotionHelper(eventsStatus, parentPanel, mouseX, mouseY, dropdownToggle);
+		onMouseMotionHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, dropdownToggle);
 
 		// hover and unhover subevents
 		if (eventsStatus->hovered)
-			hover();
+			hover(cGfx);
 		else
 		{
 			if (!unhovered)
@@ -261,7 +266,7 @@ EventTracker* GItem::processEvents(GPanel* parentPanel, SDL_Event event, int mou
 					SDL_SetCursor(renderCursor);
 				}
 
-				unhover();
+				unhover(cGfx);
 				unhovered = true;
 			}
 		}
@@ -271,26 +276,26 @@ EventTracker* GItem::processEvents(GPanel* parentPanel, SDL_Event event, int mou
 		if (event.wheel.y > 0)
 		{
 			// Scroll down
-			onMouseWheelHelper(eventsStatus, parentPanel, mouseX, mouseY, SCROLL_DOWN,
+			onMouseWheelHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, SCROLL_DOWN,
 							   dropdownToggle);
 		}
 		else if (event.wheel.y < 0)
 		{
 			// Scroll up
-			onMouseWheelHelper(eventsStatus, parentPanel, mouseX, mouseY, SCROLL_UP,
+			onMouseWheelHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, SCROLL_UP,
 							   dropdownToggle);
 		}
 
 		if (event.wheel.x > 0)
 		{
 			// Scroll right
-			onMouseWheelHelper(eventsStatus, parentPanel, mouseX, mouseY, SCROLL_RIGHT,
+			onMouseWheelHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, SCROLL_RIGHT,
 							   dropdownToggle);
 		}
 		else if (event.wheel.x < 0)
 		{
 			// Scroll left
-			onMouseWheelHelper(eventsStatus, parentPanel, mouseX, mouseY, SCROLL_LEFT,
+			onMouseWheelHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, SCROLL_LEFT,
 							   dropdownToggle);
 		}
 	}
@@ -299,14 +304,14 @@ EventTracker* GItem::processEvents(GPanel* parentPanel, SDL_Event event, int mou
 		SDL_Keycode keyPressed = event.key.keysym.sym;
 		Uint16 keyModPressed = event.key.keysym.mod;
 		// Send a key press to the focused ui element
-		onKeyDownHelper(eventsStatus, parentPanel, keyPressed, keyModPressed);
+		onKeyDownHelper(cGfx, eventsStatus, parentPanel, keyPressed, keyModPressed);
 	}
 	else if (event.type == SDL_KEYUP)
 	{
 		SDL_Keycode keyPressed = event.key.keysym.sym;
 		Uint16 keyModPressed = event.key.keysym.mod;
 		// Send a key release to the focused ui element
-		onKeyUpHelper(eventsStatus, parentPanel, keyPressed, keyModPressed);
+		onKeyUpHelper(cGfx, eventsStatus, parentPanel, keyPressed, keyModPressed);
 	}
 
 	return eventsStatus;

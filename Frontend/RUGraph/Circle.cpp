@@ -199,7 +199,7 @@ void Circle::draw(SDL_Renderer* renderer)
 			int8_t redMask = 0;
 			int8_t greenMask = 0;
 			int8_t blueMask = 0;
-			unsigned int colorMask = Graphics::RGBfromHue(hue, &redMask, &greenMask, &blueMask);
+			unsigned int colorMask = gfxpp::RGBfromHue(hue, &redMask, &greenMask, &blueMask);
 
 			// set the color and draw the point
 			SDL_SetRenderDrawColor(renderer, redMask, greenMask, blueMask, SDL_ALPHA_OPAQUE);

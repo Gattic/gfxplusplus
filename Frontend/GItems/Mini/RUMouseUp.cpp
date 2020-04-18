@@ -31,9 +31,12 @@ RUMouseUp::~RUMouseUp()
 	MouseUpListener = 0;
 }
 
-void RUMouseUp::onMouseUpHelper(EventTracker* eventsStatus, GPanel* cPanel, int eventX, int eventY,
-								bool overrideRange)
+void RUMouseUp::onMouseUpHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPanel, int eventX,
+								int eventY, bool overrideRange)
 {
+	if (!cGfx)
+		return;
+
 	if (!eventsStatus)
 		return;
 
@@ -50,7 +53,7 @@ void RUMouseUp::onMouseUpHelper(EventTracker* eventsStatus, GPanel* cPanel, int 
 	drawUpdate = true;
 
 	// pass on the event
-	onMouseUp(cPanel, eventX - getX(), eventY - getY());
+	onMouseUp(cGfx, cPanel, eventX - getX(), eventY - getY());
 
 	if (MouseUpListener != 0)
 		(cPanel->*MouseUpListener)(eventX - getX(), eventY - getY());
@@ -58,7 +61,7 @@ void RUMouseUp::onMouseUpHelper(EventTracker* eventsStatus, GPanel* cPanel, int 
 	eventsStatus->upClicked = true;
 }
 
-void RUMouseUp::onMouseUp(GPanel* cPanel, int eventX, int eventY)
+void RUMouseUp::onMouseUp(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUMouseUp: onMouseUp(%d, %d);\n", eventX, eventY);
 }

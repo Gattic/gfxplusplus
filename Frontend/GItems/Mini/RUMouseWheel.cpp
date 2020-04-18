@@ -36,9 +36,12 @@ void RUMouseWheel::setMouseWheelListener(void (GPanel::*f)(int))
 	MouseWheelListener = f;
 }
 
-void RUMouseWheel::onMouseWheelHelper(EventTracker* eventsStatus, GPanel* cPanel, int eventX,
-									  int eventY, int scrollType, bool overrideRange)
+void RUMouseWheel::onMouseWheelHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPanel,
+									  int eventX, int eventY, int scrollType, bool overrideRange)
 {
+	if (!cGfx)
+		return;
+
 	if (!eventsStatus)
 		return;
 
@@ -55,7 +58,7 @@ void RUMouseWheel::onMouseWheelHelper(EventTracker* eventsStatus, GPanel* cPanel
 	drawUpdate = true;
 
 	// pass on the event
-	onMouseWheel(cPanel, eventX - getX(), eventY - getY(), scrollType);
+	onMouseWheel(cGfx, cPanel, eventX - getX(), eventY - getY(), scrollType);
 
 	if (MouseWheelListener != 0)
 		(cPanel->*MouseWheelListener)(scrollType);
@@ -63,7 +66,7 @@ void RUMouseWheel::onMouseWheelHelper(EventTracker* eventsStatus, GPanel* cPanel
 	eventsStatus->wheeled = true;
 }
 
-void RUMouseWheel::onMouseWheel(GPanel* cPanel, int eventX, int eventY, int scrollType)
+void RUMouseWheel::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY, int scrollType)
 {
 	// printf("RUMouseWheel: onMouseWheel(%d);\n", scrollType);
 }

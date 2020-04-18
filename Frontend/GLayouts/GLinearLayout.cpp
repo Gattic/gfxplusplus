@@ -91,8 +91,9 @@ void GLinearLayout::calculateSubItemPositions(std::pair<int, int> parentOffset)
 	}
 }
 
-void GLinearLayout::processSubItemEvents(EventTracker* eventsStatus, GPanel* parentPanel,
-										 SDL_Event event, int mouseX, int mouseY)
+void GLinearLayout::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus,
+										 GPanel* parentPanel, SDL_Event event, int mouseX,
+										 int mouseY)
 {
 	if (!eventsStatus)
 		return;
@@ -111,7 +112,8 @@ void GLinearLayout::processSubItemEvents(EventTracker* eventsStatus, GPanel* par
 			continue;
 
 		//
-		EventTracker* subEventsStatus = cItem->processEvents(parentPanel, event, mouseX, mouseY);
+		EventTracker* subEventsStatus =
+			cItem->processEvents(cGfx, parentPanel, event, mouseX, mouseY);
 		if (subEventsStatus->hovered)
 			eventsStatus->hovered = true;
 

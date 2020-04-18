@@ -17,7 +17,7 @@
 #include "graphics.h"
 #include "object.h"
 
-void Graphics::addCube()
+void gfxpp::addCube()
 {
 	Object* newObject = (Object*)malloc(sizeof(Object));
 	*newObject = Object();
@@ -27,7 +27,7 @@ void Graphics::addCube()
 		objects.push_back(newObject);
 }
 
-void Graphics::addBasis()
+void gfxpp::addBasis()
 {
 	Object* newObject = (Object*)malloc(sizeof(Object));
 	*newObject = Object();
@@ -37,7 +37,7 @@ void Graphics::addBasis()
 		objects.push_back(newObject);
 }
 
-bool Graphics::contains(const Object* newObject)
+bool gfxpp::contains(const Object* newObject) const
 {
 	// check if the other object is already in the vector
 	std::vector<Object*>::const_iterator itr = objects.begin();
@@ -50,7 +50,7 @@ bool Graphics::contains(const Object* newObject)
 	return false;
 }
 
-bool Graphics::contains(const Object newObject)
+bool gfxpp::contains(const Object newObject) const
 {
 	// check if the other object is already in the vector
 	std::vector<Object*>::const_iterator itr = objects.begin();

@@ -344,7 +344,7 @@ void RUListbox::updateLabels()
 	drawUpdate = true;
 }
 
-void RUListbox::onMouseMotion(GPanel* cPanel, int eventX, int eventY)
+void RUListbox::onMouseMotion(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// selecting listbox items
 	if (optionsShown > 0)
@@ -359,7 +359,7 @@ void RUListbox::onMouseMotion(GPanel* cPanel, int eventX, int eventY)
 	updateLabels();
 }
 
-void RUListbox::onMouseDown(GPanel* cPanel, int eventX, int eventY)
+void RUListbox::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUListbox: onMouseDown(%d, %d);\n", eventX, eventY);
 
@@ -416,7 +416,7 @@ void RUListbox::onMouseDown(GPanel* cPanel, int eventX, int eventY)
 	updateLabels();
 }
 
-void RUListbox::onMouseWheel(GPanel* cPanel, int eventX, int eventY, int scrollType)
+void RUListbox::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY, int scrollType)
 {
 	// printf("RUListbox: onMouseWheel(%d);\n", scrollType);
 

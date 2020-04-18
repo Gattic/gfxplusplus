@@ -36,9 +36,12 @@ void RUMouseDown::setMouseDownListener(void (GPanel::*f)(const std::string&, int
 	MouseDownListener = f;
 }
 
-void RUMouseDown::onMouseDownHelper(EventTracker* eventsStatus, GPanel* cPanel, int eventX,
-									int eventY, bool overrideRange)
+void RUMouseDown::onMouseDownHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPanel,
+									int eventX, int eventY, bool overrideRange)
 {
+	if (!cGfx)
+		return;
+
 	if (!eventsStatus)
 		return;
 
@@ -54,13 +57,13 @@ void RUMouseDown::onMouseDownHelper(EventTracker* eventsStatus, GPanel* cPanel, 
 	// bring focus to the component
 	GItem* cItem = dynamic_cast<GItem*>(this);
 	if (!eventsStatus->downClicked)
-		Graphics::setFocus(cItem);
+		cGfx->setFocus(cItem);
 
 	// Render the GUI object
 	drawUpdate = true;
 
 	// pass on the event
-	onMouseDown(cPanel, eventX - getX(), eventY - getY());
+	onMouseDown(cGfx, cPanel, eventX - getX(), eventY - getY());
 
 	if (MouseDownListener != 0)
 		(cPanel->*MouseDownListener)(cItem->getName(), eventX - getX(), eventY - getY());
@@ -68,7 +71,7 @@ void RUMouseDown::onMouseDownHelper(EventTracker* eventsStatus, GPanel* cPanel, 
 	eventsStatus->downClicked = true;
 }
 
-void RUMouseDown::onMouseDown(GPanel* cPanel, int eventX, int eventY)
+void RUMouseDown::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUMouseDown: onMouseDown(%d, %d);\n", eventX, eventY);
 }

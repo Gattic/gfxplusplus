@@ -15,9 +15,9 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUTextComponent.h"
-#include "../../../include/Backend/Database/gtype.h"
 #include "../../GItems/RUColors.h"
 #include "../../Graphics/graphics.h"
+#include "Backend/Database/gtype.h"
 
 std::string RUTextComponent::FONT_PATH = "resources/fonts/carlenlund_helmet/Helmet-Regular.ttf";
 TTF_Font* RUTextComponent::font = NULL;
@@ -286,7 +286,7 @@ void RUTextComponent::drawCursor(SDL_Renderer* renderer)
 {
 	if (!readOnly)
 	{
-		if (Graphics::focusedItem == this)
+		if (isFocused())
 		{
 			unsigned int cursorCounter = (time(NULL) - cursorStart) % 2;
 			if ((cursorStart > 0) && (cursorCounter == 0))
@@ -313,19 +313,19 @@ void RUTextComponent::setKeyListener(void (GPanel::*f)(char))
 	KeyListener = f;
 }
 
-void RUTextComponent::onMouseDown(GPanel* cPanel, int eventX, int eventY)
+void RUTextComponent::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUTextComponent: onMouseDown(%d, %d);\n", eventX, eventY);
 	cursorStart = time(NULL);
 	drawUpdate = true;
 }
 
-void RUTextComponent::onKey(char eventKeyPressed)
+void RUTextComponent::onKey(gfxpp* cGfx, char eventKeyPressed)
 {
 	// printf("RUTextComponent: onKey(%c);\n", eventKeyPressed);
 }
 
-bool RUTextComponent::onKeyHelper(GPanel* cPanel, SDL_Keycode eventKeyPressed,
+bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode eventKeyPressed,
 								  Uint16 eventKeyModPressed)
 {
 	bool typed = false;
@@ -455,7 +455,7 @@ bool RUTextComponent::onKeyHelper(GPanel* cPanel, SDL_Keycode eventKeyPressed,
 
 	// pass down the event
 	if (eventChar > 0x00)
-		onKey(eventChar);
+		onKey(cGfx, eventChar);
 
 	if (KeyListener != 0)
 		(cPanel->*KeyListener)(eventKeyPressed);

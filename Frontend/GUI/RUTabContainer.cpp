@@ -361,7 +361,7 @@ std::string RUTabContainer::getType() const
 	return "RUTabContainer";
 }
 
-void RUTabContainer::onMouseDown(GPanel* cPanel, int eventX, int eventY)
+void RUTabContainer::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUTabContainer: onMouseDown(%d, %d);\n", eventX, eventY);
 
@@ -404,7 +404,7 @@ void RUTabContainer::onMouseDown(GPanel* cPanel, int eventX, int eventY)
 	updateLabels();
 }
 
-void RUTabContainer::onMouseMotion(GPanel* cPanel, int eventX, int eventY)
+void RUTabContainer::onMouseMotion(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 
 	// Ignore clicks on padding

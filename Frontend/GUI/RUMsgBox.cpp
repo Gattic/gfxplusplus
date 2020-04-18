@@ -167,7 +167,7 @@ void RUMsgBox::updateBackground(SDL_Renderer* renderer)
 	//
 }
 
-void RUMsgBox::onMouseDown(GPanel* cPanel, int eventX, int eventY)
+void RUMsgBox::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUMsgBox: onMouseDown(%d, %d);\n", eventX, eventY);
 
@@ -188,7 +188,7 @@ void RUMsgBox::onMouseDown(GPanel* cPanel, int eventX, int eventY)
 
 				if (itr->second->getName() == OK_BUTTON)
 				{
-					msgButtonOKClicked();
+					msgButtonOKClicked(cGfx);
 				}
 				break;
 
@@ -196,11 +196,11 @@ void RUMsgBox::onMouseDown(GPanel* cPanel, int eventX, int eventY)
 
 				if (itr->second->getName() == YES_BUTTON)
 				{
-					confirmButtonYESClicked();
+					confirmButtonYESClicked(cGfx);
 				}
 				else if (itr->second->getName() == NO_BUTTON)
 				{
-					confirmButtonNOClicked();
+					confirmButtonNOClicked(cGfx);
 				}
 				break;
 
@@ -208,7 +208,7 @@ void RUMsgBox::onMouseDown(GPanel* cPanel, int eventX, int eventY)
 
 				if (itr->second->getName() == SUBMIT_BUTTON)
 				{
-					inputButtonSUBMITClicked();
+					inputButtonSUBMITClicked(cGfx);
 				}
 				break;
 			}
@@ -216,48 +216,48 @@ void RUMsgBox::onMouseDown(GPanel* cPanel, int eventX, int eventY)
 	}
 }
 
-void RUMsgBox::msgButtonOKClicked()
+void RUMsgBox::msgButtonOKClicked(gfxpp* cGfx)
 {
 	// close it
 	setVisible(false);
-	panel->removeItem(this->getID());
+	panel->removeItem(cGfx, this->getID());
 
 	// printf("\nOK CLICKED\n");
 }
 
-void RUMsgBox::confirmButtonYESClicked()
+void RUMsgBox::confirmButtonYESClicked(gfxpp* cGfx)
 {
 	// close it and set confirmButtonClicked to 0
 	setVisible(false);
 	confirmButtonYES->setVisible(false);
 	confirmButtonNO->setVisible(false);
-	panel->removeItem(this->getID());
+	panel->removeItem(cGfx, this->getID());
 
 	confirmButtonClicked = 0;
 
 	// printf("\nYES CLICKED\n");
 }
 
-void RUMsgBox::confirmButtonNOClicked()
+void RUMsgBox::confirmButtonNOClicked(gfxpp* cGfx)
 {
 	// close it and set confirmButtonClicked to 1
 	setVisible(false);
 	confirmButtonYES->setVisible(false);
 	confirmButtonNO->setVisible(false);
-	panel->removeItem(this->getID());
+	panel->removeItem(cGfx, this->getID());
 
 	confirmButtonClicked = 1;
 
 	// printf("\nNO CLICKED\n");
 }
 
-void RUMsgBox::inputButtonSUBMITClicked()
+void RUMsgBox::inputButtonSUBMITClicked(gfxpp* cGfx)
 {
 	// close it and set inputSubmitText
 	setVisible(false);
 	inputText->setVisible(false);
 	inputButtonSubmit->setVisible(false);
-	panel->removeItem(this->getID());
+	panel->removeItem(cGfx, this->getID());
 
 	inputSubmitText = inputText->getText();
 

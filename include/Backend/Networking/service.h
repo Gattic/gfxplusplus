@@ -28,6 +28,7 @@
 
 namespace GNet {
 
+class GServer;
 class newServiceArgs;
 
 class Service
@@ -46,7 +47,8 @@ public:
 	Service();
 	virtual ~Service();
 
-	static void ExecuteService(const shmea::GList&, class Instance* = NULL);
+	static void ExecuteService(GServer* serverInstance, const shmea::GList&,
+							   class Instance* = NULL);
 	virtual Service* MakeService() const = 0;
 	virtual std::string getName() const = 0;
 };

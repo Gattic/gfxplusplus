@@ -130,7 +130,7 @@ void RUCheckbox::updateBackground(SDL_Renderer* renderer)
 	//
 }
 
-void RUCheckbox::onMouseDown(GPanel* cPanel, int eventX, int eventY)
+void RUCheckbox::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUCheckbox: onMouseDown(%d, %d);\n", eventX, eventY);
 
@@ -142,7 +142,7 @@ void RUCheckbox::onMouseDown(GPanel* cPanel, int eventX, int eventY)
 	}
 }
 
-void RUCheckbox::onMouseWheel(GPanel* cPanel, int eventX, int eventY, int scrollType)
+void RUCheckbox::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY, int scrollType)
 {
 	// printf("RUCheckbox: onMouseWheel(%d);\n", scrollType);
 	drawUpdate = true;
