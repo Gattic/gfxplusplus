@@ -110,6 +110,9 @@ void RUTabContainer::setOptionsShown(unsigned int newOptionsShown)
 
 void RUTabContainer::addTab(std::string newItemText)
 {
+	if (!optionsShown)
+		return;
+
 	// add the label
 	int newLabelWidth = (getWidth() - (getPaddingX() * optionsShown)) / optionsShown;
 	if (items.size() + 1 > optionsShown)
