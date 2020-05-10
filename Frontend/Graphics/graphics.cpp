@@ -20,6 +20,7 @@
 #include "../GItems/GLayout.h"
 #include "../GItems/RUColors.h"
 #include "../GItems/RUComponent.h"
+#include "../GUI/Text/GFont.h"
 #include "../GUI/Text/RULabel.h"
 #include "object.h"
 
@@ -160,6 +161,8 @@ int gfxpp::init2D()
 		finish();
 		return -4;
 	}
+
+	cFont = new GFont(renderer);
 
 	// Load support for the PNG, TIF, and JPG image formats
 	int flags = IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_JPG;
@@ -662,6 +665,10 @@ void gfxpp::clean2D()
 		SDL_DestroyRenderer(renderer);
 		renderer = NULL;
 	}
+
+	if (cFont)
+		delete cFont;
+	cFont = NULL;
 }
 
 void gfxpp::clean3D()

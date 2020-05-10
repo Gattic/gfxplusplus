@@ -1,4 +1,6 @@
 set(TextC_src_files
+	GFont.cpp
+	GFont.h
 	RUTextComponent.cpp
 	RUTextComponent.h
 	RUButton.cpp

@@ -36,6 +36,7 @@ class RUComponent;
 class RULabel;
 class GPanel;
 class Object;
+class GFont;
 
 class gfxpp
 {
@@ -131,6 +132,7 @@ public:
 	bool contains(const Object) const;
 
 	// 2D
+	GFont* cFont;
 	GPanel* focusedPanel;
 	void addGradient(int, int, int);
 	void addItem(GItem*);
