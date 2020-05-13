@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 
+class gfxpp;
 class RULabel;
 class RUScrollbar;
 
@@ -63,7 +64,7 @@ public:
 	// render
 	void updateLabels();
 	void refreshLabels();
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	virtual std::string getType() const;
 };
 

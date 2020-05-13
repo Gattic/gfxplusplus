@@ -17,6 +17,7 @@
 #include "Circle.h"
 #include "../GFXUtilities/point2.h"
 #include "../Graphics/graphics.h"
+#include "../Graphics/graphics.h"
 #include "RUGraph.h"
 
 Circle::Circle(RUGraph* newParent, SDL_Color newColor) : Graphable(newParent, newColor)
@@ -170,7 +171,7 @@ double Circle::getRadius() const
 	return radius;
 }
 
-void Circle::draw(SDL_Renderer* renderer)
+void Circle::draw(gfxpp* cGfx)
 {
 	if (radius <= 0)
 		return;
@@ -178,7 +179,8 @@ void Circle::draw(SDL_Renderer* renderer)
 	if (foci.size() == 0)
 		return;
 
-	SDL_SetRenderDrawColor(renderer, getColor().r, getColor().g, getColor().b, getColor().a);
+	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
+						   getColor().a);
 
 	std::map<int, std::map<int, int> >::const_iterator itr = heatmap.begin();
 	for (; itr != heatmap.end(); ++itr)
@@ -202,8 +204,10 @@ void Circle::draw(SDL_Renderer* renderer)
 			unsigned int colorMask = gfxpp::RGBfromHue(hue, &redMask, &greenMask, &blueMask);
 
 			// set the color and draw the point
-			SDL_SetRenderDrawColor(renderer, redMask, greenMask, blueMask, SDL_ALPHA_OPAQUE);
-			SDL_RenderDrawPoint(renderer, parent->getX() + xIndex, parent->getY() + yIndex);
+			SDL_SetRenderDrawColor(cGfx->getRenderer(), redMask, greenMask, blueMask,
+								   SDL_ALPHA_OPAQUE);
+			SDL_RenderDrawPoint(cGfx->getRenderer(), parent->getX() + xIndex,
+								parent->getY() + yIndex);
 		}
 	}
 }

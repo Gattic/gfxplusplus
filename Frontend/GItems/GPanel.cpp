@@ -148,12 +148,12 @@ void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPane
 	}
 }
 
-void GPanel::updateBackgroundHelper(SDL_Renderer* renderer)
+void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 {
 	if (!focus)
 		return;
 
-	if (!renderer)
+	if (!cGfx->getRenderer())
 		return;
 
 	if (!visible)
@@ -172,28 +172,28 @@ void GPanel::updateBackgroundHelper(SDL_Renderer* renderer)
 		background = NULL;
 
 		// draw the background
-		background = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
-									   width, height);
+		background = SDL_CreateTexture(cGfx->getRenderer(), SDL_PIXELFORMAT_RGBA8888,
+									   SDL_TEXTUREACCESS_TARGET, width, height);
 		if (!background)
 		{
 			background = NULL;
 			return;
 		}
 
-		SDL_SetRenderTarget(renderer, background);
+		SDL_SetRenderTarget(cGfx->getRenderer(), background);
 		SDL_SetTextureBlendMode(background, SDL_BLENDMODE_BLEND);
 
 		// draw the background
-		updateBGBackground(renderer);
+		updateBGBackground(cGfx);
 
 		// Call the component draw call
-		updateBackground(renderer);
+		updateBackground(cGfx);
 
 		// draw the border
-		updateBorderBackground(renderer);
+		updateBorderBackground(cGfx);
 
 		// reset the render target to default
-		SDL_SetRenderTarget(renderer, NULL);
+		SDL_SetRenderTarget(cGfx->getRenderer(), NULL);
 	}
 
 	// draw the background
@@ -202,7 +202,7 @@ void GPanel::updateBackgroundHelper(SDL_Renderer* renderer)
 	dRect.y = getY();
 	SDL_Texture* geBackground = getBackground();
 	if (geBackground)
-		SDL_RenderCopy(renderer, geBackground, NULL, &dRect);
+		SDL_RenderCopy(cGfx->getRenderer(), geBackground, NULL, &dRect);
 
 	/*
 	// Setup the render vector
@@ -231,10 +231,10 @@ void GPanel::updateBackgroundHelper(SDL_Renderer* renderer)
 
 	// Go backwards because of dropdowns
 	for (int i = subitems.size() - 1; i >= 0; --i)
-		subitems[i]->updateBackgroundHelper(renderer);
+		subitems[i]->updateBackgroundHelper(cGfx);
 }
 
-void GPanel::updateBackground(SDL_Renderer* renderer)
+void GPanel::updateBackground(gfxpp* cGfx)
 {
 	//
 }

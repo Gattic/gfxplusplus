@@ -50,7 +50,9 @@ public:
 
 	SDL_Color getTextColor() const;
 	int getFontSize() const;
+	std::string getFontPath() const;
 
+	TTF_Font* getFont() const;
 	void setFontSize(int);
 	void setTextColor(SDL_Color);
 

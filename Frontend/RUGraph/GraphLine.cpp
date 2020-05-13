@@ -17,6 +17,7 @@
 #include "GraphLine.h"
 #include "../GFXUtilities/point2.h"
 #include "../GItems/RUColors.h"
+#include "../Graphics/graphics.h"
 #include "RUGraph.h"
 
 GraphLine::GraphLine(RUGraph* newParent, SDL_Color newColor) : Graphable(newParent, newColor)
@@ -29,9 +30,10 @@ GraphLine::~GraphLine()
 	// put code here to destroy private GraphLine variables
 }
 
-void GraphLine::draw(SDL_Renderer* renderer)
+void GraphLine::draw(gfxpp* cGfx)
 {
-	SDL_SetRenderDrawColor(renderer, getColor().r, getColor().g, getColor().b, getColor().a);
+	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
+						   getColor().a);
 
 	float xRange = (float)points.size(); // points per x axis
 	float yRange = y_max - y_min;
@@ -52,12 +54,12 @@ void GraphLine::draw(SDL_Renderer* renderer)
 		// draw a thick line from the previous to the current point
 		if ((prevPoint) && (i > 0))
 		{
-			SDL_RenderDrawLine(renderer, prevPoint->getX(), prevPoint->getY() - 1, cPoint->getX(),
-							   cPoint->getY() - 1);
-			SDL_RenderDrawLine(renderer, prevPoint->getX(), prevPoint->getY(), cPoint->getX(),
-							   cPoint->getY());
-			SDL_RenderDrawLine(renderer, prevPoint->getX(), prevPoint->getY() + 1, cPoint->getX(),
-							   cPoint->getY() + 1);
+			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
+							   cPoint->getX(), cPoint->getY() - 1);
+			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
+							   cPoint->getX(), cPoint->getY());
+			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
+							   cPoint->getX(), cPoint->getY() + 1);
 		}
 
 		// save the previous point for later

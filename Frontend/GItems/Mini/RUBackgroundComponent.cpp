@@ -17,6 +17,7 @@
 #include "RUBackgroundComponent.h"
 #include "../../../include/Backend/Database/image.h"
 #include "../../Graphics/graphics.h"
+#include "../../Graphics/graphics.h"
 #include "../GItem.h"
 #include "../RUColors.h"
 
@@ -218,7 +219,7 @@ void RUBackgroundComponent::setBGColor(SDL_Color newBGColor)
 	bgColor = newBGColor;
 }
 
-void RUBackgroundComponent::updateBGBackground(SDL_Renderer* renderer)
+void RUBackgroundComponent::updateBGBackground(gfxpp* cGfx)
 {
 	if (!bgEnabled)
 		return;
@@ -233,8 +234,8 @@ void RUBackgroundComponent::updateBGBackground(SDL_Renderer* renderer)
 	bgRect.w = getWidth();
 	bgRect.h = getHeight();
 
-	SDL_SetRenderDrawColor(renderer, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-	SDL_RenderFillRect(renderer, &bgRect);
+	SDL_SetRenderDrawColor(cGfx->getRenderer(), bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+	SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
 
 	// draw the background image
 	if (!bgImageType)
@@ -247,12 +248,12 @@ void RUBackgroundComponent::updateBGBackground(SDL_Renderer* renderer)
 		return;
 
 	// Replace newBMP with surfaceTheUSA
-	SDL_Texture* bgImageTex = SDL_CreateTextureFromSurface(renderer, surfaceTheUSA);
+	SDL_Texture* bgImageTex = SDL_CreateTextureFromSurface(cGfx->getRenderer(), surfaceTheUSA);
 	if (!bgImageTex)
 	{
 		printf("[GUI] bgImageTex error: %s\n", SDL_GetError());
 		return;
 	}
 
-	SDL_RenderCopy(renderer, bgImageTex, NULL, NULL);
+	SDL_RenderCopy(cGfx->getRenderer(), bgImageTex, NULL, NULL);
 }

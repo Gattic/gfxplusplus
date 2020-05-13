@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUScrollbar.h"
 #include "../GItems/RUColors.h"
+#include "../Graphics/graphics.h"
 #include "RUImageComponent.h"
 
 // set default image paths
@@ -250,7 +251,7 @@ void RUScrollbar::calculateBarPos()
 	arrowDown->setVisible((maxValue > 0) && (optionsShown > 0));
 }
 
-void RUScrollbar::updateBackground(SDL_Renderer* renderer)
+void RUScrollbar::updateBackground(gfxpp* cGfx)
 {
 	//
 }

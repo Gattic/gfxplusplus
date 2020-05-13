@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUListbox.h"
 #include "../GItems/RUColors.h"
+#include "../Graphics/graphics.h"
 #include "RUScrollbar.h"
 #include "Text/RULabel.h"
 
@@ -121,13 +122,13 @@ void RUListbox::setHeight(int newHeight)
 			int labelHeight = getHeight() / optionsShown;
 			items[i]->setMarginY(i * labelHeight);
 			items[i]->setHeight(labelHeight);
-			items[i]->setFontSize(labelHeight / 2);
+			// items[i]->setFontSize(labelHeight / 2);
 		}
 		else
 		{
 			items[i]->setMarginY(0);
 			items[i]->setHeight(0);
-			items[i]->setFontSize(0);
+			// items[i]->setFontSize(0);
 		}
 	}
 
@@ -175,14 +176,14 @@ void RUListbox::addOption(std::string newItemText)
 		int labelHeight = getHeight() / optionsShown;
 		newLabel->setMarginY(items.size() * labelHeight);
 		newLabel->setHeight(labelHeight);
-		newLabel->setFontSize(labelHeight / 2);
+		// newLabel->setFontSize(labelHeight / 2);
 		newLabel->setVisible((items.size() >= cIndex) && (items.size() - cIndex < optionsShown));
 	}
 	else
 	{
 		newLabel->setMarginY(0);
 		newLabel->setHeight(0);
-		newLabel->setFontSize(0);
+		// newLabel->setFontSize(0);
 		newLabel->setVisible(false);
 	}
 
@@ -282,7 +283,7 @@ void RUListbox::clearOptions()
 	drawUpdate = true;
 }
 
-void RUListbox::updateBackground(SDL_Renderer* renderer)
+void RUListbox::updateBackground(gfxpp* cGfx)
 {
 	if (optionsShown > 0)
 	{
@@ -326,14 +327,14 @@ void RUListbox::updateLabels()
 			int labelHeight = getHeight() / optionsShown;
 			items[i]->setMarginY((i - cIndex) * labelHeight);
 			items[i]->setHeight(labelHeight);
-			items[i]->setFontSize(labelHeight / 2);
+			// items[i]->setFontSize(labelHeight / 2);
 			items[i]->setVisible((i >= cIndex) && (i - cIndex < optionsShown));
 		}
 		else
 		{
 			items[i]->setMarginY(0);
 			items[i]->setHeight(0);
-			items[i]->setFontSize(0);
+			// items[i]->setFontSize(0);
 			items[i]->setVisible(false);
 		}
 	}

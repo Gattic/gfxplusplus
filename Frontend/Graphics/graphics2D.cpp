@@ -18,6 +18,7 @@
 #include "../GItems/GItem.h"
 #include "../GItems/GLayout.h"
 #include "../GItems/RUComponent.h"
+#include "../GUI/Text/RUTextComponent.h"
 
 unsigned int gfxpp::RGBfromHue(double hue, int8_t* r, int8_t* g, int8_t* b)
 {
@@ -111,10 +112,15 @@ void gfxpp::addItem(GItem* newItem)
 
 	} while (getItemByID(itemID)); // Generate new item id if already used
 
-	newItem->setID(itemID); // Assign id to GItem
-
 	// Assign same id to object of GItem and add it
 	newItem->setID(itemID);
+
+	if ((newItem->getType() == "RULabel") || (newItem->getType() == "RUTextbox") ||
+		(newItem->getType() == "RUButton"))
+	{
+		((RUTextComponent*)newItem)->setFont(cFont);
+	}
+
 	guiElements.push_back(newItem);
 }
 

@@ -26,6 +26,7 @@
 #include <string>
 
 class gfxpp;
+class GFont;
 
 class RUTextComponent : public RUComponent
 {
@@ -33,10 +34,7 @@ protected:
 	static const int IS_LEFT = 0;
 	static const int IS_RIGHT = 1;
 
-	static std::string FONT_PATH;
-	static const int DEFAULT_FONT_SIZE = 30; // font resolution?
-	static TTF_Font* font;
-	int fontSize;
+	GFont* cFont;
 
 	std::string text;
 	std::string strDrawText;
@@ -52,7 +50,6 @@ protected:
 	bool passwordField;
 	unsigned int cursorStart;
 	bool readOnly;
-	SDL_Color textColor;
 
 	// render
 	void calculateRenderInfo();
@@ -71,11 +68,9 @@ public:
 
 	// gets
 	std::string getText() const;
-	SDL_Color getTextColor() const;
 	char getPasswordChar() const;
 	bool isPasswordField() const;
 	bool getReadOnly() const;
-	int getFontSize() const;
 
 	// sets
 	void setText(const char*);
@@ -83,18 +78,12 @@ public:
 	void setPasswordChar(char);
 	void setPasswordField(bool);
 	void setReadOnly(bool);
-	void setTextColor(SDL_Color);
-	void setFontSize(int);
-
-	//
-	static bool validChar(char);
-	static char keycodeTOchar(SDL_Keycode);
-	static char specialChar(char keyPressed);
+	void setFont(GFont*);
 
 	// render
-	void drawText(SDL_Renderer*);
-	void drawCursor(SDL_Renderer*);
-	virtual void updateBackground(SDL_Renderer*) = 0;
+	void drawText(gfxpp*);
+	void drawCursor(gfxpp*);
+	virtual void updateBackground(gfxpp*) = 0;
 
 	// event functions
 	void setKeyListener(void (GPanel::*)(char));

@@ -15,6 +15,7 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "GFont.h"
+#include "../../GItems/RUColors.h"
 #include "Backend/Database/gtype.h"
 
 GFont::GFont()
@@ -28,6 +29,7 @@ GFont::GFont()
 		font = NULL;
 	}
 
+	setTextColor(RUColors::DEFAULT_TEXT_COLOR);
 	loadLetters();
 }
 
@@ -46,6 +48,7 @@ GFont::GFont(SDL_Renderer* newRenderer, std::string newFontPath)
 		font = NULL;
 	}
 
+	setTextColor(RUColors::DEFAULT_TEXT_COLOR);
 	loadLetters();
 }
 
@@ -102,9 +105,19 @@ SDL_Color GFont::getTextColor() const
 	return textColor;
 }
 
+TTF_Font* GFont::getFont() const
+{
+	return font;
+}
+
 int GFont::getFontSize() const
 {
 	return fontSize;
+}
+
+std::string GFont::getFontPath() const
+{
+	return fontPath;
 }
 
 void GFont::setFontSize(int newFontSize)

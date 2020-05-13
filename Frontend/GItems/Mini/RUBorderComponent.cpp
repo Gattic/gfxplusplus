@@ -15,6 +15,7 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUBorderComponent.h"
+#include "../../Graphics/graphics.h"
 #include "../GItem.h"
 #include "../RUColors.h"
 
@@ -82,7 +83,7 @@ void RUBorderComponent::setBorderWidth(int newBorderWidth)
 	borderWidth = newBorderWidth;
 }
 
-void RUBorderComponent::updateBorderBackground(SDL_Renderer* renderer)
+void RUBorderComponent::updateBorderBackground(gfxpp* cGfx)
 {
 	if (!borderEnabled)
 		return;
@@ -99,8 +100,8 @@ void RUBorderComponent::updateBorderBackground(SDL_Renderer* renderer)
 		borderRect.w = getWidth() - (borderWidth - 1);
 		borderRect.h = getHeight() - (borderWidth - 1);
 
-		SDL_SetRenderDrawColor(renderer, borderColor.r, borderColor.g, borderColor.b,
+		SDL_SetRenderDrawColor(cGfx->getRenderer(), borderColor.r, borderColor.g, borderColor.b,
 							   borderColor.a);
-		SDL_RenderDrawRect(renderer, &borderRect);
+		SDL_RenderDrawRect(cGfx->getRenderer(), &borderRect);
 	}
 }

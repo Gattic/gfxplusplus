@@ -38,12 +38,12 @@ void GRelativeLayout::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStat
 	//
 }
 
-void GRelativeLayout::updateBackground(SDL_Renderer* renderer)
+void GRelativeLayout::updateBackground(gfxpp* cGfx)
 {
 	//
 }
 
-void GRelativeLayout::updateBackgroundHelper(SDL_Renderer* renderer)
+void GRelativeLayout::updateBackgroundHelper(gfxpp* cGfx)
 {
 	//
 }

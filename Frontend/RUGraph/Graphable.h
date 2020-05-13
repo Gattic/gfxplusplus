@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 
+class gfxpp;
 class RUGraph;
 class Point2;
 
@@ -64,8 +65,8 @@ public:
 	virtual void clear();
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
-	virtual void draw(SDL_Renderer*) = 0;
+	virtual void updateBackground(gfxpp*);
+	virtual void draw(gfxpp*) = 0;
 	virtual std::string getType() const = 0;
 };
 

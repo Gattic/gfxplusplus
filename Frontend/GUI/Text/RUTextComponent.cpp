@@ -15,12 +15,9 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUTextComponent.h"
-#include "../../GItems/RUColors.h"
 #include "../../Graphics/graphics.h"
 #include "Backend/Database/gtype.h"
-
-std::string RUTextComponent::FONT_PATH = "resources/fonts/carlenlund_helmet/Helmet-Regular.ttf";
-TTF_Font* RUTextComponent::font = NULL;
+#include "GFont.h"
 
 RUTextComponent::RUTextComponent()
 {
@@ -36,23 +33,12 @@ RUTextComponent::RUTextComponent()
 	boxLen = 0;
 	passwordChar = '*';
 	passwordField = false;
-	fontSize = DEFAULT_FONT_SIZE;
 	cursorStart = 0;
 	readOnly = true;
 
 	// event listeners
 	KeyListener = 0;
-
-	setTextColor(RUColors::DEFAULT_TEXT_COLOR);
-	if (!font)
-	{
-		font = TTF_OpenFont(FONT_PATH.c_str(), 100);
-		if (!font)
-		{
-			printf("[GUI] TTF Font load error 1: %s\n", TTF_GetError());
-			font = NULL;
-		}
-	}
+	cFont = NULL;
 }
 
 RUTextComponent::~RUTextComponent()
@@ -69,15 +55,12 @@ RUTextComponent::~RUTextComponent()
 	boxLen = 0;
 	passwordChar = '*';
 	passwordField = false;
-	fontSize = DEFAULT_FONT_SIZE;
 	readOnly = true;
 
 	// event listeners
 	KeyListener = 0;
 
-	if (font)
-		TTF_CloseFont(font);
-	font = NULL;
+	cFont = NULL;
 }
 
 std::string RUTextComponent::getText() const
@@ -98,16 +81,6 @@ bool RUTextComponent::isPasswordField() const
 bool RUTextComponent::getReadOnly() const
 {
 	return readOnly;
-}
-
-SDL_Color RUTextComponent::getTextColor() const
-{
-	return textColor;
-}
-
-int RUTextComponent::getFontSize() const
-{
-	return fontSize;
 }
 
 void RUTextComponent::setText(const char* newCStrText)
@@ -148,25 +121,22 @@ void RUTextComponent::setReadOnly(bool newReadOnly)
 	readOnly = newReadOnly;
 }
 
-void RUTextComponent::setTextColor(SDL_Color newTextColor)
+void RUTextComponent::setFont(GFont* newFont)
 {
-	textColor = newTextColor;
-	drawUpdate = true;
-}
-
-void RUTextComponent::setFontSize(int newFontSize)
-{
-	fontSize = newFontSize;
+	cFont = newFont;
 	drawUpdate = true;
 }
 
 void RUTextComponent::calculateRenderInfo()
 {
+	if ((!cFont) || (!cFont->getFont()))
+		return;
+
 	// Font letter w/h
 	int newWidth = 0;
 	int newHeight = 0;
 	strDrawText = text;
-	cursorYGap = (getHeight() - fontSize);
+	cursorYGap = (getHeight() - cFont->getFontSize());
 
 	// set the text to draw
 	if (passwordField)
@@ -179,7 +149,7 @@ void RUTextComponent::calculateRenderInfo()
 	// First run
 	if (strWidth == 0.0f)
 	{
-		TTF_SizeText(font, strDrawText.c_str(), &newWidth, &newHeight);
+		TTF_SizeText(cFont->getFont(), strDrawText.c_str(), &newWidth, &newHeight);
 		dimRatio = (((float)(getHeight())) / ((float)(newHeight)));
 		strWidth = dimRatio * newWidth;
 	}
@@ -195,7 +165,7 @@ void RUTextComponent::calculateRenderInfo()
 			strDrawText = strDrawText.substr(boxIndex, boxLen);
 
 		// Text dimensions
-		TTF_SizeText(font, strDrawText.c_str(), &newWidth, &newHeight);
+		TTF_SizeText(cFont->getFont(), strDrawText.c_str(), &newWidth, &newHeight);
 		dimRatio = (((float)(getHeight())) / ((float)(newHeight)));
 		strWidth = dimRatio * newWidth;
 
@@ -227,27 +197,32 @@ void RUTextComponent::calculateRenderInfo()
 		}
 
 		// Cursor dimensions
-		TTF_SizeText(font, strDrawText.substr(0, boxInnerIndex).c_str(), &newWidth, &newHeight);
+		TTF_SizeText(cFont->getFont(), strDrawText.substr(0, boxInnerIndex).c_str(), &newWidth,
+					 &newHeight);
 		float cursorDimRatio = (((float)(getHeight())) / ((float)(newHeight)));
 		cursorX = cursorDimRatio * newWidth;
 	}
 }
 
-void RUTextComponent::drawText(SDL_Renderer* renderer)
+void RUTextComponent::drawText(gfxpp* cGfx)
 {
+	if ((!cFont) || (!cFont->getFont()))
+		return;
+
 	calculateRenderInfo();
 
 	// Draw the string
 	if (strDrawText.length() > 0)
 	{
 		// Check the font
-		if (!font)
+		if (!cFont->getFont())
 		{
 			printf("[GUI] TTF Font load error 2: %s\n", SDL_GetError());
 			return;
 		}
 
-		SDL_Surface* textMessage = TTF_RenderText_Solid(font, strDrawText.c_str(), textColor);
+		SDL_Surface* textMessage =
+			TTF_RenderText_Solid(cFont->getFont(), strDrawText.c_str(), cFont->getTextColor());
 		if (!textMessage)
 		{
 			printf("[GUI] Text create error: %s\n", SDL_GetError());
@@ -255,7 +230,7 @@ void RUTextComponent::drawText(SDL_Renderer* renderer)
 		}
 
 		//
-		SDL_Texture* textTex = SDL_CreateTextureFromSurface(renderer, textMessage);
+		SDL_Texture* textTex = SDL_CreateTextureFromSurface(cGfx->getRenderer(), textMessage);
 		if (!textTex)
 		{
 			printf("[GUI] Texture error: %s\n", SDL_GetError());
@@ -270,7 +245,7 @@ void RUTextComponent::drawText(SDL_Renderer* renderer)
 		textRect.w = strWidth;
 		textRect.h = getHeight();
 
-		SDL_RenderCopy(renderer, textTex, NULL, &textRect);
+		SDL_RenderCopy(cGfx->getRenderer(), textTex, NULL, &textRect);
 
 		// Cleanup
 		if (textMessage)
@@ -279,33 +254,37 @@ void RUTextComponent::drawText(SDL_Renderer* renderer)
 			SDL_DestroyTexture(textTex);
 	}
 
-	drawCursor(renderer);
+	drawCursor(cGfx);
 }
 
-void RUTextComponent::drawCursor(SDL_Renderer* renderer)
+void RUTextComponent::drawCursor(gfxpp* cGfx)
 {
-	if (!readOnly)
+	if (!cFont)
+		return;
+
+	if (readOnly)
+		return;
+
+	if (!isFocused())
+		return;
+
+	unsigned int cursorCounter = (time(NULL) - cursorStart) % 2;
+	if ((cursorStart > 0) && (cursorCounter == 0))
 	{
-		if (isFocused())
-		{
-			unsigned int cursorCounter = (time(NULL) - cursorStart) % 2;
-			if ((cursorStart > 0) && (cursorCounter == 0))
-			{
-				SDL_SetRenderDrawColor(renderer, textColor.r, textColor.g, textColor.b,
-									   textColor.a);
+		SDL_SetRenderDrawColor(cGfx->getRenderer(), cFont->getTextColor().r,
+							   cFont->getTextColor().g, cFont->getTextColor().b,
+							   cFont->getTextColor().a);
 
-				SDL_Rect cursorRect;
-				cursorRect.x = cursorX;
-				cursorRect.y = cursorYGap / 2.0f;
-				cursorRect.w = 2;
-				cursorRect.h = ((float)height) - cursorYGap;
+		SDL_Rect cursorRect;
+		cursorRect.x = cursorX;
+		cursorRect.y = cursorYGap / 2.0f;
+		cursorRect.w = 2;
+		cursorRect.h = ((float)height) - cursorYGap;
 
-				SDL_RenderFillRect(renderer, &cursorRect);
-			}
-
-			drawUpdate = true;
-		}
+		SDL_RenderFillRect(cGfx->getRenderer(), &cursorRect);
 	}
+
+	drawUpdate = true;
 }
 
 void RUTextComponent::setKeyListener(void (GPanel::*f)(char))
@@ -333,7 +312,7 @@ bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode event
 	if (!cPanel)
 		return typed;
 
-	char eventChar = keycodeTOchar(eventKeyPressed);
+	char eventChar = GFont::keycodeTOchar(eventKeyPressed);
 
 	// make the character caps
 	if ((eventKeyModPressed & KMOD_SHIFT) || (eventKeyModPressed & KMOD_LSHIFT) ||
@@ -417,14 +396,14 @@ bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode event
 		}
 		else
 		{
-			if (validChar(eventChar))
+			if (GFont::validChar(eventChar))
 			{
 				// Handle special characters manually
 				// Not sure why SDL_Keycode is not detecting special chars
 				if ((eventKeyModPressed & KMOD_SHIFT) || (eventKeyModPressed & KMOD_LSHIFT) ||
 					(eventKeyModPressed & KMOD_RSHIFT))
 				{
-					eventChar = specialChar(eventChar);
+					eventChar = GFont::specialChar(eventChar);
 				}
 
 				// Insert the Character
@@ -462,276 +441,4 @@ bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode event
 
 	typed = true;
 	return typed;
-}
-
-bool RUTextComponent::validChar(char text)
-{
-	text = shmea::GType::toLower(text);
-	switch (text)
-	{
-	// letters
-	case 'a':
-	case 'b':
-	case 'c':
-	case 'd':
-	case 'e':
-	case 'f':
-	case 'g':
-	case 'h':
-	case 'i':
-	case 'j':
-	case 'k':
-	case 'l':
-	case 'm':
-	case 'n':
-	case 'o':
-	case 'p':
-	case 'q':
-	case 'r':
-	case 's':
-	case 't':
-	case 'u':
-	case 'v':
-	case 'w':
-	case 'x':
-	case 'y':
-	case 'z':
-
-	// numbers
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-
-	// symbols
-	case ' ':
-	case '+':
-	case '-':
-	case '_':
-	case '!':
-	case '@':
-	case '#':
-	case '$':
-	case '*':
-	case '?':
-	case '^':
-	case '(':
-	case ')':
-	case '&':
-	case '.':
-	case ',':
-	case '<':
-	case '>':
-	case '/':
-	case '\\':
-	case ':':
-	case ';':
-	case '[':
-	case ']':
-	case '=':
-	case '%':
-
-		// valid character
-		return true;
-
-	default:
-		return false;
-	}
-}
-
-char RUTextComponent::specialChar(char keyPressed)
-{
-	switch (keyPressed)
-	{
-	case '0':
-		return ')';
-	case '1':
-		return '!';
-	case '2':
-		return '@';
-	case '3':
-		return '#';
-	case '4':
-		return '$';
-	case '5':
-		return '%';
-	case '6':
-		return '^';
-	case '7':
-		return '&';
-	case '8':
-		return '*';
-	case '9':
-		return '(';
-	case '`':
-		return '~';
-	case '-':
-		return '_';
-	case '=':
-		return '+';
-	case '[':
-		return '{';
-	case ']':
-		return '}';
-	case '\\':
-		return '|';
-	case ';':
-		return ':';
-	case '\'':
-		return '"';
-	case ',':
-		return '<';
-	case '.':
-		return '>';
-	case '/':
-		return '?';
-
-	default:
-		return keyPressed; // Add char as is to text string
-	}
-}
-
-char RUTextComponent::keycodeTOchar(SDL_Keycode keyPressed)
-{
-	switch (keyPressed)
-	{
-	// letters
-	case SDLK_a:
-		return 'a';
-	case SDLK_b:
-		return 'b';
-	case SDLK_c:
-		return 'c';
-	case SDLK_d:
-		return 'd';
-	case SDLK_e:
-		return 'e';
-	case SDLK_f:
-		return 'f';
-	case SDLK_g:
-		return 'g';
-	case SDLK_h:
-		return 'h';
-	case SDLK_i:
-		return 'i';
-	case SDLK_j:
-		return 'j';
-	case SDLK_k:
-		return 'k';
-	case SDLK_l:
-		return 'l';
-	case SDLK_m:
-		return 'm';
-	case SDLK_n:
-		return 'n';
-	case SDLK_o:
-		return 'o';
-	case SDLK_p:
-		return 'p';
-	case SDLK_q:
-		return 'q';
-	case SDLK_r:
-		return 'r';
-	case SDLK_s:
-		return 's';
-	case SDLK_t:
-		return 't';
-	case SDLK_u:
-		return 'u';
-	case SDLK_v:
-		return 'v';
-	case SDLK_w:
-		return 'w';
-	case SDLK_x:
-		return 'x';
-	case SDLK_y:
-		return 'y';
-	case SDLK_z:
-		return 'z';
-
-	// numbers
-	case SDLK_0:
-		return '0';
-	case SDLK_1:
-		return '1';
-	case SDLK_2:
-		return '2';
-	case SDLK_3:
-		return '3';
-	case SDLK_4:
-		return '4';
-	case SDLK_5:
-		return '5';
-	case SDLK_6:
-		return '6';
-	case SDLK_7:
-		return '7';
-	case SDLK_8:
-		return '8';
-	case SDLK_9:
-		return '9';
-
-	// symbols
-	case SDLK_SPACE:
-		return ' ';
-	case SDLK_PLUS:
-		return '+';
-	case SDLK_MINUS:
-		return '-';
-	case SDLK_UNDERSCORE:
-		return '_';
-	case SDLK_EXCLAIM:
-		return '!';
-	case SDLK_AT:
-		return '@';
-	case SDLK_HASH:
-		return '#';
-	case SDLK_DOLLAR:
-		return '$';
-	case SDLK_ASTERISK:
-		return '*';
-	case SDLK_QUESTION:
-		return '?';
-	case SDLK_CARET:
-		return '^';
-	case SDLK_LEFTPAREN:
-		return '(';
-	case SDLK_RIGHTPAREN:
-		return ')';
-	case SDLK_AMPERSAND:
-		return '&';
-	case SDLK_PERIOD:
-		return '.';
-	case SDLK_COMMA:
-		return ',';
-	case SDLK_LESS:
-		return '<';
-	case SDLK_GREATER:
-		return '>';
-	case SDLK_SLASH:
-		return '/';
-	case SDLK_BACKSLASH:
-		return '\\';
-	case SDLK_COLON:
-		return ':';
-	case SDLK_SEMICOLON:
-		return ';';
-	case SDLK_LEFTBRACKET:
-		return '[';
-	case SDLK_RIGHTBRACKET:
-		return ']';
-	case SDLK_EQUALS:
-		return '=';
-	case SDLK_PERCENT:
-		return '%';
-
-	default:
-		return 0x00; // no key
-	}
 }

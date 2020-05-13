@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RULabel.h"
 #include "../../GItems/RUColors.h"
+#include "../../Graphics/graphics.h"
 
 RULabel::RULabel()
 {
@@ -25,7 +26,7 @@ RULabel::RULabel()
 RULabel::RULabel(std::string newText)
 {
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
-	setText(newText);
+	// setText(newText);
 }
 
 RULabel::~RULabel()
@@ -33,9 +34,10 @@ RULabel::~RULabel()
 	//
 }
 
-void RULabel::updateBackground(SDL_Renderer* renderer)
+void RULabel::updateBackground(gfxpp* cGfx)
 {
-	drawText(renderer);
+	cFont = cGfx->cFont;
+	drawText(cGfx);
 }
 
 std::string RULabel::getType() const

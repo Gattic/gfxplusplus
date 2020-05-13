@@ -19,6 +19,7 @@
 #include "../GFXUtilities/EventTracker.h"
 #include "../GItems/Mini/RUBackgroundComponent.h"
 #include "../GItems/Mini/RUBorderComponent.h"
+#include "../Graphics/graphics.h"
 
 GLinearLayout::GLinearLayout(std::string layoutName, int newOrientation)
 {
@@ -37,7 +38,7 @@ void GLinearLayout::setOrientation(int newOrientation)
 	orientation = newOrientation;
 }
 
-void GLinearLayout::updateBackground(SDL_Renderer* renderer)
+void GLinearLayout::updateBackground(gfxpp* cGfx)
 {
 	//
 }
@@ -125,9 +126,9 @@ void GLinearLayout::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus
 	}
 }
 
-void GLinearLayout::updateBackgroundHelper(SDL_Renderer* renderer)
+void GLinearLayout::updateBackgroundHelper(gfxpp* cGfx)
 {
-	if (!renderer)
+	if (!cGfx->getRenderer())
 		return;
 
 	if (!visible)
@@ -141,7 +142,7 @@ void GLinearLayout::updateBackgroundHelper(SDL_Renderer* renderer)
 			continue;
 
 		// draw the item
-		cItem->updateBackgroundHelper(renderer);
+		cItem->updateBackgroundHelper(cGfx);
 	}
 }
 

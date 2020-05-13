@@ -17,6 +17,7 @@
 #include "RUGraph.h"
 #include "../GFXUtilities/point2.h"
 #include "../GUI/Text/RULabel.h"
+#include "../Graphics/graphics.h"
 #include "Backend/Database/GList.h"
 #include "Backend/Database/gtable.h"
 #include "Backend/Database/gtype.h"
@@ -182,14 +183,14 @@ void RUGraph::setTitleLabel(std::string newLabel)
 	titleLabel->setVisible(true);
 }
 
-void RUGraph::updateBackground(SDL_Renderer* renderer)
+void RUGraph::updateBackground(gfxpp* cGfx)
 {
 	// draw the axes
 	if (axisWidth > 0)
 	{
 		// x axis
-		SDL_SetRenderDrawColor(renderer, getBorderColor().r, getBorderColor().g, getBorderColor().b,
-							   0xFF);
+		SDL_SetRenderDrawColor(cGfx->getRenderer(), getBorderColor().r, getBorderColor().g,
+							   getBorderColor().b, 0xFF);
 
 		// set the x rect
 		SDL_Rect axisX;
@@ -205,12 +206,12 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 		axisY.w = axisWidth;
 		axisY.h = height;
 
-		SDL_RenderFillRect(renderer, &axisX);
-		SDL_RenderFillRect(renderer, &axisY);
+		SDL_RenderFillRect(cGfx->getRenderer(), &axisX);
+		SDL_RenderFillRect(cGfx->getRenderer(), &axisY);
 
 		if ((gridEnabled) && (gridLineWidth > 0))
 		{
-			SDL_SetRenderDrawColor(renderer, 0x61, 0x61, 0x61, 0xFF); // gray
+			SDL_SetRenderDrawColor(cGfx->getRenderer(), 0x61, 0x61, 0x61, 0xFF); // gray
 
 			// x grid
 			int lineCount = graphSize * DEFAULT_NUM_ZONES; // 10 spaces per axis
@@ -230,7 +231,7 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 				lineXRect.w = lineWidth;
 				lineXRect.h = lineHeight;
 
-				SDL_RenderFillRect(renderer, &lineXRect);
+				SDL_RenderFillRect(cGfx->getRenderer(), &lineXRect);
 			}
 
 			// y grid
@@ -251,7 +252,7 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 				lineYRect.w = lineWidth;
 				lineYRect.h = lineHeight;
 
-				SDL_RenderFillRect(renderer, &lineYRect);
+				SDL_RenderFillRect(cGfx->getRenderer(), &lineYRect);
 			}
 		}
 
@@ -262,8 +263,8 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 		int tickHeight = axisWidth * 5;
 		if (quadrants == QUADRANTS_FOUR)
 			tickWidth = axisWidth / DEFAULT_AXIS_WIDTH;
-		SDL_SetRenderDrawColor(renderer, getBorderColor().r, getBorderColor().g, getBorderColor().b,
-							   getBorderColor().a);
+		SDL_SetRenderDrawColor(cGfx->getRenderer(), getBorderColor().r, getBorderColor().g,
+							   getBorderColor().b, getBorderColor().a);
 
 		for (int i = (quadrants == QUADRANTS_FOUR) ? -tickCount : 0; i < tickCount; ++i)
 		{
@@ -274,7 +275,7 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 			tickXRect.w = tickWidth;
 			tickXRect.h = tickHeight;
 
-			SDL_RenderFillRect(renderer, &tickXRect);
+			SDL_RenderFillRect(cGfx->getRenderer(), &tickXRect);
 		}
 
 		// y ticks
@@ -294,7 +295,7 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 			tickYRect.w = tickWidth;
 			tickYRect.h = tickHeight;
 
-			SDL_RenderFillRect(renderer, &tickYRect);
+			SDL_RenderFillRect(cGfx->getRenderer(), &tickYRect);
 		}
 	}
 
@@ -306,7 +307,7 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 	{
 		Graphable* g = it->second;
 		if (g)
-			g->updateBackground(renderer);
+			g->updateBackground(cGfx);
 	}
 	pthread_mutex_unlock(plotMutex);
 }

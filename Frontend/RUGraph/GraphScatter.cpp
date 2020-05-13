@@ -18,6 +18,7 @@
 #include "GraphScatter.h"
 #include "../GFXUtilities/point2.h"
 #include "../GItems/RUColors.h"
+#include "../Graphics/graphics.h"
 #include "RUGraph.h"
 
 GraphScatter::GraphScatter(RUGraph* newParent, SDL_Color newColor, int pointSz)
@@ -31,9 +32,10 @@ GraphScatter::~GraphScatter()
 	pointSize = 0;
 }
 
-void GraphScatter::draw(SDL_Renderer* renderer)
+void GraphScatter::draw(gfxpp* cGfx)
 {
-	SDL_SetRenderDrawColor(renderer, getColor().r, getColor().g, getColor().b, getColor().a);
+	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
+						   getColor().a);
 
 	// draw the line
 	float xRange = (x_max - x_min) * 1.000001;
@@ -52,7 +54,7 @@ void GraphScatter::draw(SDL_Renderer* renderer)
 		cPoint = new Point2(parent->getAxisOriginX() + newXValue,
 							parent->getAxisOriginY() + parent->getHeight() - newYValue);
 
-		drawPointOutline(renderer, cPoint->getX(), cPoint->getY());
+		drawPointOutline(cGfx, cPoint->getX(), cPoint->getY());
 
 		// save the previous point for later
 		if (prevPoint)
@@ -64,7 +66,7 @@ void GraphScatter::draw(SDL_Renderer* renderer)
 		delete cPoint;
 }
 
-void GraphScatter::drawPointOutline(SDL_Renderer* renderer, int cx, int cy, int r)
+void GraphScatter::drawPointOutline(gfxpp* cGfx, int cx, int cy, int r)
 {
 	if (r < 0 || cx < 0 || cy < 0)
 		return;
@@ -73,14 +75,14 @@ void GraphScatter::drawPointOutline(SDL_Renderer* renderer, int cx, int cy, int 
 	int x = r - 1, y = 0, dx = 1, dy = 1, err = dx - (r << 1);
 	while (x >= y)
 	{
-		SDL_RenderDrawPoint(renderer, cx + x, cy + y);
-		SDL_RenderDrawPoint(renderer, cx + y, cy + x);
-		SDL_RenderDrawPoint(renderer, cx - y, cy + x);
-		SDL_RenderDrawPoint(renderer, cx - x, cy + y);
-		SDL_RenderDrawPoint(renderer, cx - x, cy - y);
-		SDL_RenderDrawPoint(renderer, cx - y, cy - x);
-		SDL_RenderDrawPoint(renderer, cx + y, cy - x);
-		SDL_RenderDrawPoint(renderer, cx + x, cy - y);
+		SDL_RenderDrawPoint(cGfx->getRenderer(), cx + x, cy + y);
+		SDL_RenderDrawPoint(cGfx->getRenderer(), cx + y, cy + x);
+		SDL_RenderDrawPoint(cGfx->getRenderer(), cx - y, cy + x);
+		SDL_RenderDrawPoint(cGfx->getRenderer(), cx - x, cy + y);
+		SDL_RenderDrawPoint(cGfx->getRenderer(), cx - x, cy - y);
+		SDL_RenderDrawPoint(cGfx->getRenderer(), cx - y, cy - x);
+		SDL_RenderDrawPoint(cGfx->getRenderer(), cx + y, cy - x);
+		SDL_RenderDrawPoint(cGfx->getRenderer(), cx + x, cy - y);
 
 		if (err <= 0)
 		{
@@ -101,17 +103,17 @@ void GraphScatter::drawPointOutline(SDL_Renderer* renderer, int cx, int cy, int 
  * @brief draw point
  * @details draws a filled point on the renderer at (x,y) with radius r using the Midpoint circle
  * algorithm.
- * @param renderer the SDL renderer
+ * @param cGfx the central graphics object
  * @param cx the desired central x-coordinate
  * @param cy the desired central y-coordinate
  * @param r the desired circle radius
  */
-void GraphScatter::drawPoint(SDL_Renderer* renderer, int cx, int cy, int r)
+void GraphScatter::drawPoint(gfxpp* cGfx, int cx, int cy, int r)
 {
 	if (r == 0)
 		r = pointSize / 2;
 	for (int i = 1; i <= r; ++i)
-		drawPointOutline(renderer, cx, cy, i);
+		drawPointOutline(cGfx, cx, cy, i);
 }
 
 std::string GraphScatter::getType() const

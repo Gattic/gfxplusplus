@@ -125,6 +125,7 @@ public:
 	gfxpp();
 	gfxpp(std::string, int = _2D, bool = true, int = 800, int = 600);
 	int getErrorFlag() const;
+	SDL_Renderer* getRenderer();
 
 	// GFX Utils
 	static unsigned int RGBfromHue(double, int8_t*, int8_t*, int8_t*);

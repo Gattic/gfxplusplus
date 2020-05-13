@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUTabContainer.h"
 #include "../GItems/RUColors.h"
+#include "../Graphics/graphics.h"
 #include "Text/RULabel.h"
 
 RUTabContainer::RUTabContainer()
@@ -88,13 +89,13 @@ void RUTabContainer::setHeight(int newHeight)
 			int labelHeight = getHeight() / optionsShown;
 			// items[i]->setMarginY(i * labelHeight);
 			items[i].first->setHeight(labelHeight);
-			items[i].first->setFontSize(labelHeight / 2);
+			// items[i].first->setFontSize(labelHeight / 2);
 		}
 		else
 		{
 			items[i].first->setMarginY(0);
 			items[i].first->setHeight(0);
-			items[i].first->setFontSize(0);
+			// items[i].first->setFontSize(0);
 		}
 	}
 
@@ -136,14 +137,14 @@ void RUTabContainer::addTab(std::string newItemText)
 
 		// newLabel->setMarginY(items.size() * labelHeight);
 		newLabel->setHeight(labelHeight);
-		newLabel->setFontSize(labelHeight / 2);
+		// newLabel->setFontSize(labelHeight / 2);
 		newLabel->setVisible(items.size() < optionsShown);
 	}
 	else
 	{
 		newLabel->setMarginY(0);
 		newLabel->setHeight(0);
-		newLabel->setFontSize(0);
+		// newLabel->setFontSize(0);
 		newLabel->setVisible(false);
 	}
 
@@ -272,7 +273,7 @@ void RUTabContainer::setOptionChangedListener(void (GPanel::*f)(int))
 	OptionChangedListener = f;
 }
 
-void RUTabContainer::updateBackground(SDL_Renderer* renderer)
+void RUTabContainer::updateBackground(gfxpp* cGfx)
 {
 	if (optionsShown > 0)
 	{
@@ -332,14 +333,14 @@ void RUTabContainer::updateLabels()
 			int labelWidth = (getWidth() - (getPaddingX() * optionsShown)) / optionsShown;
 			int labelHeight = getHeight();
 			items[i].first->setHeight(labelHeight);
-			items[i].first->setFontSize(labelHeight / 2);
+			// items[i].first->setFontSize(labelHeight / 2);
 			items[i].first->setVisible(i < optionsShown);
 		}
 		else
 		{
 			items[i].first->setMarginY(0);
 			items[i].first->setHeight(0);
-			items[i].first->setFontSize(0);
+			// items[i].first->setFontSize(0);
 			items[i].first->setVisible(false);
 		}
 	}

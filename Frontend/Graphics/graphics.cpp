@@ -48,6 +48,11 @@ int gfxpp::getErrorFlag() const
 	return errorFlag;
 }
 
+SDL_Renderer* gfxpp::getRenderer()
+{
+	return renderer;
+}
+
 int gfxpp::initHelper(bool fullscreenMode, std::string title)
 {
 	running = false;
@@ -199,7 +204,7 @@ void gfxpp::run()
 		fpsLabel->setX(width - fpsLabel->getWidth() - 6);
 		fpsLabel->setY(0);
 		fpsLabel->setText("");
-		fpsLabel->setFontSize(40);
+		// fpsLabel->setFontSize(40);
 		// fpsLabel->toggleBG(false);
 		addItem(fpsLabel);
 	}
@@ -549,7 +554,7 @@ void gfxpp::display()
 		{
 			// Render the focused panel
 			if (focusedPanel)
-				focusedPanel->updateBackgroundHelper(renderer);
+				focusedPanel->updateBackgroundHelper(this);
 		}
 		else if (renderStatus == _3D)
 		{
@@ -594,7 +599,7 @@ void gfxpp::display()
 
 		// global gui elements
 		if (fpsLabel)
-			fpsLabel->updateBackgroundHelper(renderer);
+			fpsLabel->updateBackgroundHelper(this);
 
 		// Update the screen
 		if (renderer)
@@ -620,7 +625,7 @@ void gfxpp::changeRenderStatus(int newRenderStatus)
 			fpsLabel->setX(width - fpsLabel->getWidth() - 6);
 			fpsLabel->setY(0);
 			fpsLabel->setText("");
-			fpsLabel->setFontSize(40);
+			// fpsLabel->setFontSize(40);
 			// fpsLabel->toggleBG(false);
 			addItem(fpsLabel);
 		}

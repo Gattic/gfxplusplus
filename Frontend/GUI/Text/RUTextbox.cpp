@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUTextbox.h"
 #include "../../GItems/RUColors.h"
+#include "../../Graphics/graphics.h"
 
 RUTextbox::RUTextbox()
 {
@@ -30,9 +31,10 @@ RUTextbox::~RUTextbox()
 	//
 }
 
-void RUTextbox::updateBackground(SDL_Renderer* renderer)
+void RUTextbox::updateBackground(gfxpp* cGfx)
 {
-	drawText(renderer);
+	cFont = cGfx->cFont;
+	drawText(cGfx);
 }
 
 std::string RUTextbox::getType() const

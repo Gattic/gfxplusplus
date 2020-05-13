@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUProgressBar.h"
 #include "../GItems/RUColors.h"
+#include "../Graphics/graphics.h"
 
 RUProgressBar::RUProgressBar()
 {
@@ -72,7 +73,7 @@ void RUProgressBar::setMaxValue(int newMaxValue)
 	drawUpdate = true;
 }
 
-void RUProgressBar::updateBackground(SDL_Renderer* renderer)
+void RUProgressBar::updateBackground(gfxpp* cGfx)
 {
 	// draw the bar
 	SDL_Rect barRect;
@@ -81,8 +82,9 @@ void RUProgressBar::updateBackground(SDL_Renderer* renderer)
 	barRect.w = (((float)value) / ((float)maxValue)) * width;
 	barRect.h = height;
 
-	SDL_SetRenderDrawColor(renderer, barColor.r, barColor.g, barColor.b, SDL_ALPHA_OPAQUE);
-	SDL_RenderFillRect(renderer, &barRect);
+	SDL_SetRenderDrawColor(cGfx->getRenderer(), barColor.r, barColor.g, barColor.b,
+						   SDL_ALPHA_OPAQUE);
+	SDL_RenderFillRect(cGfx->getRenderer(), &barRect);
 }
 
 std::string RUProgressBar::getType() const

@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUCheckbox.h"
 #include "../GItems/RUColors.h"
+#include "../Graphics/graphics.h"
 #include "RUImageComponent.h"
 #include "Text/RULabel.h"
 
@@ -125,7 +126,7 @@ void RUCheckbox::setCheck(bool value)
 	drawUpdate = true;
 }
 
-void RUCheckbox::updateBackground(SDL_Renderer* renderer)
+void RUCheckbox::updateBackground(gfxpp* cGfx)
 {
 	//
 }

@@ -162,7 +162,7 @@ RUMsgBox::~RUMsgBox()
 	inputButtonSubmit = NULL;
 }
 
-void RUMsgBox::updateBackground(SDL_Renderer* renderer)
+void RUMsgBox::updateBackground(gfxpp* cGfx)
 {
 	//
 }

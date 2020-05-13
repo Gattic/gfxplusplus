@@ -127,13 +127,13 @@ void Graphable::clear()
 	y_min = 0.0f;
 }
 
-void Graphable::updateBackground(SDL_Renderer* renderer)
+void Graphable::updateBackground(gfxpp* cGfx)
 {
 	if (!parent || !parent->isVisible() || !(parent->getWidth() > 0 && parent->getHeight() > 0))
 		return;
 
 	// draw the line
 	pthread_mutex_lock(plotMutex);
-	draw(renderer);
+	draw(cGfx);
 	pthread_mutex_unlock(plotMutex);
 }
