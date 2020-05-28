@@ -33,7 +33,6 @@ RUTextbox::~RUTextbox()
 
 void RUTextbox::updateBackground(gfxpp* cGfx)
 {
-	cFont = cGfx->cFont;
 	drawText(cGfx);
 }
 

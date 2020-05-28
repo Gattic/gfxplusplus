@@ -28,31 +28,48 @@
 class gfxpp;
 class GFont;
 
+class SlidingFocusWindow
+{
+public:
+	unsigned int index;
+	unsigned int maxLen;
+	unsigned int cursorIndex; // innerIndex
+	unsigned int cursorDirection;
+
+	SlidingFocusWindow()
+	{
+		reset();
+	}
+
+	void reset()
+	{
+		index = 0;
+		maxLen = 0;
+		cursorIndex = 0;
+		cursorDirection = 0;
+	}
+};
+
 class RUTextComponent : public RUComponent
 {
 protected:
-	static const int IS_LEFT = 0;
-	static const int IS_RIGHT = 1;
+	static const int CUROSR_LEFT = 0;
+	static const int CURSOR_RIGHT = 1;
 
-	GFont* cFont;
+	SlidingFocusWindow cursor;
 
 	std::string text;
 	std::string strDrawText;
 	float strWidth;
-	float cursorXGap;
-	float cursorYGap;
 	int cursorX;
 	float dimRatio;
-	unsigned int boxInnerIndex;
-	unsigned int boxIndex;
-	unsigned int boxLen;
 	char passwordChar;
 	bool passwordField;
 	unsigned int cursorStart;
 	bool readOnly;
 
 	// render
-	void calculateRenderInfo();
+	void calculateRenderInfo(GFont*);
 
 	// events
 	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
@@ -82,7 +99,7 @@ public:
 
 	// render
 	void drawText(gfxpp*);
-	void drawCursor(gfxpp*);
+	void drawCursor(gfxpp*, float);
 	virtual void updateBackground(gfxpp*) = 0;
 
 	// event functions

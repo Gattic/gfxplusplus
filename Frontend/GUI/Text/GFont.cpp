@@ -23,6 +23,8 @@ GFont::GFont()
 	fontPath = "resources/fonts/carlenlund_helmet/Helmet-Regular.ttf";
 	fontSize = DEFAULT_FONT_SIZE;
 	font = TTF_OpenFont(fontPath.c_str(), 100);
+	maxHeight = 0;
+
 	if (!font)
 	{
 		printf("[GUI] TTF Font load error 1: %s\n", TTF_GetError());
@@ -42,6 +44,8 @@ GFont::GFont(SDL_Renderer* newRenderer, std::string newFontPath)
 
 	fontSize = DEFAULT_FONT_SIZE;
 	font = TTF_OpenFont(fontPath.c_str(), 100);
+	maxHeight = 0;
+
 	if (!font)
 	{
 		printf("[GUI] TTF Font load error 2: %s\n", TTF_GetError());
@@ -54,6 +58,7 @@ GFont::GFont(SDL_Renderer* newRenderer, std::string newFontPath)
 
 GFont::~GFont()
 {
+	maxHeight = 0;
 	fontPath = "";
 	fontSize = DEFAULT_FONT_SIZE;
 
@@ -73,6 +78,7 @@ void GFont::loadLetters()
 	if (!cRenderer)
 		return;
 
+	maxHeight = 0;
 	for (unsigned char i = 0; i < 255; ++i)
 	{
 		if (!validChar(i))
@@ -96,7 +102,19 @@ void GFont::loadLetters()
 			return;
 		}
 
-		textureMap[i] = textTex;
+		// Letter texture dimensions
+		int newWidth = 0;
+		int newHeight = 0;
+		std::string letterAsString = "";
+		letterAsString += i;
+		TTF_SizeText(getFont(), letterAsString.c_str(), &newWidth, &newHeight);
+
+		if (newHeight > maxHeight)
+			maxHeight = newHeight;
+
+		// Create the new letters
+		GLetter* cLetter = new GLetter(i, textTex, newWidth);
+		textureMap[i] = cLetter;
 	}
 }
 
@@ -108,6 +126,19 @@ SDL_Color GFont::getTextColor() const
 TTF_Font* GFont::getFont() const
 {
 	return font;
+}
+GLetter* GFont::getLetter(char cLetter) const
+{
+	std::map<char, GLetter*>::const_iterator itr = textureMap.find(cLetter);
+	if (itr == textureMap.end())
+		return NULL;
+
+	return itr->second;
+}
+
+int GFont::getMaxHeight() const
+{
+	return maxHeight;
 }
 
 int GFont::getFontSize() const

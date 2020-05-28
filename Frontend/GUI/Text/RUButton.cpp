@@ -65,7 +65,6 @@ RUButton::~RUButton()
 
 void RUButton::updateBackground(gfxpp* cGfx)
 {
-	cFont = cGfx->cFont;
 	drawText(cGfx);
 }
 

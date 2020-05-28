@@ -24,13 +24,8 @@ RUTextComponent::RUTextComponent()
 	text = "";
 	strDrawText = "";
 	strWidth = 0.0f;
-	cursorXGap = 0.0f;
-	cursorYGap = 0.0f;
 	cursorX = 0;
 	dimRatio = 0.0f;
-	boxInnerIndex = 0;
-	boxIndex = 0;
-	boxLen = 0;
 	passwordChar = '*';
 	passwordField = false;
 	cursorStart = 0;
@@ -38,7 +33,6 @@ RUTextComponent::RUTextComponent()
 
 	// event listeners
 	KeyListener = 0;
-	cFont = NULL;
 }
 
 RUTextComponent::~RUTextComponent()
@@ -46,21 +40,14 @@ RUTextComponent::~RUTextComponent()
 	text = "";
 	strDrawText = "";
 	strWidth = 0.0f;
-	cursorXGap = 0.0f;
-	cursorYGap = 0.0f;
 	cursorX = 0;
 	dimRatio = 0.0f;
-	boxInnerIndex = 0;
-	boxIndex = 0;
-	boxLen = 0;
 	passwordChar = '*';
 	passwordField = false;
 	readOnly = true;
 
 	// event listeners
 	KeyListener = 0;
-
-	cFont = NULL;
 }
 
 std::string RUTextComponent::getText() const
@@ -94,15 +81,13 @@ void RUTextComponent::setText(std::string newText)
 	if (text == newText)
 		return;
 
-	// 0 means no boxLen
-	if ((boxLen > 0) && (newText.length() > boxLen))
+	// 0 means no cursor.maxLen
+	if ((cursor.maxLen > 0) && (newText.length() > cursor.maxLen))
 		return;
 
 	text = newText;
-	boxInnerIndex = 0;
-	boxIndex = 0;
-	boxLen = 0;
-	strWidth = 0.0;
+	cursor.reset();
+	strWidth = 0.0; // Force recalculate
 	drawUpdate = true;
 }
 
@@ -121,22 +106,14 @@ void RUTextComponent::setReadOnly(bool newReadOnly)
 	readOnly = newReadOnly;
 }
 
-void RUTextComponent::setFont(GFont* newFont)
-{
-	cFont = newFont;
-	drawUpdate = true;
-}
-
-void RUTextComponent::calculateRenderInfo()
+void RUTextComponent::calculateRenderInfo(GFont* cFont)
 {
 	if ((!cFont) || (!cFont->getFont()))
 		return;
 
-	// Font letter w/h
 	int newWidth = 0;
 	int newHeight = 0;
 	strDrawText = text;
-	cursorYGap = (getHeight() - cFont->getFontSize());
 
 	// set the text to draw
 	if (passwordField)
@@ -146,58 +123,62 @@ void RUTextComponent::calculateRenderInfo()
 			strDrawText += '*';
 	}
 
+	// First with no optimization
+	for (unsigned int i = 0; i < strDrawText.length(); ++i)
+	{
+		GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+		newWidth += cLetter->getWidth();
+	}
+
 	// First run
 	if (strWidth == 0.0f)
 	{
-		TTF_SizeText(cFont->getFont(), strDrawText.c_str(), &newWidth, &newHeight);
+		newHeight = cFont->getMaxHeight();
 		dimRatio = (((float)(getHeight())) / ((float)(newHeight)));
 		strWidth = dimRatio * newWidth;
 	}
 
 	if (getType() == "RUTextbox")
 	{
-		// printf("Text: %s\n", text.c_str());
-		/*printf("%s(%ld): (%u,%u,%u)\n", strDrawText.c_str(), strDrawText.length(), boxIndex,
-			   boxInnerIndex, boxLen);*/
-
 		// Chop the text
-		if (boxLen)
-			strDrawText = strDrawText.substr(boxIndex, boxLen);
+		if (cursor.maxLen)
+			strDrawText = strDrawText.substr(cursor.index, cursor.maxLen);
 
 		// Text dimensions
-		TTF_SizeText(cFont->getFont(), strDrawText.c_str(), &newWidth, &newHeight);
+		newHeight = cFont->getMaxHeight();
 		dimRatio = (((float)(getHeight())) / ((float)(newHeight)));
 		strWidth = dimRatio * newWidth;
 
 		// We have to chop/grow the text
 		if (strWidth > getWidth())
 		{
-			if (boxLen == 0)
+			if (cursor.maxLen == 0)
 			{
 				// First time overflowing in the textbox
-				boxLen = strDrawText.length() - 1;
-				boxIndex = 1;
+				cursor.maxLen = strDrawText.length() - 1;
+				cursor.index = 1;
 			}
-			else if (boxLen > 0)
+			else if (cursor.maxLen > 0)
 			{
 				// Compensate for big characters
-				--boxLen;
-				++boxIndex;
+				--cursor.maxLen;
+				++cursor.index;
 			}
 
-			--boxInnerIndex; // Special case because of rendering
+			--cursor.cursorIndex; // Special case because of rendering
 		}
 		else
 		{
 			// Compensate for small characters where large characters used to be
-			if ((boxLen > 1) && (boxIndex + boxInnerIndex + boxLen < text.length()))
+			if ((cursor.maxLen > 1) &&
+				(cursor.index + cursor.cursorIndex + cursor.maxLen < text.length()))
 			{
 				// if(CanLeft()) Left()
 			}
 		}
 
 		// Cursor dimensions
-		TTF_SizeText(cFont->getFont(), strDrawText.substr(0, boxInnerIndex).c_str(), &newWidth,
+		TTF_SizeText(cFont->getFont(), strDrawText.substr(0, cursor.cursorIndex).c_str(), &newWidth,
 					 &newHeight);
 		float cursorDimRatio = (((float)(getHeight())) / ((float)(newHeight)));
 		cursorX = cursorDimRatio * newWidth;
@@ -206,10 +187,15 @@ void RUTextComponent::calculateRenderInfo()
 
 void RUTextComponent::drawText(gfxpp* cGfx)
 {
-	if ((!cFont) || (!cFont->getFont()))
+	if (!cGfx)
 		return;
 
-	calculateRenderInfo();
+	GFont* cFont = cGfx->cFont;
+	if (!cFont)
+		return;
+
+	float cursorYGap = (getHeight() - cFont->getFontSize());
+	calculateRenderInfo(cFont);
 
 	// Draw the string
 	if (strDrawText.length() > 0)
@@ -221,7 +207,11 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 			return;
 		}
 
-		SDL_Surface* textMessage =
+		// TODO: CHANGE THIS TO BUILD FROM GFONT TEXTURES
+
+		// SDL_SetRenderTarget(cGfx->getRenderer(), NULL);//USE THIS TO DRAW EACH LETTER TO THE
+		// TEXTURE
+		/*SDL_Surface* textMessage =
 			TTF_RenderText_Solid(cFont->getFont(), strDrawText.c_str(), cFont->getTextColor());
 		if (!textMessage)
 		{
@@ -237,28 +227,42 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 			if (textMessage)
 				SDL_FreeSurface(textMessage);
 			return;
-		}
+		}*/
 
 		SDL_Rect textRect;
 		textRect.x = 0;
 		textRect.y = 0;
-		textRect.w = strWidth;
+		textRect.w = 0;
 		textRect.h = getHeight();
 
-		SDL_RenderCopy(cGfx->getRenderer(), textTex, NULL, &textRect);
+		SDL_SetRenderTarget(cGfx->getRenderer(), getBackground());
+		for (unsigned int i = 0; i < strDrawText.length(); ++i)
+		{
+			GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+			textRect.w = dimRatio * cLetter->getWidth();
+
+			SDL_RenderCopy(cGfx->getRenderer(), cLetter->getTexture(), NULL, &textRect);
+			textRect.x += textRect.w;
+		}
+
+		// SDL_RenderCopy(cGfx->getRenderer(), textTex, NULL, &textRect);
 
 		// Cleanup
-		if (textMessage)
-			SDL_FreeSurface(textMessage);
-		if (textTex)
-			SDL_DestroyTexture(textTex);
+		// if (textMessage)
+		// SDL_FreeSurface(textMessage);
+		// if (textTex)
+		// SDL_DestroyTexture(textTex);
 	}
 
-	drawCursor(cGfx);
+	drawCursor(cGfx, cursorYGap);
 }
 
-void RUTextComponent::drawCursor(gfxpp* cGfx)
+void RUTextComponent::drawCursor(gfxpp* cGfx, float cursorYGap)
 {
+	if (!cGfx)
+		return;
+
+	GFont* cFont = cGfx->cFont;
 	if (!cFont)
 		return;
 
@@ -329,66 +333,67 @@ bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode event
 		// interact with the component
 		if (eventKeyPressed == SDLK_BACKSPACE)
 		{
-			if ((text.length() > 0) && ((boxIndex > 0) || (boxInnerIndex > 0)))
+			if ((text.length() > 0) && ((cursor.index > 0) || (cursor.cursorIndex > 0)))
 			{
 
 				// Delete the character
-				if (boxIndex + boxInnerIndex == boxLen)
-					text = text.substr(0, boxIndex + boxInnerIndex - 1);
+				if (cursor.index + cursor.cursorIndex == cursor.maxLen)
+					text = text.substr(0, cursor.index + cursor.cursorIndex - 1);
 				else
-					text = text.substr(0, boxIndex + boxInnerIndex - 1) +
-						   text.substr(boxIndex + boxInnerIndex);
+					text = text.substr(0, cursor.index + cursor.cursorIndex - 1) +
+						   text.substr(cursor.index + cursor.cursorIndex);
 
 				// Shift the cursor
-				if ((boxInnerIndex) && (boxIndex == 0))
-					--boxInnerIndex;
-				else if (boxIndex)
-					--boxIndex;
+				if ((cursor.cursorIndex) && (cursor.index == 0))
+					--cursor.cursorIndex;
+				else if (cursor.index)
+					--cursor.index;
 
-				if (boxIndex + boxInnerIndex < boxLen)
-					boxLen = 0;
+				if (cursor.index + cursor.cursorIndex < cursor.maxLen)
+					cursor.maxLen = 0;
 			}
 		}
 		else if (eventKeyPressed == SDLK_DELETE)
 		{
-			if ((text.length() > 0) && (boxIndex + boxInnerIndex < text.length()))
+			if ((text.length() > 0) && (cursor.index + cursor.cursorIndex < text.length()))
 			{
-				// text = text.substr(0, boxIndex + boxInnerIndex -1) + text.substr(boxIndex +
-				// boxInnerIndex - 1);
+				// text = text.substr(0, cursor.index + cursor.cursorIndex -1) +
+				// text.substr(cursor.index +
+				// cursor.cursorIndex - 1);
 			}
 		}
 		else if ((eventKeyPressed == SDLK_UP) || (eventKeyPressed == SDLK_HOME))
 		{
-			cursorStart = time(NULL);
+			// cursorStart = time(NULL);
 		}
 		else if ((eventKeyPressed == SDLK_DOWN) || (eventKeyPressed == SDLK_END))
 		{
-			cursorStart = time(NULL);
+			// cursorStart = time(NULL);
 		}
 		else if (eventKeyPressed == SDLK_LEFT)
 		{
-			if (boxInnerIndex)
-				--boxInnerIndex;
-			else if (boxIndex)
-				--boxIndex;
+			if (cursor.cursorIndex)
+				--cursor.cursorIndex;
+			else if (cursor.index)
+				--cursor.index;
 
 			cursorStart = time(NULL);
 		}
 		else if (eventKeyPressed == SDLK_RIGHT)
 		{
-			if (boxLen == 0)
+			if (cursor.maxLen == 0)
 			{
-				if (boxInnerIndex < text.length())
-					++boxInnerIndex;
+				if (cursor.cursorIndex < text.length())
+					++cursor.cursorIndex;
 			}
-			else if (boxLen > 0)
+			else if (cursor.maxLen > 0)
 			{
-				if (boxIndex + boxInnerIndex < text.length())
+				if (cursor.index + cursor.cursorIndex < text.length())
 				{
-					if (boxInnerIndex == boxLen)
-						++boxIndex;
-					else if (boxInnerIndex < boxLen)
-						++boxInnerIndex;
+					if (cursor.cursorIndex == cursor.maxLen)
+						++cursor.index;
+					else if (cursor.cursorIndex < cursor.maxLen)
+						++cursor.cursorIndex;
 				}
 			}
 
@@ -407,25 +412,13 @@ bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode event
 				}
 
 				// Insert the Character
-				text = text.substr(0, boxIndex + boxInnerIndex) + eventChar +
-					   text.substr(boxIndex + boxInnerIndex);
+				text = text.substr(0, cursor.index + cursor.cursorIndex) + eventChar +
+					   text.substr(cursor.index + cursor.cursorIndex);
 
-				if (boxLen)
-					++boxIndex;
+				if (cursor.maxLen)
+					++cursor.index;
 				else
-					++boxInnerIndex;
-
-				// Shift the cursor
-				/*if (boxLen)
-					++boxIndex;
-				else
-					++boxInnerIndex;
-
-				if(boxIndex > 0)
-					--boxIndex;
-
-				if(boxInnerIndex < boxLen)
-					++boxInnerIndex;*/
+					++cursor.cursorIndex;
 			}
 		}
 

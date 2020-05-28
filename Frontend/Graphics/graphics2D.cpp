@@ -114,13 +114,6 @@ void gfxpp::addItem(GItem* newItem)
 
 	// Assign same id to object of GItem and add it
 	newItem->setID(itemID);
-
-	if ((newItem->getType() == "RULabel") || (newItem->getType() == "RUTextbox") ||
-		(newItem->getType() == "RUButton"))
-	{
-		((RUTextComponent*)newItem)->setFont(cFont);
-	}
-
 	guiElements.push_back(newItem);
 }
 

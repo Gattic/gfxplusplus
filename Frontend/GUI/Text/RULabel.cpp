@@ -36,7 +36,6 @@ RULabel::~RULabel()
 
 void RULabel::updateBackground(gfxpp* cGfx)
 {
-	cFont = cGfx->cFont;
 	drawText(cGfx);
 }
 
