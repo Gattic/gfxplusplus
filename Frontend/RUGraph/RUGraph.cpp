@@ -49,8 +49,8 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 	gridLineWidth = DEFAULT_GRIDLINE_WIDTH;
 
 	// plotter mutex
-	plotMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(plotMutex, NULL);
+	// plotMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	// pthread_mutex_init(plotMutex, NULL);
 
 	// checkbox label
 	titleLabel = new RULabel();
@@ -78,8 +78,8 @@ RUGraph::~RUGraph()
 	clear();
 
 	// plotter mutex
-	pthread_mutex_destroy(plotMutex);
-	free(plotMutex);
+	// pthread_mutex_destroy(plotMutex);
+	// free(plotMutex);
 }
 
 int RUGraph::getGraphSize() const
@@ -300,7 +300,7 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 	}
 
 	// draw the lines
-	pthread_mutex_lock(plotMutex);
+	// pthread_mutex_lock(plotMutex);
 	std::map<std::string, Graphable*>::iterator it;
 
 	for (it = lines.begin(); it != lines.end(); ++it)
@@ -309,7 +309,7 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 		if (g)
 			g->updateBackground(cGfx);
 	}
-	pthread_mutex_unlock(plotMutex);
+	// pthread_mutex_unlock(plotMutex);
 }
 
 void RUGraph::setPoints(const std::string& label, const std::vector<Point2*>& graphPoints,
@@ -324,10 +324,10 @@ void RUGraph::setPoints(const std::string& label, const std::vector<Point2*>& gr
 		return;
 	newPlotter->setPoints(graphPoints);
 	// add the graph comp to the graph
-	pthread_mutex_lock(plotMutex);
+	// pthread_mutex_lock(plotMutex);
 	if (newPlotter)
 		lines[label] = newPlotter;
-	pthread_mutex_unlock(plotMutex);
+	// pthread_mutex_unlock(plotMutex);
 
 	// trigger the draw update
 	drawUpdate = true;
@@ -345,10 +345,10 @@ void RUGraph::setLine(const std::string& label, const shmea::GList& graphPoints,
 		return;
 	newPlotter->setLine(graphPoints);
 	// add the graph comp to the graph
-	pthread_mutex_lock(plotMutex);
+	// pthread_mutex_lock(plotMutex);
 	if (newPlotter)
 		lines[label] = newPlotter;
-	pthread_mutex_unlock(plotMutex);
+	// pthread_mutex_unlock(plotMutex);
 
 	// trigger the draw update
 	drawUpdate = true;
@@ -411,13 +411,13 @@ void RUGraph::buildDotMatrix()
 
 void RUGraph::clear(bool toggleDraw)
 {
-	pthread_mutex_lock(plotMutex);
+	// pthread_mutex_lock(plotMutex);
 	std::map<std::string, Graphable*>::iterator it;
 
 	for (it = lines.begin(); it != lines.end(); ++it)
 		delete it->second;
 	lines.clear();
-	pthread_mutex_unlock(plotMutex);
+	// pthread_mutex_unlock(plotMutex);
 
 	if (toggleDraw)
 		drawUpdate = true;
