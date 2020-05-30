@@ -20,11 +20,11 @@ set(MiniC_src_files
 )
 add_library(MiniC ${MiniC_src_files})
 
-install(TARGETS MiniC EXPORT gfxConfig
+install(TARGETS MiniC EXPORT gfxplusplusConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(EXPORT gfxConfig DESTINATION share/glades/cmake)
+install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
 
-export(TARGETS MiniC FILE gfxConfig.cmake)
+export(TARGETS MiniC FILE gfxplusplusConfig.cmake)

@@ -24,6 +24,7 @@
 #include <utility>
 #include <vector>
 
+class gfxpp;
 class RULabel;
 
 class RUTabContainer : public RUComponent
@@ -46,8 +47,8 @@ protected:
 
 	// events
 	void (GPanel::*OptionChangedListener)(int);
-	virtual void onMouseDown(GPanel*, int, int);
-	virtual void onMouseMotion(GPanel*, int, int);
+	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
+	virtual void onMouseMotion(gfxpp*, GPanel*, int, int);
 
 public:
 	static const int DEFAULT_SIDE_WIDTH = 24;
@@ -75,7 +76,7 @@ public:
 	void setOptionChangedListener(void (GPanel::*)(int));
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	void updateLabels();
 	virtual void unhover();
 	virtual std::string getType() const;

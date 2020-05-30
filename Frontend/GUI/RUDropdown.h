@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+class gfxpp;
 class RULabel;
 class RUImageComponent;
 class RUListbox;
@@ -42,8 +43,8 @@ protected:
 
 	// events
 	void (GPanel::*OptionChangedListener)(int);
-	virtual void onMouseDown(GPanel*, int, int);
-	virtual void onMouseWheel(GPanel*, int, int, int);
+	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
+	virtual void onMouseWheel(gfxpp*, GPanel*, int, int, int);
 
 public:
 	static const int DEFAULT_SIDE_WIDTH = 24;
@@ -71,7 +72,7 @@ public:
 	void setOptionChangedListener(void (GPanel::*)(int));
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	virtual std::string getType() const;
 };
 

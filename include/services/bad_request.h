@@ -23,10 +23,30 @@
 
 class Bad_Request : public GNet::Service
 {
+private:
+	GNet::GServer* serverInstance;
+
 public:
+	Bad_Request()
+	{
+		serverInstance = NULL;
+	}
+
+	Bad_Request(GNet::GServer* newInstance)
+	{
+		serverInstance = newInstance;
+	}
+
+	~Bad_Request()
+	{
+		serverInstance = NULL; // Not ours to delete
+	}
+
 	shmea::GList execute(class GNet::Instance* cInstance, const shmea::GList& data)
 	{
 		shmea::GList retList;
+		if (!serverInstance)
+			return retList;
 
 		printf("[SRVC] Bad Request\n");
 

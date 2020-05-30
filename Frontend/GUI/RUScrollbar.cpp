@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUScrollbar.h"
 #include "../GItems/RUColors.h"
+#include "../Graphics/graphics.h"
 #include "RUImageComponent.h"
 
 // set default image paths
@@ -250,12 +251,12 @@ void RUScrollbar::calculateBarPos()
 	arrowDown->setVisible((maxValue > 0) && (optionsShown > 0));
 }
 
-void RUScrollbar::updateBackground(SDL_Renderer* renderer)
+void RUScrollbar::updateBackground(gfxpp* cGfx)
 {
 	//
 }
 
-void RUScrollbar::onMouseDown(GPanel* cPanel, int eventX, int eventY)
+void RUScrollbar::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUScrollbar: onMouseDown(%d, %d);\n", eventX, eventY);
 	if (eventY <= arrowSpace)
@@ -266,7 +267,7 @@ void RUScrollbar::onMouseDown(GPanel* cPanel, int eventX, int eventY)
 	drawUpdate = true;
 }
 
-void RUScrollbar::onMouseWheel(GPanel* cPanel, int eventX, int eventY, int scrollType)
+void RUScrollbar::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY, int scrollType)
 {
 	// printf("RUScrollbar: onMouseWheel(%d);\n", scrollType);
 

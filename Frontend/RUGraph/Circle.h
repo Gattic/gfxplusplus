@@ -14,39 +14,44 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GRAPHSCATTER_H
-#define _GRAPHSCATTER_H
+#ifndef _RUCIRCLE
+#define _RUCIRCLE
 
+#include "Graphable.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
+#include <map>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
 
-#include "../../GItems/RUColors.h"
-#include "Graphable.h"
-
+class gfxpp;
 class RUGraph;
 class Point2;
 
-class GraphScatter : public Graphable
+class Circle : public Graphable
 {
 private:
-	void drawPoint(SDL_Renderer*, int, int, int = 0);
-	void drawPointOutline(SDL_Renderer*, int, int, int = 0);
-	int pointSize;
+	std::map<int, std::map<int, int> > heatmap;
+	std::vector<const Point2*> foci;
+	double radius;
+	int maxHit;
 
 public:
 	// constructors & destructor
-	GraphScatter(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, int = 4);
-	~GraphScatter();
+	Circle(RUGraph*, SDL_Color);
+	~Circle();
 
-	void setPointSize(int);
-	int getPointSize(int);
+	void addFocalPoint(const Point2*);
+	void setRadius(double);
+	void createHeatmap();
 
-	virtual void draw(SDL_Renderer*);
+	const Point2* getFocalPoint(unsigned int) const;
+	double getRadius() const;
+
+	virtual void draw(gfxpp*);
 	virtual std::string getType() const;
 };
 

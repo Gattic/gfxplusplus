@@ -23,11 +23,11 @@ add_library(GFXItem ${GFXItem_src_files})
 
 target_link_libraries(GFXItem MiniC)
 
-install(TARGETS GFXItem EXPORT gfxConfig
+install(TARGETS GFXItem EXPORT gfxplusplusConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(EXPORT gfxConfig DESTINATION share/glades/cmake)
+install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
 
-export(TARGETS GFXItem FILE gfxConfig.cmake)
+export(TARGETS GFXItem FILE gfxplusplusConfig.cmake)

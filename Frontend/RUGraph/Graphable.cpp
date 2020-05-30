@@ -15,8 +15,8 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
-#include "../../../include/Backend/Database/GList.h"
-#include "../../GFXUtilities/point2.h"
+#include "../../include/Backend/Database/GList.h"
+#include "../GFXUtilities/point2.h"
 #include "RUGraph.h"
 
 Graphable::Graphable(RUGraph* newParent, SDL_Color newColor)
@@ -28,10 +28,6 @@ Graphable::Graphable(RUGraph* newParent, SDL_Color newColor)
 	x_min = 0.0f;
 	y_max = 0.0f;
 	y_min = 0.0f;
-
-	// plotter mutex
-	plotMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(plotMutex, NULL);
 }
 
 Graphable::~Graphable()
@@ -46,10 +42,6 @@ Graphable::~Graphable()
 	y_max = 0.0f;
 
 	clear();
-
-	// plotter mutex
-	pthread_mutex_destroy(plotMutex);
-	free(plotMutex);
 }
 
 SDL_Color Graphable::getColor() const
@@ -95,9 +87,7 @@ void Graphable::setPoints(const std::vector<Point2*>& newPoints)
 	if (newPoints.empty())
 		return;
 
-	pthread_mutex_lock(plotMutex);
 	points = newPoints;
-	pthread_mutex_unlock(plotMutex);
 	computeAxisRanges();
 }
 
@@ -106,19 +96,15 @@ void Graphable::setLine(const shmea::GList& newLine)
 	if (newLine.empty())
 		return;
 
-	pthread_mutex_lock(plotMutex);
 	points.clear();
 	for (unsigned int i = 0; i < newLine.size(); ++i)
 		points.push_back(new Point2(i, newLine.getFloat(i)));
-	pthread_mutex_unlock(plotMutex);
 	computeAxisRanges();
 }
 
 void Graphable::clear()
 {
-	pthread_mutex_lock(plotMutex);
 	points.clear();
-	pthread_mutex_unlock(plotMutex);
 
 	parent = NULL;
 	x_max = 0.0f;
@@ -127,13 +113,11 @@ void Graphable::clear()
 	y_min = 0.0f;
 }
 
-void Graphable::updateBackground(SDL_Renderer* renderer)
+void Graphable::updateBackground(gfxpp* cGfx)
 {
 	if (!parent || !parent->isVisible() || !(parent->getWidth() > 0 && parent->getHeight() > 0))
 		return;
 
 	// draw the line
-	pthread_mutex_lock(plotMutex);
-	draw(renderer);
-	pthread_mutex_unlock(plotMutex);
+	draw(cGfx);
 }

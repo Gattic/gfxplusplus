@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUButton.h"
 #include "../../GItems/RUColors.h"
+#include "../../Graphics/graphics.h"
 
 RUButton::RUButton()
 {
@@ -62,9 +63,9 @@ RUButton::~RUButton()
 	//
 }
 
-void RUButton::updateBackground(SDL_Renderer* renderer)
+void RUButton::updateBackground(gfxpp* cGfx)
 {
-	drawText(renderer);
+	drawText(cGfx);
 }
 
 void RUButton::hover()
@@ -72,23 +73,23 @@ void RUButton::hover()
 	if (buttonColor == "red")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_HOVER_RED);
-		setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_HIGHLIGHT_RED);
+		// setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_HIGHLIGHT_RED);
 	}
 	else if (buttonColor == "green")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_HOVER_GREEN);
-		setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_HIGHLIGHT_GREEN);
+		// setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_HIGHLIGHT_GREEN);
 	}
 	else if (buttonColor == "blue")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_HOVER_BLUE);
-		setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_HIGHLIGHT_BLUE);
+		// setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_HIGHLIGHT_BLUE);
 	}
 	else
 	{
 		// Default to blue
 		setBGColor(RUColors::DEFAULT_BUTTON_HOVER_BLUE);
-		setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_HIGHLIGHT_BLUE);
+		// setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_HIGHLIGHT_BLUE);
 	}
 }
 
@@ -97,23 +98,23 @@ void RUButton::unhover()
 	if (buttonColor == "red")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_RED);
-		setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_RED);
+		// setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_RED);
 	}
 	else if (buttonColor == "green")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_GREEN);
-		setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_GREEN);
+		// setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_GREEN);
 	}
 	else if (buttonColor == "blue")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_BLUE);
-		setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_BLUE);
+		// setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_BLUE);
 	}
 	else
 	{
 		// Default to blue
 		setBGColor(RUColors::DEFAULT_BUTTON_BLUE);
-		setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_BLUE);
+		// setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_BLUE);
 	}
 }
 

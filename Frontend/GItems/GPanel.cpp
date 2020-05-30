@@ -15,10 +15,11 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "GPanel.h"
-#include "../../include/Backend/Networking/main.h"
 #include "../GFXUtilities/EventTracker.h"
+#include "../GUI/RUMsgBox.h"
 #include "../GUI/Text/RUTextComponent.h"
 #include "../Graphics/graphics.h"
+#include "Backend/Networking/main.h"
 #include "GItem.h"
 #include "GLayout.h"
 #include "Mini/RUBackgroundComponent.h"
@@ -35,33 +36,33 @@ GPanel::GPanel(const std::string& newName, int newWidth, int newHeight)
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 }
 
-void GPanel::onShow()
+void GPanel::onShow(gfxpp* cGfx)
 {
 	focus = true;
-	Graphics::focusedPanel = this;
+	cGfx->focusedPanel = this;
 }
 
-void GPanel::onHide()
+void GPanel::onHide(gfxpp* cGfx)
 {
 	focus = false;
 }
 
-void GPanel::show()
+void GPanel::show(gfxpp* cGfx)
 {
-	onShow();
+	onShow(cGfx);
 }
 
-void GPanel::hide()
+void GPanel::hide(gfxpp* cGfx)
 {
-	onHide();
+	onHide(cGfx);
 }
 
-void GPanel::hover()
+void GPanel::hover(gfxpp* cGfx)
 {
 	//
 }
 
-void GPanel::unhover()
+void GPanel::unhover(gfxpp* cGfx)
 {
 	//
 }
@@ -117,9 +118,12 @@ void GPanel::calculateSubItemPositions(std::pair<int, int> parentOffset)
 	}
 }
 
-void GPanel::processSubItemEvents(EventTracker* eventsStatus, GPanel* parentPanel, SDL_Event event,
-								  int mouseX, int mouseY)
+void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* parentPanel,
+								  SDL_Event event, int mouseX, int mouseY)
 {
+	if (!cGfx)
+		return;
+
 	if (!focus)
 		return;
 
@@ -130,7 +134,7 @@ void GPanel::processSubItemEvents(EventTracker* eventsStatus, GPanel* parentPane
 		if (!cItem)
 			continue;
 
-		EventTracker* eventsStatus = cItem->processEvents(this, event, mouseX, mouseY);
+		EventTracker* eventsStatus = cItem->processEvents(cGfx, this, event, mouseX, mouseY);
 		if (eventsStatus->hovered)
 			hovered = true;
 		delete eventsStatus;
@@ -144,12 +148,12 @@ void GPanel::processSubItemEvents(EventTracker* eventsStatus, GPanel* parentPane
 	}
 }
 
-void GPanel::updateBackgroundHelper(SDL_Renderer* renderer)
+void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 {
 	if (!focus)
 		return;
 
-	if (!renderer)
+	if (!cGfx->getRenderer())
 		return;
 
 	if (!visible)
@@ -168,28 +172,28 @@ void GPanel::updateBackgroundHelper(SDL_Renderer* renderer)
 		background = NULL;
 
 		// draw the background
-		background = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
-									   width, height);
+		background = SDL_CreateTexture(cGfx->getRenderer(), SDL_PIXELFORMAT_RGBA8888,
+									   SDL_TEXTUREACCESS_TARGET, width, height);
 		if (!background)
 		{
 			background = NULL;
 			return;
 		}
 
-		SDL_SetRenderTarget(renderer, background);
+		SDL_SetRenderTarget(cGfx->getRenderer(), background);
 		SDL_SetTextureBlendMode(background, SDL_BLENDMODE_BLEND);
 
 		// draw the background
-		updateBGBackground(renderer);
+		updateBGBackground(cGfx);
 
 		// Call the component draw call
-		updateBackground(renderer);
+		updateBackground(cGfx);
 
 		// draw the border
-		updateBorderBackground(renderer);
+		updateBorderBackground(cGfx);
 
 		// reset the render target to default
-		SDL_SetRenderTarget(renderer, NULL);
+		SDL_SetRenderTarget(cGfx->getRenderer(), NULL);
 	}
 
 	// draw the background
@@ -198,7 +202,7 @@ void GPanel::updateBackgroundHelper(SDL_Renderer* renderer)
 	dRect.y = getY();
 	SDL_Texture* geBackground = getBackground();
 	if (geBackground)
-		SDL_RenderCopy(renderer, geBackground, NULL, &dRect);
+		SDL_RenderCopy(cGfx->getRenderer(), geBackground, NULL, &dRect);
 
 	/*
 	// Setup the render vector
@@ -227,10 +231,10 @@ void GPanel::updateBackgroundHelper(SDL_Renderer* renderer)
 
 	// Go backwards because of dropdowns
 	for (int i = subitems.size() - 1; i >= 0; --i)
-		subitems[i]->updateBackgroundHelper(renderer);
+		subitems[i]->updateBackgroundHelper(cGfx);
 }
 
-void GPanel::updateBackground(SDL_Renderer* renderer)
+void GPanel::updateBackground(gfxpp* cGfx)
 {
 	//
 }
@@ -238,4 +242,15 @@ void GPanel::updateBackground(SDL_Renderer* renderer)
 std::string GPanel::getType() const
 {
 	return "GPanel";
+}
+
+void GPanel::MsgBox(std::string title, std::string msg, int type)
+{
+	// Type = Message Box, ConfirmBox, or InputBox
+	RUMsgBox* newMsgBox = new RUMsgBox(this, title, msg, type);
+
+	newMsgBox->setX((getWidth() / 2.0f) - (newMsgBox->getWidth() / 2.0f));
+	newMsgBox->setY((getHeight() / 2.0f) - (newMsgBox->getHeight() / 2.0f));
+	newMsgBox->setName(title + ":" + msg);
+	addSubItem(newMsgBox, GItem::Z_BACK);
 }

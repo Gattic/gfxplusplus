@@ -26,10 +26,7 @@
 #include <string.h>
 #include <vector>
 
-class GPanel;
-class RUComponent;
-class RUBackgroundComponent;
-class RUBorderComponent;
+class gfxpp;
 
 class GLayout : public GItem
 {
@@ -44,8 +41,8 @@ public:
 	// gets
 	int getLayoutType() const;
 
-	virtual void hover();
-	virtual void unhover();
+	virtual void hover(gfxpp*);
+	virtual void unhover(gfxpp*);
 	virtual std::string getType() const = 0;
 };
 

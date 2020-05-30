@@ -34,11 +34,13 @@ include(GNUInstallDirs)
 
 #Subdirectories
 include_directories(${CMAKE_SOURCE_DIR})
+include_directories("include")
 include_directories("services")
+add_subdirectory("Frontend/GFXUtilities")
 add_subdirectory("Frontend/Graphics")
 add_subdirectory("Frontend/GItems")
-add_subdirectory("Frontend/GFXUtilities")
 add_subdirectory("Frontend/GUI")
+add_subdirectory("Frontend/RUGraph")
 add_subdirectory("Frontend/GLayouts")
 
 set(MAIN_SRC_FILES
@@ -49,25 +51,30 @@ set(MAIN_SRC_FILES
 add_library(${PROJECT_NAME} SHARED ${MAIN_SRC_FILES})
 
 #Link libraries
-target_link_libraries(${PROJECT_NAME}
-	GFX GPanel GLayout GUI GFXItem GU GNet DB)#custom libs
+target_link_libraries(${PROJECT_NAME} PUBLIC
+	GFX GLayout GraphGUI GFXItem GUI GU GNet DB)#custom libs
 
-target_include_directories(gfxplusplus PRIVATE "include")
-target_include_directories(gfxplusplus PRIVATE "Frontend")
+#target_include_directories(gfxplusplus PUBLIC "include")
+#target_include_directories(gfxplusplus PUBLIC "Frontend")
+target_include_directories(gfxplusplus PUBLIC  
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
+    $<INSTALL_INTERFACE:include>  # <prefix>/include
+)
 
 #target_include_directories(${PROJECT_NAME} PUBLIC
 #    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 #    $<INSTALL_INTERFACE:include>
 #    PRIVATE Frontend)
 
-install(TARGETS ${PROJECT_NAME} EXPORT gfxConfig
+install(TARGETS ${PROJECT_NAME} EXPORT gfxplusplusConfig
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(EXPORT gfxConfig DESTINATION share/glades/cmake)
+install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
 
-export(TARGETS ${PROJECT_NAME} FILE gfxConfig.cmake)
+export(TARGETS ${PROJECT_NAME} FILE gfxplusplusConfig.cmake)
 
 #make fmt
 add_custom_target(fmt ALL
@@ -114,5 +121,11 @@ add_custom_target(debug
 	add_custom_target(profile
 	COMMAND valgrind --tool=callgrind ./build/${PROJECT_NAME}
 	DEPENDS ${PROJECT_NAME}
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+#make uninstall
+	add_custom_target(uninstall
+	COMMAND sudo xargs rm < ./build/install_manifest.txt
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )

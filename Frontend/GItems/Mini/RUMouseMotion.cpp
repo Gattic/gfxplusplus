@@ -53,9 +53,12 @@ void RUMouseMotion::setMouseMotionListener(void (GPanel::*f)(int, int))
 	MouseMotionListener = f;
 }
 
-void RUMouseMotion::onMouseMotionHelper(EventTracker* eventsStatus, GPanel* cPanel, int eventX,
-										int eventY, bool overrideRange)
+void RUMouseMotion::onMouseMotionHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPanel,
+										int eventX, int eventY, bool overrideRange)
 {
+	if (!cGfx)
+		return;
+
 	if (!eventsStatus)
 		return;
 
@@ -79,7 +82,7 @@ void RUMouseMotion::onMouseMotionHelper(EventTracker* eventsStatus, GPanel* cPan
 
 	// pass on the event
 	unhovered = false;
-	onMouseMotion(cPanel, eventX - getX(), eventY - getY());
+	onMouseMotion(cGfx, cPanel, eventX - getX(), eventY - getY());
 
 	if (MouseMotionListener != 0)
 		(cPanel->*MouseMotionListener)(eventX - getX(), eventY - getY());
@@ -87,7 +90,7 @@ void RUMouseMotion::onMouseMotionHelper(EventTracker* eventsStatus, GPanel* cPan
 	eventsStatus->hovered = true;
 }
 
-void RUMouseMotion::onMouseMotion(GPanel* cPanel, int eventX, int eventY)
+void RUMouseMotion::onMouseMotion(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUMouseMotion: onMouseMotion(%d, %d);\n", eventX, eventY);
 }

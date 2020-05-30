@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
 class RUImageComponent;
 
 class RUScrollbar : public RUComponent
@@ -44,8 +45,8 @@ protected:
 	RUImageComponent* scrollBar;
 
 	// events
-	virtual void onMouseDown(GPanel*, int, int);
-	virtual void onMouseWheel(GPanel*, int, int, int);
+	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
+	virtual void onMouseWheel(gfxpp*, GPanel*, int, int, int);
 
 public:
 	static const int ORIENTATION_HORIZONTAL = 0;
@@ -75,7 +76,7 @@ public:
 	void calculateBarPos();
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	virtual std::string getType() const;
 };
 

@@ -37,9 +37,12 @@ void RUKeyUp::setKeyUpListener(void (GPanel::*f)(const std::string&))
 	KeyUpListener = f;
 }
 
-void RUKeyUp::onKeyUpHelper(EventTracker* eventsStatus, GPanel* cPanel, SDL_Keycode keyPressed,
-							Uint16 keyModPressed)
+void RUKeyUp::onKeyUpHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPanel,
+							SDL_Keycode keyPressed, Uint16 keyModPressed)
 {
+	if (!cGfx)
+		return;
+
 	if (!eventsStatus)
 		return;
 
@@ -50,17 +53,17 @@ void RUKeyUp::onKeyUpHelper(EventTracker* eventsStatus, GPanel* cPanel, SDL_Keyc
 		return;
 
 	GItem* cItem = dynamic_cast<GItem*>(this);
-	if (!(Graphics::focusedItem == cItem))
+	if (!(cGfx->focusedItem == cItem))
 		return;
 
 	// Render the GUI object
 	drawUpdate = true;
 
 	// pass on the event
-	onKeyUp(cPanel, keyPressed, keyModPressed);
+	onKeyUp(cGfx, cPanel, keyPressed, keyModPressed);
 }
 
-void RUKeyUp::onKeyUp(GPanel* cPanel, SDL_Keycode keyPressed, Uint16 keyModPressed)
+void RUKeyUp::onKeyUp(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode keyPressed, Uint16 keyModPressed)
 {
 	// printf("RUKeyUp: ");
 }

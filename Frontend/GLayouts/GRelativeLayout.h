@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+class gfxpp;
 class EventTracker;
 
 /*!
@@ -32,7 +33,7 @@ class EventTracker;
 class GRelativeLayout : public GLayout
 {
 	// render
-	void updateBackground(SDL_Renderer* renderer);
+	void updateBackground(gfxpp*);
 
 public:
 	GRelativeLayout(std::string);
@@ -40,10 +41,10 @@ public:
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
 	// events
-	virtual void processSubItemEvents(EventTracker*, GPanel*, SDL_Event, int, int);
+	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
 
 	// render
-	virtual void updateBackgroundHelper(SDL_Renderer*);
+	virtual void updateBackgroundHelper(gfxpp*);
 
 	virtual std::string getType() const;
 };

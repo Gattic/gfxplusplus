@@ -37,9 +37,12 @@ void RUKeyDown::setKeyDownListener(void (GPanel::*f)(const std::string&))
 	KeyDownListener = f;
 }
 
-void RUKeyDown::onKeyDownHelper(EventTracker* eventsStatus, GPanel* cPanel, SDL_Keycode keyPressed,
-								Uint16 keyModPressed)
+void RUKeyDown::onKeyDownHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPanel,
+								SDL_Keycode keyPressed, Uint16 keyModPressed)
 {
+	if (!cGfx)
+		return;
+
 	if (!eventsStatus)
 		return;
 
@@ -50,33 +53,33 @@ void RUKeyDown::onKeyDownHelper(EventTracker* eventsStatus, GPanel* cPanel, SDL_
 		return;
 
 	GItem* cItem = dynamic_cast<GItem*>(this);
-	if (!(Graphics::focusedItem == cItem))
+	if (!(cGfx->focusedItem == cItem))
 		return;
 
-	if (!((cItem->getType() == "RUTextbox") && (!Graphics::CTRLPressed) && (!Graphics::ALTPressed)))
+	if (!((cItem->getType() == "RUTextbox") && (!cGfx->CTRLPressed) && (!cGfx->ALTPressed)))
 		return;
 
 	// Render the GUI object
 	drawUpdate = true;
 
 	// pass on the event
-	onKeyDown(cPanel, keyPressed, keyModPressed);
+	onKeyDown(cGfx, cPanel, keyPressed, keyModPressed);
 
 	if (KeyDownListener != 0)
 		(cPanel->*KeyDownListener)(cItem->getName());
 
-	if ((Graphics::focusedItem->getType() == "RUTextbox") && (!Graphics::CTRLPressed) &&
-		(!Graphics::ALTPressed))
+	if ((cGfx->focusedItem->getType() == "RUTextbox") && (!cGfx->CTRLPressed) &&
+		(!cGfx->ALTPressed))
 	{
-		((RUTextComponent*)(Graphics::focusedItem))
-			->onKeyHelper(Graphics::focusedPanel, keyPressed, keyModPressed);
+		((RUTextComponent*)(cGfx->focusedItem))
+			->onKeyHelper(cGfx, cGfx->focusedPanel, keyPressed, keyModPressed);
 		eventsStatus->keyReleased = true;
 	}
 
 	eventsStatus->keyPressed = true;
 }
 
-void RUKeyDown::onKeyDown(GPanel* cPanel, SDL_Keycode keyPressed, Uint16 keyModPressed)
+void RUKeyDown::onKeyDown(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode keyPressed, Uint16 keyModPressed)
 {
 	// printf("RUKeyDown: ");
 }

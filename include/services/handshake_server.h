@@ -24,11 +24,33 @@
 
 class Handshake_Server : public GNet::Service
 {
+private:
+	GNet::GServer* serverInstance;
+
 public:
+	Handshake_Server()
+	{
+		serverInstance = NULL;
+	}
+
+	Handshake_Server(GNet::GServer* newInstance)
+	{
+		serverInstance = newInstance;
+	}
+
+	~Handshake_Server()
+	{
+		serverInstance = NULL; // Not ours to delete
+	}
+
 	shmea::GList execute(class GNet::Instance* cInstance, const shmea::GList& data)
 	{
 		// Log the client into the server
 		shmea::GList retList;
+
+		if (!serverInstance)
+			return retList;
+
 		if (data.size() < 1)
 			return retList;
 
@@ -36,6 +58,7 @@ public:
 		std::string clientName = data.getString(0);
 		if (GNet::Instance::validName(clientName))
 			cInstance->setName(clientName);
+		printf("[SERVER] clientName: %s\n", clientName.c_str());
 
 		// generate a new key for the sockets
 		if (cInstance->getIP() != GNet::Sockets::LOCALHOST)
@@ -47,7 +70,7 @@ public:
 			wData.addString("Handshake_Client");
 			wData.addString(cInstance->getName());
 			wData.addLong(newKey);
-			GNet::Sockets::writeConnection(cInstance, cInstance->sockfd, wData, GNet::ACK_TYPE);
+			GNet::Service::ExecuteService(serverInstance, wData, cInstance);
 
 			// Set the new instance key
 			cInstance->setKey(newKey);

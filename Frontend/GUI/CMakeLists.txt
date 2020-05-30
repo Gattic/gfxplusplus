@@ -1,4 +1,3 @@
-add_subdirectory("RUGraph")
 add_subdirectory("Text")
 
 #opengl lib
@@ -33,13 +32,13 @@ set(GUI_src_files
 )
 add_library(GUI ${GUI_src_files})
 
-target_link_libraries(GUI GraphGUI TextC ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} SDL2_ttf SDL2_image)
+target_link_libraries(GUI TextC ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} SDL2_ttf SDL2_image)
 
-install(TARGETS GUI EXPORT gfxConfig
+install(TARGETS GUI EXPORT gfxplusplusConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(EXPORT gfxConfig DESTINATION share/glades/cmake)
+install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
 
-export(TARGETS GUI FILE gfxConfig.cmake)
+export(TARGETS GUI FILE gfxplusplusConfig.cmake)

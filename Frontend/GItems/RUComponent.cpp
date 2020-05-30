@@ -17,6 +17,7 @@
 
 #include "RUComponent.h"
 #include "../GFXUtilities/EventTracker.h"
+#include "../Graphics/graphics.h"
 #include "Mini/RUBackgroundComponent.h"
 #include "Mini/RUBorderComponent.h"
 
@@ -38,7 +39,7 @@ void RUComponent::calculateSubItemPositions(std::pair<int, int> parentOffset)
 	}
 }
 
-void RUComponent::processSubItemEvents(EventTracker* eventsStatus, GPanel* parentPanel,
+void RUComponent::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* parentPanel,
 									   SDL_Event event, int mouseX, int mouseY)
 {
 	if (!eventsStatus)
@@ -58,7 +59,7 @@ void RUComponent::processSubItemEvents(EventTracker* eventsStatus, GPanel* paren
 	for (unsigned int i = 0; i < subitems.size(); ++i)
 	{
 		EventTracker* subEventsStatus =
-			subitems[i]->processEvents(parentPanel, event, mouseX, mouseY);
+			subitems[i]->processEvents(cGfx, parentPanel, event, mouseX, mouseY);
 		if (subEventsStatus->hovered)
 			eventsStatus->hovered = true;
 
@@ -70,9 +71,9 @@ void RUComponent::processSubItemEvents(EventTracker* eventsStatus, GPanel* paren
 	}
 }
 
-void RUComponent::updateBackgroundHelper(SDL_Renderer* renderer)
+void RUComponent::updateBackgroundHelper(gfxpp* cGfx)
 {
-	if (!renderer)
+	if (!cGfx->getRenderer())
 		return;
 
 	if (!visible)
@@ -87,7 +88,7 @@ void RUComponent::updateBackgroundHelper(SDL_Renderer* renderer)
 
 		// draw the new background
 		if (!background)
-			background = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
+			background = SDL_CreateTexture(cGfx->getRenderer(), SDL_PIXELFORMAT_RGBA8888,
 										   SDL_TEXTUREACCESS_TARGET, width, height);
 
 		// still?
@@ -98,21 +99,21 @@ void RUComponent::updateBackgroundHelper(SDL_Renderer* renderer)
 		}
 
 		// Assign the background as the render target and reset the background
-		SDL_SetRenderTarget(renderer, background);
-		SDL_RenderClear(renderer);
+		SDL_SetRenderTarget(cGfx->getRenderer(), background);
+		SDL_RenderClear(cGfx->getRenderer());
 		SDL_SetTextureBlendMode(background, SDL_BLENDMODE_BLEND);
 
 		// draw the background
-		updateBGBackground(renderer);
+		updateBGBackground(cGfx);
 
 		// Call the component draw call
-		updateBackground(renderer);
+		updateBackground(cGfx);
 
 		// draw the border
-		updateBorderBackground(renderer);
+		updateBorderBackground(cGfx);
 
 		// Reset the render target to default
-		SDL_SetRenderTarget(renderer, NULL);
+		SDL_SetRenderTarget(cGfx->getRenderer(), NULL);
 	}
 
 	// draw the background
@@ -121,18 +122,18 @@ void RUComponent::updateBackgroundHelper(SDL_Renderer* renderer)
 	dRect.y = getY();
 	SDL_Texture* geBackground = getBackground();
 	if (geBackground)
-		SDL_RenderCopy(renderer, geBackground, NULL, &dRect);
+		SDL_RenderCopy(cGfx->getRenderer(), geBackground, NULL, &dRect);
 
 	for (unsigned int i = 0; i < subitems.size(); ++i)
-		subitems[i]->updateBackgroundHelper(renderer);
+		subitems[i]->updateBackgroundHelper(cGfx);
 }
 
-void RUComponent::hover()
+void RUComponent::hover(gfxpp* cGfx)
 {
 	//
 }
 
-void RUComponent::unhover()
+void RUComponent::unhover(gfxpp* cGfx)
 {
 	//
 }

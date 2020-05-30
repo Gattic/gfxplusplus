@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 
+class gfxpp;
 class GPanel;
 class EventTracker;
 
@@ -57,7 +58,7 @@ protected:
 	std::vector<GItem*> subitems;
 
 	// render
-	virtual void updateBackground(SDL_Renderer*) = 0;
+	virtual void updateBackground(gfxpp*) = 0;
 
 public:
 	static const int Z_FRONT = -1;
@@ -85,18 +86,18 @@ public:
 
 	// subcomps
 	virtual void addSubItem(GItem*, int = Z_FRONT);
-	void removeItem(int);
-	void removeItem(const std::string&);
+	void removeItem(gfxpp*, int);
+	void removeItem(gfxpp*, const std::string&);
 	void clearItems(unsigned int = 0);
 
 	virtual void calculateSubItemPositions(std::pair<int, int>) = 0;
 
 	// render
-	virtual void updateBackgroundHelper(SDL_Renderer*) = 0;
+	virtual void updateBackgroundHelper(gfxpp*) = 0;
 
 	// event functions
-	EventTracker* processEvents(GPanel*, SDL_Event, int, int);
-	virtual void processSubItemEvents(EventTracker*, GPanel*, SDL_Event, int, int) = 0;
+	EventTracker* processEvents(gfxpp*, GPanel*, SDL_Event, int, int);
+	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int) = 0;
 
 	virtual std::string getType() const = 0;
 };

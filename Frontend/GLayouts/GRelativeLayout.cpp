@@ -31,18 +31,19 @@ void GRelativeLayout::calculateSubItemPositions(std::pair<int, int> parentOffset
 	//
 }
 
-void GRelativeLayout::processSubItemEvents(EventTracker* eventsStatus, GPanel* parentPanel,
-										   SDL_Event event, int mouseX, int mouseY)
+void GRelativeLayout::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus,
+										   GPanel* parentPanel, SDL_Event event, int mouseX,
+										   int mouseY)
 {
 	//
 }
 
-void GRelativeLayout::updateBackground(SDL_Renderer* renderer)
+void GRelativeLayout::updateBackground(gfxpp* cGfx)
 {
 	//
 }
 
-void GRelativeLayout::updateBackgroundHelper(SDL_Renderer* renderer)
+void GRelativeLayout::updateBackgroundHelper(gfxpp* cGfx)
 {
 	//
 }

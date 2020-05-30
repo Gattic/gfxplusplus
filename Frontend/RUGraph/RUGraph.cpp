@@ -15,11 +15,12 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUGraph.h"
-#include "../../../include/Backend/Database/GList.h"
-#include "../../../include/Backend/Database/gtable.h"
-#include "../../../include/Backend/Database/gtype.h"
-#include "../../GFXUtilities/point2.h"
-#include "../Text/RULabel.h"
+#include "../GFXUtilities/point2.h"
+#include "../GUI/Text/RULabel.h"
+#include "../Graphics/graphics.h"
+#include "Backend/Database/GList.h"
+#include "Backend/Database/gtable.h"
+#include "Backend/Database/gtype.h"
 #include "GraphLine.h"
 #include "GraphScatter.h"
 #include "Graphable.h"
@@ -48,8 +49,8 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 	gridLineWidth = DEFAULT_GRIDLINE_WIDTH;
 
 	// plotter mutex
-	plotMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(plotMutex, NULL);
+	// plotMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	// pthread_mutex_init(plotMutex, NULL);
 
 	// checkbox label
 	titleLabel = new RULabel();
@@ -77,8 +78,8 @@ RUGraph::~RUGraph()
 	clear();
 
 	// plotter mutex
-	pthread_mutex_destroy(plotMutex);
-	free(plotMutex);
+	// pthread_mutex_destroy(plotMutex);
+	// free(plotMutex);
 }
 
 int RUGraph::getGraphSize() const
@@ -182,14 +183,14 @@ void RUGraph::setTitleLabel(std::string newLabel)
 	titleLabel->setVisible(true);
 }
 
-void RUGraph::updateBackground(SDL_Renderer* renderer)
+void RUGraph::updateBackground(gfxpp* cGfx)
 {
 	// draw the axes
 	if (axisWidth > 0)
 	{
 		// x axis
-		SDL_SetRenderDrawColor(renderer, getBorderColor().r, getBorderColor().g, getBorderColor().b,
-							   0xFF);
+		SDL_SetRenderDrawColor(cGfx->getRenderer(), getBorderColor().r, getBorderColor().g,
+							   getBorderColor().b, 0xFF);
 
 		// set the x rect
 		SDL_Rect axisX;
@@ -205,12 +206,12 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 		axisY.w = axisWidth;
 		axisY.h = height;
 
-		SDL_RenderFillRect(renderer, &axisX);
-		SDL_RenderFillRect(renderer, &axisY);
+		SDL_RenderFillRect(cGfx->getRenderer(), &axisX);
+		SDL_RenderFillRect(cGfx->getRenderer(), &axisY);
 
 		if ((gridEnabled) && (gridLineWidth > 0))
 		{
-			SDL_SetRenderDrawColor(renderer, 0x61, 0x61, 0x61, 0xFF); // gray
+			SDL_SetRenderDrawColor(cGfx->getRenderer(), 0x61, 0x61, 0x61, 0xFF); // gray
 
 			// x grid
 			int lineCount = graphSize * DEFAULT_NUM_ZONES; // 10 spaces per axis
@@ -230,7 +231,7 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 				lineXRect.w = lineWidth;
 				lineXRect.h = lineHeight;
 
-				SDL_RenderFillRect(renderer, &lineXRect);
+				SDL_RenderFillRect(cGfx->getRenderer(), &lineXRect);
 			}
 
 			// y grid
@@ -251,7 +252,7 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 				lineYRect.w = lineWidth;
 				lineYRect.h = lineHeight;
 
-				SDL_RenderFillRect(renderer, &lineYRect);
+				SDL_RenderFillRect(cGfx->getRenderer(), &lineYRect);
 			}
 		}
 
@@ -262,8 +263,8 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 		int tickHeight = axisWidth * 5;
 		if (quadrants == QUADRANTS_FOUR)
 			tickWidth = axisWidth / DEFAULT_AXIS_WIDTH;
-		SDL_SetRenderDrawColor(renderer, getBorderColor().r, getBorderColor().g, getBorderColor().b,
-							   getBorderColor().a);
+		SDL_SetRenderDrawColor(cGfx->getRenderer(), getBorderColor().r, getBorderColor().g,
+							   getBorderColor().b, getBorderColor().a);
 
 		for (int i = (quadrants == QUADRANTS_FOUR) ? -tickCount : 0; i < tickCount; ++i)
 		{
@@ -274,7 +275,7 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 			tickXRect.w = tickWidth;
 			tickXRect.h = tickHeight;
 
-			SDL_RenderFillRect(renderer, &tickXRect);
+			SDL_RenderFillRect(cGfx->getRenderer(), &tickXRect);
 		}
 
 		// y ticks
@@ -294,21 +295,21 @@ void RUGraph::updateBackground(SDL_Renderer* renderer)
 			tickYRect.w = tickWidth;
 			tickYRect.h = tickHeight;
 
-			SDL_RenderFillRect(renderer, &tickYRect);
+			SDL_RenderFillRect(cGfx->getRenderer(), &tickYRect);
 		}
 	}
 
 	// draw the lines
-	pthread_mutex_lock(plotMutex);
+	// pthread_mutex_lock(plotMutex);
 	std::map<std::string, Graphable*>::iterator it;
 
 	for (it = lines.begin(); it != lines.end(); ++it)
 	{
 		Graphable* g = it->second;
 		if (g)
-			g->updateBackground(renderer);
+			g->updateBackground(cGfx);
 	}
-	pthread_mutex_unlock(plotMutex);
+	// pthread_mutex_unlock(plotMutex);
 }
 
 void RUGraph::setPoints(const std::string& label, const std::vector<Point2*>& graphPoints,
@@ -323,10 +324,10 @@ void RUGraph::setPoints(const std::string& label, const std::vector<Point2*>& gr
 		return;
 	newPlotter->setPoints(graphPoints);
 	// add the graph comp to the graph
-	pthread_mutex_lock(plotMutex);
+	// pthread_mutex_lock(plotMutex);
 	if (newPlotter)
 		lines[label] = newPlotter;
-	pthread_mutex_unlock(plotMutex);
+	// pthread_mutex_unlock(plotMutex);
 
 	// trigger the draw update
 	drawUpdate = true;
@@ -344,10 +345,10 @@ void RUGraph::setLine(const std::string& label, const shmea::GList& graphPoints,
 		return;
 	newPlotter->setLine(graphPoints);
 	// add the graph comp to the graph
-	pthread_mutex_lock(plotMutex);
+	// pthread_mutex_lock(plotMutex);
 	if (newPlotter)
 		lines[label] = newPlotter;
-	pthread_mutex_unlock(plotMutex);
+	// pthread_mutex_unlock(plotMutex);
 
 	// trigger the draw update
 	drawUpdate = true;
@@ -410,13 +411,13 @@ void RUGraph::buildDotMatrix()
 
 void RUGraph::clear(bool toggleDraw)
 {
-	pthread_mutex_lock(plotMutex);
+	// pthread_mutex_lock(plotMutex);
 	std::map<std::string, Graphable*>::iterator it;
 
 	for (it = lines.begin(); it != lines.end(); ++it)
 		delete it->second;
 	lines.clear();
-	pthread_mutex_unlock(plotMutex);
+	// pthread_mutex_unlock(plotMutex);
 
 	if (toggleDraw)
 		drawUpdate = true;

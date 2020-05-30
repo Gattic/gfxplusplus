@@ -19,6 +19,7 @@
 #include "../GFXUtilities/EventTracker.h"
 #include "../GItems/Mini/RUBackgroundComponent.h"
 #include "../GItems/Mini/RUBorderComponent.h"
+#include "../Graphics/graphics.h"
 
 GLinearLayout::GLinearLayout(std::string layoutName, int newOrientation)
 {
@@ -37,7 +38,7 @@ void GLinearLayout::setOrientation(int newOrientation)
 	orientation = newOrientation;
 }
 
-void GLinearLayout::updateBackground(SDL_Renderer* renderer)
+void GLinearLayout::updateBackground(gfxpp* cGfx)
 {
 	//
 }
@@ -91,8 +92,9 @@ void GLinearLayout::calculateSubItemPositions(std::pair<int, int> parentOffset)
 	}
 }
 
-void GLinearLayout::processSubItemEvents(EventTracker* eventsStatus, GPanel* parentPanel,
-										 SDL_Event event, int mouseX, int mouseY)
+void GLinearLayout::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus,
+										 GPanel* parentPanel, SDL_Event event, int mouseX,
+										 int mouseY)
 {
 	if (!eventsStatus)
 		return;
@@ -111,7 +113,8 @@ void GLinearLayout::processSubItemEvents(EventTracker* eventsStatus, GPanel* par
 			continue;
 
 		//
-		EventTracker* subEventsStatus = cItem->processEvents(parentPanel, event, mouseX, mouseY);
+		EventTracker* subEventsStatus =
+			cItem->processEvents(cGfx, parentPanel, event, mouseX, mouseY);
 		if (subEventsStatus->hovered)
 			eventsStatus->hovered = true;
 
@@ -123,9 +126,9 @@ void GLinearLayout::processSubItemEvents(EventTracker* eventsStatus, GPanel* par
 	}
 }
 
-void GLinearLayout::updateBackgroundHelper(SDL_Renderer* renderer)
+void GLinearLayout::updateBackgroundHelper(gfxpp* cGfx)
 {
-	if (!renderer)
+	if (!cGfx->getRenderer())
 		return;
 
 	if (!visible)
@@ -139,7 +142,7 @@ void GLinearLayout::updateBackgroundHelper(SDL_Renderer* renderer)
 			continue;
 
 		// draw the item
-		cItem->updateBackgroundHelper(renderer);
+		cItem->updateBackgroundHelper(cGfx);
 	}
 }
 

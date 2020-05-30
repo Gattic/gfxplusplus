@@ -15,9 +15,8 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUDrawComponent.h"
-#include "../../../include/Backend/Database/gtype.h"
-#include "../../GFXUtilities/point2.h"
-#include "../../GItems/GPanel.h"
+#include "../GFXUtilities/point2.h"
+#include "Backend/Database/gtype.h"
 #include "Circle.h"
 #include "GraphLine.h"
 #include "GraphScatter.h"
@@ -67,7 +66,7 @@ void RUDrawComponent::setPenWidth(float newPenWidth)
 	penWidth = newPenWidth;
 }
 
-void RUDrawComponent::updateBackground(SDL_Renderer* renderer)
+void RUDrawComponent::updateBackground(gfxpp* cGfx)
 {
 	// draw the circles
 	pthread_mutex_lock(plotMutex);
@@ -75,7 +74,7 @@ void RUDrawComponent::updateBackground(SDL_Renderer* renderer)
 	{
 		Graphable* g = circles[i];
 		if (g)
-			g->updateBackground(renderer);
+			g->updateBackground(cGfx);
 	}
 	pthread_mutex_unlock(plotMutex);
 }
@@ -116,7 +115,7 @@ void RUDrawComponent::addCircle(const Point2* focalPoint, double radius)
 	drawUpdate = true;
 }
 
-void RUDrawComponent::onMouseDown(GPanel* cPanel, int eventX, int eventY)
+void RUDrawComponent::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	if (clickMode == MODE_CIRCLES)
 	{

@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
 class RUButton;
 class RUTextbox;
 class RULabel;
@@ -61,7 +62,7 @@ protected:
 	std::string inputSubmitText;
 
 	// events
-	virtual void onMouseDown(GPanel*, int, int);
+	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 
 public:
 	static const int MESSAGEBOX = 0;
@@ -73,13 +74,13 @@ public:
 	~RUMsgBox();
 
 	// events
-	void msgButtonOKClicked();
-	void confirmButtonYESClicked();
-	void confirmButtonNOClicked();
-	void inputButtonSUBMITClicked();
+	void msgButtonOKClicked(gfxpp*);
+	void confirmButtonYESClicked(gfxpp*);
+	void confirmButtonNOClicked(gfxpp*);
+	void inputButtonSUBMITClicked(gfxpp*);
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	virtual std::string getType() const;
 };
 

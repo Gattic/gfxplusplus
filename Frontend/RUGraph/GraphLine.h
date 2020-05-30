@@ -14,59 +14,31 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUDRAWCOMP
-#define _RUDRAWCOMP
+#ifndef _RUGRAPHLINE
+#define _RUGRAPHLINE
 
-#include "RUGraph.h"
+#include "../GItems/RUColors.h"
+#include "Graphable.h"
 #include <SDL2/SDL.h>
-#include <map>
+#include <SDL2/SDL_opengl.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
 
-class GPanel;
-class Graphable;
+class gfxpp;
+class RUGraph;
 class Point2;
-class Circle;
 
-class RUDrawComponent : public RUGraph
+class GraphLine : public Graphable
 {
-private:
-	float penWidth;
-	bool clickMode;
-	Circle* prevCircle;
-
-	std::vector<Circle*> circles;
-
-protected:
-	// events
-	virtual void onMouseDown(GPanel*, int, int);
-
 public:
-	static const int MODE_CIRCLES = 0;
-	static const int MODE_NELLIPSE = 1;
-
 	// constructors & destructor
-	RUDrawComponent(int, int, int);
-	~RUDrawComponent();
-
-	// gets
-	int getMode() const;
-	float getPenWidth() const;
-
-	// sets
-	void toggleMode();
-	void setPenWidth(float);
-
-	// render
-	virtual void updateBackground(SDL_Renderer*);
+	GraphLine(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	~GraphLine();
+	virtual void draw(gfxpp*);
 	virtual std::string getType() const;
-	void clear(bool = false);
-
-	// Circle functions
-	void addCircle(const Point2*, double);
 };
 
 #endif

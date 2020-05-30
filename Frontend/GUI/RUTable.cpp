@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUTable.h"
 #include "../GItems/RUColors.h"
+#include "../Graphics/graphics.h"
 #include "RUScrollbar.h"
 #include "Text/RULabel.h"
 
@@ -222,7 +223,7 @@ void RUTable::updateLabels()
 			newItem->setMarginY(row * cellHeight);
 			newItem->setWidth(cellWidth);
 			newItem->setHeight(cellHeight);
-			newItem->setFontSize(cellHeight / 2);
+			// newItem->setFontSize(cellHeight / 2);
 			newItem->toggleBorder(true);
 			newRow.push_back(newItem);
 			addSubItem(newItem);
@@ -271,7 +272,7 @@ void RUTable::refreshLabels()
 			textLabels[row][col]->setMarginY(row * cellHeight);
 			textLabels[row][col]->setWidth(cellWidth);
 			textLabels[row][col]->setHeight(cellHeight);
-			textLabels[row][col]->setFontSize(cellHeight / 2);
+			// textLabels[row][col]->setFontSize(cellHeight / 2);
 			textLabels[row][col]->setText(getCell(row + cIndex, col).getString());
 		}
 	}
@@ -279,7 +280,7 @@ void RUTable::refreshLabels()
 	drawUpdate = true;
 }
 
-void RUTable::updateBackground(SDL_Renderer* renderer)
+void RUTable::updateBackground(gfxpp* cGfx)
 {
 	//
 }

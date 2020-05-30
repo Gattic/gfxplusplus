@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUCheckbox.h"
 #include "../GItems/RUColors.h"
+#include "../Graphics/graphics.h"
 #include "RUImageComponent.h"
 #include "Text/RULabel.h"
 
@@ -125,12 +126,12 @@ void RUCheckbox::setCheck(bool value)
 	drawUpdate = true;
 }
 
-void RUCheckbox::updateBackground(SDL_Renderer* renderer)
+void RUCheckbox::updateBackground(gfxpp* cGfx)
 {
 	//
 }
 
-void RUCheckbox::onMouseDown(GPanel* cPanel, int eventX, int eventY)
+void RUCheckbox::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUCheckbox: onMouseDown(%d, %d);\n", eventX, eventY);
 
@@ -142,7 +143,7 @@ void RUCheckbox::onMouseDown(GPanel* cPanel, int eventX, int eventY)
 	}
 }
 
-void RUCheckbox::onMouseWheel(GPanel* cPanel, int eventX, int eventY, int scrollType)
+void RUCheckbox::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY, int scrollType)
 {
 	// printf("RUCheckbox: onMouseWheel(%d);\n", scrollType);
 	drawUpdate = true;
