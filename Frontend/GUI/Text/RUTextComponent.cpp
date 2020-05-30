@@ -123,16 +123,15 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 			strDrawText += '*';
 	}
 
-	// First with no optimization
-	for (unsigned int i = 0; i < strDrawText.length(); ++i)
-	{
-		GLetter* cLetter = cFont->getLetter(strDrawText[i]);
-		newWidth += cLetter->getWidth();
-	}
-
 	// First run
 	if (strWidth == 0.0f)
 	{
+		for (unsigned int i = 0; i < strDrawText.length(); ++i)
+		{
+			GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+			newWidth += cLetter->getWidth();
+		}
+
 		newHeight = cFont->getMaxHeight();
 		dimRatio = (((float)(getHeight())) / ((float)(newHeight)));
 		strWidth = dimRatio * newWidth;
@@ -143,6 +142,12 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 		// Chop the text
 		if (cursor.maxLen)
 			strDrawText = strDrawText.substr(cursor.index, cursor.maxLen);
+
+		for (unsigned int i = 0; i < strDrawText.length(); ++i)
+		{
+			GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+			newWidth += cLetter->getWidth();
+		}
 
 		// Text dimensions
 		newHeight = cFont->getMaxHeight();
@@ -155,29 +160,62 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 			if (cursor.maxLen == 0)
 			{
 				// First time overflowing in the textbox
+				std::string testText = text.substr(1, strDrawText.length() - 1);
 				cursor.maxLen = strDrawText.length() - 1;
 				cursor.index = 1;
+				--cursor.cursorIndex; // Special case because of rendering
 			}
 			else if (cursor.maxLen > 0)
 			{
-				// Compensate for big characters
-				--cursor.maxLen;
-				++cursor.index;
+				if (cursor.cursorIndex > 0)
+				{
+					// Compensate for big characters
+					std::string testText = text.substr(cursor.index + 1, cursor.maxLen - 1);
+					--cursor.maxLen;
+					++cursor.index;
+					--cursor.cursorIndex; // Special case because of rendering
+				}
 			}
-
-			--cursor.cursorIndex; // Special case because of rendering
 		}
 		else
 		{
 			// Compensate for small characters where large characters used to be
-			if ((cursor.maxLen > 1) &&
-				(cursor.index + cursor.cursorIndex + cursor.maxLen < text.length()))
+			if (cursor.maxLen > 1)
 			{
-				// if(CanLeft()) Left()
+				if (text.length() > strDrawText.length() + 1)
+				{
+					if (cursor.cursorIndex == cursor.maxLen)
+					{
+						std::string testText = text[cursor.index - 1] + strDrawText;
+						GLetter* cLetter = cFont->getLetter(text[cursor.index - 1]);
+						float testWidth = newWidth + cLetter->getWidth();
+						testWidth = dimRatio * testWidth;
+						if (testWidth < getWidth())
+						{
+							--cursor.index;
+							++cursor.maxLen;
+							++cursor.cursorIndex;
+						}
+					}
+					else if ((cursor.cursorIndex == 0) &&
+							 (cursor.index + cursor.maxLen + 1 < text.length()))
+					{
+						std::string testText = strDrawText + text[cursor.index + cursor.maxLen + 1];
+						GLetter* cLetter = cFont->getLetter(text[cursor.index + cursor.maxLen + 1]);
+						float testWidth = newWidth + cLetter->getWidth();
+						testWidth = dimRatio * testWidth;
+						if (testWidth < getWidth())
+						{
+							//--cursor.index;
+							++cursor.maxLen;
+						}
+					}
+				}
 			}
 		}
 
 		// Cursor dimensions
+		// TODO: RECALC THIS USING GFONT TO SAVE PERFORMANCE
 		TTF_SizeText(cFont->getFont(), strDrawText.substr(0, cursor.cursorIndex).c_str(), &newWidth,
 					 &newHeight);
 		float cursorDimRatio = (((float)(getHeight())) / ((float)(newHeight)));
@@ -207,28 +245,6 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 			return;
 		}
 
-		// TODO: CHANGE THIS TO BUILD FROM GFONT TEXTURES
-
-		// SDL_SetRenderTarget(cGfx->getRenderer(), NULL);//USE THIS TO DRAW EACH LETTER TO THE
-		// TEXTURE
-		/*SDL_Surface* textMessage =
-			TTF_RenderText_Solid(cFont->getFont(), strDrawText.c_str(), cFont->getTextColor());
-		if (!textMessage)
-		{
-			printf("[GUI] Text create error: %s\n", SDL_GetError());
-			return;
-		}
-
-		//
-		SDL_Texture* textTex = SDL_CreateTextureFromSurface(cGfx->getRenderer(), textMessage);
-		if (!textTex)
-		{
-			printf("[GUI] Texture error: %s\n", SDL_GetError());
-			if (textMessage)
-				SDL_FreeSurface(textMessage);
-			return;
-		}*/
-
 		SDL_Rect textRect;
 		textRect.x = 0;
 		textRect.y = 0;
@@ -244,14 +260,6 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 			SDL_RenderCopy(cGfx->getRenderer(), cLetter->getTexture(), NULL, &textRect);
 			textRect.x += textRect.w;
 		}
-
-		// SDL_RenderCopy(cGfx->getRenderer(), textTex, NULL, &textRect);
-
-		// Cleanup
-		// if (textMessage)
-		// SDL_FreeSurface(textMessage);
-		// if (textTex)
-		// SDL_DestroyTexture(textTex);
 	}
 
 	drawCursor(cGfx, cursorYGap);

@@ -28,10 +28,6 @@ Graphable::Graphable(RUGraph* newParent, SDL_Color newColor)
 	x_min = 0.0f;
 	y_max = 0.0f;
 	y_min = 0.0f;
-
-	// plotter mutex
-	plotMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(plotMutex, NULL);
 }
 
 Graphable::~Graphable()
@@ -46,10 +42,6 @@ Graphable::~Graphable()
 	y_max = 0.0f;
 
 	clear();
-
-	// plotter mutex
-	pthread_mutex_destroy(plotMutex);
-	free(plotMutex);
 }
 
 SDL_Color Graphable::getColor() const
@@ -95,9 +87,7 @@ void Graphable::setPoints(const std::vector<Point2*>& newPoints)
 	if (newPoints.empty())
 		return;
 
-	pthread_mutex_lock(plotMutex);
 	points = newPoints;
-	pthread_mutex_unlock(plotMutex);
 	computeAxisRanges();
 }
 
@@ -106,19 +96,15 @@ void Graphable::setLine(const shmea::GList& newLine)
 	if (newLine.empty())
 		return;
 
-	pthread_mutex_lock(plotMutex);
 	points.clear();
 	for (unsigned int i = 0; i < newLine.size(); ++i)
 		points.push_back(new Point2(i, newLine.getFloat(i)));
-	pthread_mutex_unlock(plotMutex);
 	computeAxisRanges();
 }
 
 void Graphable::clear()
 {
-	pthread_mutex_lock(plotMutex);
 	points.clear();
-	pthread_mutex_unlock(plotMutex);
 
 	parent = NULL;
 	x_max = 0.0f;
@@ -133,7 +119,5 @@ void Graphable::updateBackground(gfxpp* cGfx)
 		return;
 
 	// draw the line
-	pthread_mutex_lock(plotMutex);
 	draw(cGfx);
-	pthread_mutex_unlock(plotMutex);
 }

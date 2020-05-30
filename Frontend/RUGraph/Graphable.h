@@ -42,7 +42,6 @@ protected:
 
 private:
 	SDL_Color lineColor;
-	pthread_mutex_t* plotMutex;
 
 	void computeAxisRanges();
 
