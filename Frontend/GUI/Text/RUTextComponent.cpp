@@ -139,18 +139,31 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 					cursorSet = true;
 				}
 
+				int prevWidth = dimRatio * newWidth;
 				GLetter* cLetter = cFont->getLetter(strDrawText[i]);
 				newWidth += cLetter->getWidth();
+
+				// Move the cursor to the click
+				if ((xClick) && (dimRatio * newWidth >= xClick))
+				{
+					cursor.cursorIndex = i;
+					if (abs(dimRatio * newWidth - xClick) < abs(prevWidth - xClick))
+						++cursor.cursorIndex;
+					xClick = 0;
+				}
 			}
 
 			strWidth = dimRatio * newWidth;
 			if (!cursorSet)
 				cursorX = strWidth;
 
+			if (xClick)
+			{
+				cursor.cursorIndex = cursor.maxLen;
+				xClick = 0;
+			}
+
 		} while ((strWidth < getWidth()) && (cursor.index + cursor.maxLen + 1 <= text.length()));
-		printf("SHMEA0[%s]: %d:%f\n", strDrawText.c_str(), strWidth, getWidth());
-		printf("SHMEA1[%s]: %d:%d:%d:%ld\n", strDrawText.c_str(), cursor.index, cursor.maxLen,
-			   cursor.cursorIndex, text.length());
 
 		// Text went over its bounds
 		while (strWidth > getWidth())
@@ -177,9 +190,6 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 
 			strWidth = dimRatio * newWidth;
 		}
-		printf("SHMEA2[%s]: %d:%f\n", strDrawText.c_str(), strWidth, getWidth());
-		printf("SHMEA3[%s]: %d:%d:%d:%ld\n", strDrawText.c_str(), cursor.index, cursor.maxLen,
-			   cursor.cursorIndex, text.length());
 	}
 	else
 	{
@@ -275,6 +285,7 @@ void RUTextComponent::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int e
 {
 	// printf("RUTextComponent: onMouseDown(%d, %d);\n", eventX, eventY);
 	cursorStart = time(NULL);
+	xClick = eventX;
 	drawUpdate = true;
 }
 

@@ -62,6 +62,7 @@ protected:
 	std::string strDrawText;
 	float strWidth;
 	int cursorX;
+	int xClick;
 	float dimRatio;
 	char passwordChar;
 	bool passwordField;
