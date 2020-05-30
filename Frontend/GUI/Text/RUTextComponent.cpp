@@ -215,11 +215,14 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 		}
 
 		// Cursor dimensions
-		// TODO: RECALC THIS USING GFONT TO SAVE PERFORMANCE
-		TTF_SizeText(cFont->getFont(), strDrawText.substr(0, cursor.cursorIndex).c_str(), &newWidth,
-					 &newHeight);
-		float cursorDimRatio = (((float)(getHeight())) / ((float)(newHeight)));
-		cursorX = cursorDimRatio * newWidth;
+		if (cursor.cursorIndex <= strDrawText.length())
+		{
+			newWidth = 0;
+			for (unsigned int i = 0; i < cursor.cursorIndex; ++i)
+				newWidth += cFont->getLetter(strDrawText[i])->getWidth();
+
+			cursorX = dimRatio * newWidth;
+		}
 	}
 }
 
