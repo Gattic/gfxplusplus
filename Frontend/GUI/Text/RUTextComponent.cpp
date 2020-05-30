@@ -330,16 +330,17 @@ bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode event
 
 				if (cursor.index + cursor.cursorIndex < cursor.maxLen)
 					cursor.maxLen = 0;
-				drawUpdate = true;
 			}
 		}
 		else if (eventKeyPressed == SDLK_DELETE)
 		{
 			if ((text.length() > 0) && (cursor.index + cursor.cursorIndex < text.length()))
 			{
-				// text = text.substr(0, cursor.index + cursor.cursorIndex -1) +
-				// text.substr(cursor.index +
-				// cursor.cursorIndex - 1);
+				text = text.substr(0, cursor.index + cursor.cursorIndex) +
+					   text.substr(cursor.index + cursor.cursorIndex + 1);
+
+				if (cursor.index + cursor.cursorIndex < cursor.maxLen)
+					cursor.maxLen = 0;
 			}
 		}
 		else if ((eventKeyPressed == SDLK_UP) || (eventKeyPressed == SDLK_HOME))
