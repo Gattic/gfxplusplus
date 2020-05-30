@@ -381,16 +381,20 @@ bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode event
 					eventChar = GFont::specialChar(eventChar);
 				}
 
-				// Insert the Character
-				if (cursor.index + cursor.cursorIndex == text.length())
+				// Append/Insert the Character
+				if (cursor.index + cursor.cursorIndex >= text.length())
 				{
 					text += eventChar;
+					++cursor.cursorIndex;
+					if (cursor.cursorIndex > cursor.maxLen)
+						++cursor.maxLen;
 				}
 				else
+				{
 					text = text.substr(0, cursor.index + cursor.cursorIndex) + eventChar +
 						   text.substr(cursor.index + cursor.cursorIndex);
-
-				++cursor.cursorIndex;
+					++cursor.cursorIndex;
+				}
 			}
 		}
 
