@@ -81,13 +81,11 @@ void RUTextComponent::setText(std::string newText)
 	if (text == newText)
 		return;
 
-	// 0 means no cursor.maxLen
-	if ((cursor.maxLen > 0) && (newText.length() > cursor.maxLen))
-		return;
-
 	text = newText;
+	strDrawText = "";
+	strWidth = 0.0f;
+	cursorX = 0;
 	cursor.reset();
-	strWidth = 0.0; // Force recalculate
 	drawUpdate = true;
 }
 
@@ -111,118 +109,84 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 	if ((!cFont) || (!cFont->getFont()))
 		return;
 
-	int newWidth = 0;
-	int newHeight = 0;
-	strDrawText = text;
-
 	// set the text to draw
-	if (passwordField)
+	/*if (passwordField)
 	{
 		strDrawText = "";
 		for (unsigned int i = 0; i < text.length(); ++i)
 			strDrawText += '*';
-	}
+	}*/
 
-	// First run
-	if (strWidth == 0.0f)
+	if (text.length())
 	{
-		for (unsigned int i = 0; i < strDrawText.length(); ++i)
-		{
-			GLetter* cLetter = cFont->getLetter(strDrawText[i]);
-			newWidth += cLetter->getWidth();
-		}
-
-		newHeight = cFont->getMaxHeight();
+		int newHeight = cFont->getMaxHeight();
 		dimRatio = (((float)(getHeight())) / ((float)(newHeight)));
-		strWidth = dimRatio * newWidth;
+
+		// Text has not tested it bounds
+		do
+		{
+			if ((strWidth < getWidth()) && (cursor.index + cursor.maxLen + 1 <= text.length()))
+				++cursor.maxLen;
+
+			bool cursorSet = false;
+			int newWidth = 0;
+			strDrawText = text.substr(cursor.index, cursor.maxLen);
+			for (unsigned int i = 0; i < strDrawText.length(); ++i)
+			{
+				if (i == cursor.cursorIndex)
+				{
+					cursorX = dimRatio * newWidth;
+					cursorSet = true;
+				}
+
+				GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+				newWidth += cLetter->getWidth();
+			}
+
+			strWidth = dimRatio * newWidth;
+			if (!cursorSet)
+				cursorX = strWidth;
+
+		} while ((strWidth < getWidth()) && (cursor.index + cursor.maxLen + 1 <= text.length()));
+		printf("SHMEA0[%s]: %d:%f\n", strDrawText.c_str(), strWidth, getWidth());
+		printf("SHMEA1[%s]: %d:%d:%d:%ld\n", strDrawText.c_str(), cursor.index, cursor.maxLen,
+			   cursor.cursorIndex, text.length());
+
+		// Text went over its bounds
+		while (strWidth > getWidth())
+		{
+			//
+			if (cursor.cursorIndex == cursor.maxLen)
+			{
+				--cursor.cursorIndex;
+				--cursor.maxLen;
+				++cursor.index;
+			}
+			else
+			{
+				--cursor.maxLen;
+			}
+
+			int newWidth = 0;
+			strDrawText = text.substr(cursor.index, cursor.maxLen);
+			for (unsigned int i = 0; i < strDrawText.length(); ++i)
+			{
+				GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+				newWidth += cLetter->getWidth();
+			}
+
+			strWidth = dimRatio * newWidth;
+		}
+		printf("SHMEA2[%s]: %d:%f\n", strDrawText.c_str(), strWidth, getWidth());
+		printf("SHMEA3[%s]: %d:%d:%d:%ld\n", strDrawText.c_str(), cursor.index, cursor.maxLen,
+			   cursor.cursorIndex, text.length());
 	}
-
-	if (getType() == "RUTextbox")
+	else
 	{
-		// Chop the text
-		if (cursor.maxLen)
-			strDrawText = strDrawText.substr(cursor.index, cursor.maxLen);
-
-		for (unsigned int i = 0; i < strDrawText.length(); ++i)
-		{
-			GLetter* cLetter = cFont->getLetter(strDrawText[i]);
-			newWidth += cLetter->getWidth();
-		}
-
-		// Text dimensions
-		newHeight = cFont->getMaxHeight();
-		dimRatio = (((float)(getHeight())) / ((float)(newHeight)));
-		strWidth = dimRatio * newWidth;
-
-		// We have to chop/grow the text
-		if (strWidth > getWidth())
-		{
-			if (cursor.maxLen == 0)
-			{
-				// First time overflowing in the textbox
-				std::string testText = text.substr(1, strDrawText.length() - 1);
-				cursor.maxLen = strDrawText.length() - 1;
-				cursor.index = 1;
-				--cursor.cursorIndex; // Special case because of rendering
-			}
-			else if (cursor.maxLen > 0)
-			{
-				if (cursor.cursorIndex > 0)
-				{
-					// Compensate for big characters
-					std::string testText = text.substr(cursor.index + 1, cursor.maxLen - 1);
-					--cursor.maxLen;
-					++cursor.index;
-					--cursor.cursorIndex; // Special case because of rendering
-				}
-			}
-		}
-		else
-		{
-			// Compensate for small characters where large characters used to be
-			if (cursor.maxLen > 1)
-			{
-				if (text.length() > strDrawText.length() + 1)
-				{
-					if (cursor.cursorIndex == cursor.maxLen)
-					{
-						std::string testText = text[cursor.index - 1] + strDrawText;
-						GLetter* cLetter = cFont->getLetter(text[cursor.index - 1]);
-						float testWidth = newWidth + cLetter->getWidth();
-						testWidth = dimRatio * testWidth;
-						if (testWidth < getWidth())
-						{
-							--cursor.index;
-							++cursor.maxLen;
-							++cursor.cursorIndex;
-						}
-					}
-					else if ((cursor.cursorIndex == 0) &&
-							 (cursor.index + cursor.maxLen + 1 < text.length()))
-					{
-						std::string testText = strDrawText + text[cursor.index + cursor.maxLen + 1];
-						GLetter* cLetter = cFont->getLetter(text[cursor.index + cursor.maxLen + 1]);
-						float testWidth = newWidth + cLetter->getWidth();
-						testWidth = dimRatio * testWidth;
-						if (testWidth < getWidth())
-						{
-							//--cursor.index;
-							++cursor.maxLen;
-						}
-					}
-				}
-			}
-		}
-
-		// Cursor dimensions
-		if (cursor.cursorIndex <= strDrawText.length())
-		{
-			newWidth = 0;
-			for (unsigned int i = 0; i < cursor.cursorIndex; ++i)
-				newWidth += cFont->getLetter(strDrawText[i])->getWidth();
-
-			cursorX = dimRatio * newWidth;
-		}
+		strDrawText = "";
+		strWidth = 0.0f;
+		cursorX = 0;
+		cursor.reset();
 	}
 }
 
@@ -344,15 +308,19 @@ bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode event
 		// interact with the component
 		if (eventKeyPressed == SDLK_BACKSPACE)
 		{
-			if ((text.length() > 0) && ((cursor.index > 0) || (cursor.cursorIndex > 0)))
+			if ((text.length() > 0) && (cursor.cursorIndex > 0))
 			{
-
 				// Delete the character
-				if (cursor.index + cursor.cursorIndex == cursor.maxLen)
-					text = text.substr(0, cursor.index + cursor.cursorIndex - 1);
-				else
-					text = text.substr(0, cursor.index + cursor.cursorIndex - 1) +
-						   text.substr(cursor.index + cursor.cursorIndex);
+				if (cursor.cursorIndex)
+				{
+					if (cursor.index + cursor.cursorIndex <= text.length())
+						text = text.substr(0, cursor.index + cursor.cursorIndex - 1) +
+							   text.substr(cursor.index + cursor.cursorIndex);
+					else if (cursor.index + cursor.cursorIndex == cursor.maxLen)
+						text = text.substr(0, cursor.index + cursor.cursorIndex - 1);
+					else if (text.length() == 1)
+						text = "";
+				}
 
 				// Shift the cursor
 				if ((cursor.cursorIndex) && (cursor.index == 0))
@@ -362,6 +330,7 @@ bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode event
 
 				if (cursor.index + cursor.cursorIndex < cursor.maxLen)
 					cursor.maxLen = 0;
+				drawUpdate = true;
 			}
 		}
 		else if (eventKeyPressed == SDLK_DELETE)
@@ -392,21 +361,10 @@ bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode event
 		}
 		else if (eventKeyPressed == SDLK_RIGHT)
 		{
-			if (cursor.maxLen == 0)
-			{
-				if (cursor.cursorIndex < text.length())
-					++cursor.cursorIndex;
-			}
-			else if (cursor.maxLen > 0)
-			{
-				if (cursor.index + cursor.cursorIndex < text.length())
-				{
-					if (cursor.cursorIndex == cursor.maxLen)
-						++cursor.index;
-					else if (cursor.cursorIndex < cursor.maxLen)
-						++cursor.cursorIndex;
-				}
-			}
+			if (cursor.cursorIndex < cursor.maxLen)
+				++cursor.cursorIndex;
+			else if (cursor.index + cursor.maxLen < text.length())
+				++cursor.index;
 
 			cursorStart = time(NULL);
 		}
@@ -423,13 +381,15 @@ bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode event
 				}
 
 				// Insert the Character
-				text = text.substr(0, cursor.index + cursor.cursorIndex) + eventChar +
-					   text.substr(cursor.index + cursor.cursorIndex);
-
-				if (cursor.maxLen)
-					++cursor.index;
+				if (cursor.index + cursor.cursorIndex == text.length())
+				{
+					text += eventChar;
+				}
 				else
-					++cursor.cursorIndex;
+					text = text.substr(0, cursor.index + cursor.cursorIndex) + eventChar +
+						   text.substr(cursor.index + cursor.cursorIndex);
+
+				++cursor.cursorIndex;
 			}
 		}
 
