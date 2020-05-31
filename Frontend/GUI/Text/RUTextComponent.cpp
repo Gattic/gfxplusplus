@@ -141,6 +141,9 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 
 				int prevWidth = dimRatio * newWidth;
 				GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+				if (cLetter)
+					continue;
+
 				newWidth += cLetter->getWidth();
 
 				// Move the cursor to the click
