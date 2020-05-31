@@ -209,6 +209,11 @@ void RUDropdown::clearOptions()
 	drawUpdate = true;
 }
 
+unsigned int RUDropdown::size() const
+{
+	return lbItems->size();
+}
+
 void RUDropdown::updateBackground(gfxpp* cGfx)
 {
 	//
