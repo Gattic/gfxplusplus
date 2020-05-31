@@ -14,49 +14,59 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GQL2_SAVELIST
-#define _GQL2_SAVELIST
+#ifndef _RUDRAWCOMP
+#define _RUDRAWCOMP
 
-#include <dirent.h>
+#include "RUGraph.h"
+#include <SDL2/SDL.h>
+#include <map>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <string>
-#include <unistd.h>
 #include <vector>
 
-namespace shmea {
+class GPanel;
+class Graphable;
+class Point2;
+class Circle;
 
-class GTable;
-class SaveItem;
-
-class SaveList
+class RUDrawComponent : public RUGraph
 {
 private:
-	std::vector<SaveItem*> saveItems;
-	std::string dname;
+	float penWidth;
+	bool clickMode;
+	Circle* prevCircle;
 
-	std::string getPath() const;
-	void addItem(SaveItem*);
-	void clean();
+	std::vector<Circle*> circles;
+
+protected:
+	// events
+	virtual void onMouseDown(GPanel*, int, int);
 
 public:
-	// constructors & destructor
-	SaveList(const std::string&);
-	~SaveList();
+	static const int MODE_CIRCLES = 0;
+	static const int MODE_NELLIPSE = 1;
 
-	SaveItem* loadItem(const std::string&);
-	bool deleteItem(const std::string&);
-	SaveItem* newItem(const std::string&, const GTable&);
-	void load();
-	static std::vector<SaveList*> loadFolders();
+	// constructors & destructor
+	RUDrawComponent(int, int, int);
+	~RUDrawComponent();
 
 	// gets
-	std::string getName() const;
-	const std::vector<SaveItem*>& getItems() const;
-	int size() const;
-};
+	int getMode() const;
+	float getPenWidth() const;
+
+	// sets
+	void toggleMode();
+	void setPenWidth(float);
+
+	// render
+	virtual void updateBackground(SDL_Renderer*);
+	virtual std::string getType() const;
+	void clear(bool = false);
+
+	// Circle functions
+	void addCircle(const Point2*, double);
 };
 
 #endif

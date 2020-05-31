@@ -14,49 +14,59 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GSERVICE
-#define _GSERVICE
+#ifndef _GRAPHABLE_H
+#define _GRAPHABLE_H
 
-#include "../Database/GList.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <string>
-#include <time.h>
 #include <vector>
 
-namespace GNet {
+class RUGraph;
+class Point2;
 
-class GServer;
-class Sockets;
-class Connection;
-class newServiceArgs;
+namespace shmea {
+class GList;
+};
 
-class Service
+class Graphable
 {
-	friend GServer;
-	friend Sockets;
+protected:
+	std::vector<Point2*> points;
+	float x_max, x_min, y_max, y_min;
+	RUGraph* parent;
 
 private:
-	// timestamp variable to store service start and end time
-	static std::string name;
-	int64_t timeExecuted;
+	SDL_Color lineColor;
+	pthread_mutex_t* plotMutex;
 
-	static void* launchService(void* y);
-	virtual shmea::GList execute(Connection*, const shmea::GList&) = 0;
-	void StartService(newServiceArgs*);
-	void ExitService(newServiceArgs*);
-
-	static void ExecuteService(GServer*, const shmea::GList&, Connection* = NULL);
+	void computeAxisRanges();
 
 public:
-	Service();
-	virtual ~Service();
+	static const int LINE = 0;
+	static const int SCATTER = 1;
 
-	virtual Service* MakeService(GServer*) const = 0;
-	virtual std::string getName() const = 0;
-};
+	// constructors & destructor
+	Graphable(RUGraph*, SDL_Color);
+	virtual ~Graphable();
+
+	// gets
+	SDL_Color getColor() const;
+
+	// sets
+	void setParent(RUGraph*);
+	void setColor(SDL_Color);
+	void setPoints(const std::vector<Point2*>&);
+	void setLine(const shmea::GList&);
+	virtual void clear();
+
+	// render
+	virtual void updateBackground(SDL_Renderer*);
+	virtual void draw(SDL_Renderer*) = 0;
+	virtual std::string getType() const = 0;
 };
 
 #endif

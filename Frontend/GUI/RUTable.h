@@ -18,7 +18,7 @@
 #define _RUTABLE
 
 #include "../GItems/RUComponent.h"
-#include "Backend/Database/gtable.h"
+#include "Backend/Database/GTable.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>

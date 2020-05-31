@@ -42,7 +42,7 @@ public:
 		serverInstance = NULL; // Not ours to delete
 	}
 
-	shmea::GList execute(class GNet::Instance* cInstance, const shmea::GList& data)
+	shmea::GList execute(class GNet::Connection* cConnection, const shmea::GList& data)
 	{
 		shmea::GList retList;
 		if (!serverInstance)
@@ -53,9 +53,9 @@ public:
 		return retList;
 	}
 
-	GNet::Service* MakeService() const
+	GNet::Service* MakeService(GNet::GServer* newInstance) const
 	{
-		return new Bad_Request();
+		return new Bad_Request(newInstance);
 	}
 
 	std::string getName() const

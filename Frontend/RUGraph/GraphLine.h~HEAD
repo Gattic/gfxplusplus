@@ -14,49 +14,30 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GSERVICE
-#define _GSERVICE
+#ifndef _RUGRAPHLINE
+#define _RUGRAPHLINE
 
-#include "../Database/GList.h"
+#include "../GItems/RUColors.h"
+#include "Graphable.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <string>
-#include <time.h>
 #include <vector>
 
-namespace GNet {
+class RUGraph;
+class Point2;
 
-class GServer;
-class Sockets;
-class Connection;
-class newServiceArgs;
-
-class Service
+class GraphLine : public Graphable
 {
-	friend GServer;
-	friend Sockets;
-
-private:
-	// timestamp variable to store service start and end time
-	static std::string name;
-	int64_t timeExecuted;
-
-	static void* launchService(void* y);
-	virtual shmea::GList execute(Connection*, const shmea::GList&) = 0;
-	void StartService(newServiceArgs*);
-	void ExitService(newServiceArgs*);
-
-	static void ExecuteService(GServer*, const shmea::GList&, Connection* = NULL);
-
 public:
-	Service();
-	virtual ~Service();
-
-	virtual Service* MakeService(GServer*) const = 0;
-	virtual std::string getName() const = 0;
-};
+	// constructors & destructor
+	GraphLine(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	~GraphLine();
+	virtual void draw(SDL_Renderer*);
+	virtual std::string getType() const;
 };
 
 #endif

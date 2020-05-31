@@ -14,49 +14,44 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GSERVICE
-#define _GSERVICE
+#ifndef _RUCIRCLE
+#define _RUCIRCLE
 
-#include "../Database/GList.h"
+#include "Graphable.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+#include <map>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <string>
-#include <time.h>
 #include <vector>
 
-namespace GNet {
+class RUGraph;
+class Point2;
 
-class GServer;
-class Sockets;
-class Connection;
-class newServiceArgs;
-
-class Service
+class Circle : public Graphable
 {
-	friend GServer;
-	friend Sockets;
-
 private:
-	// timestamp variable to store service start and end time
-	static std::string name;
-	int64_t timeExecuted;
-
-	static void* launchService(void* y);
-	virtual shmea::GList execute(Connection*, const shmea::GList&) = 0;
-	void StartService(newServiceArgs*);
-	void ExitService(newServiceArgs*);
-
-	static void ExecuteService(GServer*, const shmea::GList&, Connection* = NULL);
+	std::map<int, std::map<int, int> > heatmap;
+	std::vector<const Point2*> foci;
+	double radius;
+	int maxHit;
 
 public:
-	Service();
-	virtual ~Service();
+	// constructors & destructor
+	Circle(RUGraph*, SDL_Color);
+	~Circle();
 
-	virtual Service* MakeService(GServer*) const = 0;
-	virtual std::string getName() const = 0;
-};
+	void addFocalPoint(const Point2*);
+	void setRadius(double);
+	void createHeatmap();
+
+	const Point2* getFocalPoint(unsigned int) const;
+	double getRadius() const;
+
+	virtual void draw(SDL_Renderer*);
+	virtual std::string getType() const;
 };
 
 #endif

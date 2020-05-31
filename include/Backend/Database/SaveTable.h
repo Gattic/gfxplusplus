@@ -14,10 +14,10 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GQL2_SAVEITEM
-#define _GQL2_SAVEITEM
+#ifndef _GSAVETABLE
+#define _GSAVETABLE
 
-#include "gtable.h"
+#include "GTable.h"
 #include <fstream>
 #include <pthread.h>
 #include <sstream>
@@ -29,7 +29,7 @@
 #include <vector>
 
 namespace shmea {
-class SaveItem
+class SaveTable
 {
 private:
 	int64_t id;
@@ -52,8 +52,8 @@ protected:
 
 public:
 	// constructors & destructor
-	SaveItem(const std::string&, const std::string&);
-	~SaveItem();
+	SaveTable(const std::string&, const std::string&);
+	~SaveTable();
 
 	// Database operations
 	void loadByName();

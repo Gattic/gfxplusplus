@@ -16,7 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "GFont.h"
 #include "../../GItems/RUColors.h"
-#include "Backend/Database/gtype.h"
+#include "Backend/Database/GType.h"
 
 GFont::GFont()
 {

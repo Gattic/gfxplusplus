@@ -14,48 +14,48 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GSERVICE
-#define _GSERVICE
+#ifndef _GSAVEFOLDER
+#define _GSAVEFOLDER
 
-#include "../Database/GList.h"
+#include <dirent.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <string>
-#include <time.h>
+#include <unistd.h>
 #include <vector>
 
-namespace GNet {
+namespace shmea {
 
-class GServer;
-class Sockets;
-class Connection;
-class newServiceArgs;
+class GTable;
+class SaveTable;
 
-class Service
+class SaveFolder
 {
-	friend GServer;
-	friend Sockets;
-
 private:
-	// timestamp variable to store service start and end time
-	static std::string name;
-	int64_t timeExecuted;
+	std::vector<SaveTable*> saveItems;
+	std::string dname;
 
-	static void* launchService(void* y);
-	virtual shmea::GList execute(Connection*, const shmea::GList&) = 0;
-	void StartService(newServiceArgs*);
-	void ExitService(newServiceArgs*);
-
-	static void ExecuteService(GServer*, const shmea::GList&, Connection* = NULL);
+	std::string getPath() const;
+	void addItem(SaveTable*);
+	void clean();
 
 public:
-	Service();
-	virtual ~Service();
+	// constructors & destructor
+	SaveFolder(const std::string&);
+	~SaveFolder();
 
-	virtual Service* MakeService(GServer*) const = 0;
-	virtual std::string getName() const = 0;
+	SaveTable* loadItem(const std::string&);
+	bool deleteItem(const std::string&);
+	SaveTable* newItem(const std::string&, const GTable&);
+	void load();
+	static std::vector<SaveFolder*> loadFolders();
+
+	// gets
+	std::string getName() const;
+	const std::vector<SaveTable*>& getItems() const;
+	int size() const;
 };
 };
 

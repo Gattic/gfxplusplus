@@ -16,7 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUTextComponent.h"
 #include "../../Graphics/graphics.h"
-#include "Backend/Database/gtype.h"
+#include "Backend/Database/GType.h"
 #include "GFont.h"
 
 RUTextComponent::RUTextComponent()

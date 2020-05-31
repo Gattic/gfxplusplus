@@ -15,8 +15,8 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUDrawComponent.h"
+#include "../../include/Backend/Database/gtype.h"
 #include "../GFXUtilities/point2.h"
-#include "Backend/Database/GType.h"
 #include "Circle.h"
 #include "GraphLine.h"
 #include "GraphScatter.h"
@@ -66,7 +66,7 @@ void RUDrawComponent::setPenWidth(float newPenWidth)
 	penWidth = newPenWidth;
 }
 
-void RUDrawComponent::updateBackground(gfxpp* cGfx)
+void RUDrawComponent::updateBackground(SDL_Renderer* renderer)
 {
 	// draw the circles
 	pthread_mutex_lock(plotMutex);
@@ -74,7 +74,7 @@ void RUDrawComponent::updateBackground(gfxpp* cGfx)
 	{
 		Graphable* g = circles[i];
 		if (g)
-			g->updateBackground(cGfx);
+			g->updateBackground(renderer);
 	}
 	pthread_mutex_unlock(plotMutex);
 }
@@ -115,7 +115,7 @@ void RUDrawComponent::addCircle(const Point2* focalPoint, double radius)
 	drawUpdate = true;
 }
 
-void RUDrawComponent::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
+void RUDrawComponent::onMouseDown(GPanel* cPanel, int eventX, int eventY)
 {
 	if (clickMode == MODE_CIRCLES)
 	{
