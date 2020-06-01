@@ -141,7 +141,7 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 
 				int prevWidth = dimRatio * newWidth;
 				GLetter* cLetter = cFont->getLetter(strDrawText[i]);
-				if (cLetter)
+				if (!cLetter)
 					continue;
 
 				newWidth += cLetter->getWidth();
@@ -188,6 +188,9 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 			for (unsigned int i = 0; i < strDrawText.length(); ++i)
 			{
 				GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+				if (!cLetter)
+					continue;
+
 				newWidth += cLetter->getWidth();
 			}
 
