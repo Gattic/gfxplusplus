@@ -238,8 +238,10 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 		for (unsigned int i = 0; i < strDrawText.length(); ++i)
 		{
 			GLetter* cLetter = cFont->getLetter(strDrawText[i]);
-			textRect.w = dimRatio * cLetter->getWidth();
+			if (!cLetter)
+				continue;
 
+			textRect.w = dimRatio * cLetter->getWidth();
 			SDL_RenderCopy(cGfx->getRenderer(), cLetter->getTexture(), NULL, &textRect);
 			textRect.x += textRect.w;
 		}

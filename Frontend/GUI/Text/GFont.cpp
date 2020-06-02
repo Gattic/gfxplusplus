@@ -20,9 +20,9 @@
 
 GFont::GFont()
 {
-	fontPath = "resources/fonts/carlenlund_helmet/Helmet-Regular.ttf";
+	fontPath = "resources/fonts/Open_Sans/OpenSans-SemiBold.ttf";
 	fontSize = DEFAULT_FONT_SIZE;
-	font = TTF_OpenFont(fontPath.c_str(), 100);
+	font = TTF_OpenFont(fontPath.c_str(), 10 * fontSize);
 	maxHeight = 0;
 
 	if (!font)
@@ -40,10 +40,10 @@ GFont::GFont(SDL_Renderer* newRenderer, std::string newFontPath)
 	cRenderer = newRenderer;
 	fontPath = newFontPath;
 	if (fontPath.length() == 0)
-		fontPath = "resources/fonts/carlenlund_helmet/Helmet-Regular.ttf";
+		fontPath = "resources/fonts/Open_Sans/OpenSans-SemiBold.ttf";
 
 	fontSize = DEFAULT_FONT_SIZE;
-	font = TTF_OpenFont(fontPath.c_str(), 100);
+	font = TTF_OpenFont(fontPath.c_str(), 10 * fontSize);
 	maxHeight = 0;
 
 	if (!font)
