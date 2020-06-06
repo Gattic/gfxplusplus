@@ -184,12 +184,15 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 		SDL_SetTextureBlendMode(background, SDL_BLENDMODE_BLEND);
 
 		// draw the background
+		SDL_SetRenderTarget(cGfx->getRenderer(), background);
 		updateBGBackground(cGfx);
 
 		// Call the component draw call
+		SDL_SetRenderTarget(cGfx->getRenderer(), background);
 		updateBackground(cGfx);
 
 		// draw the border
+		SDL_SetRenderTarget(cGfx->getRenderer(), background);
 		updateBorderBackground(cGfx);
 
 		// reset the render target to default
