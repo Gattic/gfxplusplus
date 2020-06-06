@@ -104,6 +104,15 @@ void Graphable::setLine(const shmea::GList& newLine)
 
 void Graphable::clear()
 {
+	for (unsigned int i = 0; i < points.size(); ++i)
+	{
+		Point2* cPoint = points[i];
+		if (!cPoint)
+			continue;
+		delete cPoint;
+		points.erase(points.begin() + i);
+	}
+
 	points.clear();
 
 	parent = NULL;
