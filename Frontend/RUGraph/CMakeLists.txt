@@ -3,6 +3,8 @@ set(GraphGUI_src_files
 	Graphable.h
 	GraphLine.cpp
 	GraphLine.h
+	GraphCandlestick.cpp
+	GraphCandlestick.h
 	GraphScatter.cpp
 	GraphScatter.h
 	Circle.cpp

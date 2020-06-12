@@ -23,7 +23,7 @@
 /*
 Candlesticks are useful when trading as they show four price points
 (open, close, high, and low) throughout the period of time the trader specifies.
-The relationship between the days open, high, low, and close determines the look 
+The relationship between the days open, high, low, and close determines the look
 of the daily candlestick.
 */
 
@@ -40,19 +40,19 @@ GraphCandlestick::~GraphCandlestick()
 
 void GraphCandlestick::draw(gfxpp* cGfx)
 {
-	//TODO:	Create new container for rectangles. wxyz. Save in SDL_Rect.
-	
+	// TODO:	Create new container for rectangles. wxyz. Save in SDL_Rect.
+
 	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
 						   getColor().a);
 
-	float xRange = (float)points.size(); // points per x axis
-	float yRange = y_max - y_min;
+	// float xRange = (float)points.size(); // points per x axis
+	// float yRange = y_max - y_min;
 
-	float pointXGap = ((float)parent->getWidth()) / xRange;
-	float pointYGap = ((float)parent->getHeight()) / yRange;
+	// float pointXGap = ((float)parent->getWidth()) / xRange;
+	// float pointYGap = ((float)parent->getHeight()) / yRange;
 
-	Point2* cPoint = NULL;
-	Point2* prevPoint = NULL;
+	// Point2* cPoint = NULL;
+	// Point2* prevPoint = NULL;
 
 	// draw the background
 	SDL_Rect bgRect;
@@ -61,37 +61,38 @@ void GraphCandlestick::draw(gfxpp* cGfx)
 	bgRect.w = 0;
 	bgRect.h = 0;
 
-	for (unsigned int i = 0; i < points.size(); ++i)
-	{
-		float newXValue = i * pointXGap;
-		float newYValue = (points[i]->getY() - y_min) * pointYGap;
+	// for (unsigned int i = 0; i < points.size(); ++i)
+	//{
+	// float newXValue = i * pointXGap;
+	// float newYValue = (points[i]->getY() - y_min) * pointYGap;
 
-		// add it to the background
-		cPoint = new Point2(parent->getAxisOriginX() + newXValue,
-							parent->getAxisOriginY() + parent->getHeight() - newYValue);
+	// add it to the background
+	// cPoint = new Point2(parent->getAxisOriginX() + newXValue,
+	//					parent->getAxisOriginY() + parent->getHeight() - newYValue);
 
+	// SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
 
-		SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
+	// TODO:
 
-		// TODO: 
+	// SDL_RenderDrawRect for real body representing the price range between the open and close
+	// of that day's trading. When the real body is colored red, it means the close
+	// was lower than the open. If the real body is green, it means the close was higher than the
+	// open.
 
-		// SDL_RenderDrawRect for real body representing the price range between the open and close 
-		// of that day's trading. When the real body is colored red, it means the close 
-		// was lower than the open. If the real body is green, it means the close was higher than the open.
+	// Just above and below the real body are the "shadows" or "wicks." The wicks show the high
+	// and low prices of that day's trading. Use SDL_RenderDrawLine. Example:
+	// SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
+	// cPoint->getX(), cPoint->getY() - 1);
 
-		// Just above and below the real body are the "shadows" or "wicks." The wicks show the high 
-		// and low prices of that day's trading. Use SDL_RenderDrawLine. Example:
-		// SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1, cPoint->getX(), cPoint->getY() - 1);
+	// TODO: Update for Rectangle instead of Point
+	// save the previous point for later
+	// if (prevPoint)
+	//	delete prevPoint;
+	// prevPoint = cPoint;
+	//}
 
-		// TODO: Update for Rectangle instead of Point
-		// save the previous point for later
-		if (prevPoint)
-			delete prevPoint;
-		prevPoint = cPoint;
-	}
-
-	if (cPoint)
-		delete cPoint;
+	// if (cPoint)
+	//	delete cPoint;
 }
 
 std::string GraphCandlestick::getType() const
