@@ -312,6 +312,20 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 	// pthread_mutex_unlock(plotMutex);
 }
 
+void RUGraph::addPoint(gfxpp* cGfx, const std::string& label, const Point2& newPoint)
+{
+	Point2* plotterPoint = new Point2(newPoint.getX(), newPoint.getY());
+
+	if (lines.find(label) == lines.end())
+		return;
+
+	Graphable* cPlotter = lines[label];
+	// cPlotter->addPoint(cGfx, newPoint);//Uncomment this when the class becomes RULineGraph
+
+	// trigger the draw update
+	drawUpdate = true;
+}
+
 void RUGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<Point2*>& graphPoints,
 				  int lineType, SDL_Color lineColor)
 {
