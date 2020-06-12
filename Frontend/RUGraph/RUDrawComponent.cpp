@@ -31,7 +31,7 @@ RUDrawComponent::RUDrawComponent(int newWidth, int newHeight, int newQuadrants)
 	prevCircle = NULL;
 
 	setBGColor(RUColors::COLOR_WHITE);
-	buildDotMatrix();
+	// buildDotMatrix();
 }
 
 RUDrawComponent::~RUDrawComponent()

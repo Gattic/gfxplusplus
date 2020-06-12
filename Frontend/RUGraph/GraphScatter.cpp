@@ -75,6 +75,7 @@ void GraphScatter::drawPointOutline(gfxpp* cGfx, int cx, int cy, int r)
 	int x = r - 1, y = 0, dx = 1, dy = 1, err = dx - (r << 1);
 	while (x >= y)
 	{
+		// TODO: Draw a circlw instead
 		SDL_RenderDrawPoint(cGfx->getRenderer(), cx + x, cy + y);
 		SDL_RenderDrawPoint(cGfx->getRenderer(), cx + y, cy + x);
 		SDL_RenderDrawPoint(cGfx->getRenderer(), cx - y, cy + x);

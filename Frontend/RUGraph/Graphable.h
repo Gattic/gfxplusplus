@@ -41,9 +41,17 @@ protected:
 	RUGraph* parent;
 
 private:
-	SDL_Color lineColor;
+	const static int OPT_FULL = 0;
+	const static int OPT_FILL = 1;
+	const static int OPT_NOTHING = 2;
 
-	void computeAxisRanges();
+	SDL_Texture* rawGraph;
+	SDL_Color lineColor;
+	int drawType;
+	int drawWidth;
+	int drawHeight;
+
+	void computeAxisRanges(gfxpp*, bool = false);
 
 public:
 	static const int LINE = 0;
@@ -59,8 +67,9 @@ public:
 	// sets
 	void setParent(RUGraph*);
 	void setColor(SDL_Color);
-	void setPoints(const std::vector<Point2*>&);
-	void setLine(const shmea::GList&);
+	void addPoint(gfxpp*, const Point2*);
+	void set(gfxpp*, const std::vector<Point2*>&);
+	void set(gfxpp*, const shmea::GList&);
 	virtual void clear();
 
 	// render

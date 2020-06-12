@@ -91,12 +91,12 @@ public:
 	void setTitleLabel(std::string);
 
 	virtual std::string getType() const;
-	void setPoints(const std::string&, const std::vector<Point2*>&, int = 0,
-				   SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	void setLine(const std::string&, const shmea::GList&, int = 0,
-				 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	void addScatterPoints(const shmea::GTable&);
-	void buildDotMatrix();
+	void set(gfxpp*, const std::string&, const std::vector<Point2*>&, int = 0,
+			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	void set(gfxpp*, const std::string&, const shmea::GList&, int = 0,
+			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	void addScatterPoints(gfxpp*, const shmea::GTable&);
+	// void buildDotMatrix();
 	void clear(bool = false);
 };
 
