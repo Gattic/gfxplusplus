@@ -63,6 +63,6 @@ public:
 	// static GTable Deserialize(const char*, int);	  // from byte stream
 	GTable toGTable() const;
 };
-};
+}; // namespace shmea
 
 #endif

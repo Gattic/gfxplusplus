@@ -35,7 +35,7 @@ class RULabel;
 namespace shmea {
 class GList;
 class GTable;
-};
+}; // namespace shmea
 
 class RUGraph : public RUComponent
 {

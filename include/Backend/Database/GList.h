@@ -94,6 +94,6 @@ public:
 	const GType operator[](unsigned int) const;
 	void operator=(const GList&);
 };
-};
+}; // namespace shmea
 
 #endif

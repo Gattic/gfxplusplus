@@ -103,6 +103,6 @@ public:
 	// static bool validSID(const std::string&);
 	// static std::string generateSID();
 };
-};
+}; // namespace GNet
 
 #endif

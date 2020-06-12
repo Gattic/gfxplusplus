@@ -57,6 +57,6 @@ public:
 	virtual Service* MakeService(GServer*) const = 0;
 	virtual std::string getName() const = 0;
 };
-};
+}; // namespace GNet
 
 #endif

@@ -84,6 +84,6 @@ public:
 	void writeLists(GServer*);
 	void addResponseList(GServer*, Connection*, const shmea::GList&);
 };
-};
+}; // namespace GNet
 
 #endif

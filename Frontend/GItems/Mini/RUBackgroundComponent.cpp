@@ -17,7 +17,6 @@
 #include "RUBackgroundComponent.h"
 #include "../../../include/Backend/Database/image.h"
 #include "../../Graphics/graphics.h"
-#include "../../Graphics/graphics.h"
 #include "../GItem.h"
 #include "../RUColors.h"
 
