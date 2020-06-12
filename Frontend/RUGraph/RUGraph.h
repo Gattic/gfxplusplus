@@ -35,7 +35,7 @@ class RULabel;
 namespace shmea {
 class GList;
 class GTable;
-};
+}; // namespace shmea
 
 class RUGraph : public RUComponent
 {
@@ -91,7 +91,6 @@ public:
 	void setTitleLabel(std::string);
 
 	virtual std::string getType() const;
-	void addPoint(gfxpp*, const std::string&, const Point2&);
 	void set(gfxpp*, const std::string&, const std::vector<Point2*>&, int = 0,
 			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 	void set(gfxpp*, const std::string&, const shmea::GList&, int = 0,

@@ -66,6 +66,6 @@ public:
 	GTable getTable() const;
 	void print() const;
 };
-};
+}; // namespace shmea
 
 #endif

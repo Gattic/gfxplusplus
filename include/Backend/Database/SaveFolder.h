@@ -57,6 +57,6 @@ public:
 	const std::vector<SaveTable*>& getItems() const;
 	int size() const;
 };
-};
+}; // namespace shmea
 
 #endif

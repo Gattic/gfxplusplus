@@ -150,6 +150,6 @@ public:
 	std::string serverIP;
 };
 
-}; // GNet
+}; // namespace GNet
 
 #endif

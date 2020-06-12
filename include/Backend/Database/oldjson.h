@@ -71,6 +71,6 @@ public:
 	int getMaxDepth() const;
 	int getMaxDepthHelper(GJson*) const;
 };
-};
+}; // namespace shmea
 
 #endif

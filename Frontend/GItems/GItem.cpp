@@ -196,7 +196,7 @@ void GItem::removeItem(gfxpp* cGfx, const std::string& itemName)
 	{
 		if (subitems[i]->getName() == itemName)
 		{
-			subitems.erase(subitems.begin() + i);   // Remove item from this layout
+			subitems.erase(subitems.begin() + i);	// Remove item from this layout
 			cGfx->removeItem(subitems[i]->getID()); // Remove from master vector of GUI items
 			break;
 		}

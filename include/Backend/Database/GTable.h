@@ -110,6 +110,6 @@ public:
 	void standardize();
 	float unstandardize(float) const;
 };
-};
+}; // namespace shmea
 
 #endif
