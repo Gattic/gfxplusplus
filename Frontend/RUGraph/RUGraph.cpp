@@ -22,6 +22,7 @@
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/GType.h"
 #include "GraphLine.h"
+#include "GraphCandlestick.h"
 #include "GraphScatter.h"
 #include "Graphable.h"
 

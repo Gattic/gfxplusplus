@@ -40,35 +40,51 @@ GraphCandlestick::~GraphCandlestick()
 
 void GraphCandlestick::draw(gfxpp* cGfx)
 {
-	// TODO:	Create new container for rectangles. wxyz. Save in SDL_Rect.
+	// TODO: Create new container for rectangles. wxyz. Save in SDL_Rect.
 
-	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
-						   getColor().a);
-
-	// float xRange = (float)points.size(); // points per x axis
-	// float yRange = y_max - y_min;
-
-	// float pointXGap = ((float)parent->getWidth()) / xRange;
-	// float pointYGap = ((float)parent->getHeight()) / yRange;
-
-	// Point2* cPoint = NULL;
-	// Point2* prevPoint = NULL;
-
-	// draw the background
 	SDL_Rect bgRect;
 	bgRect.x = 0;
 	bgRect.y = 0;
 	bgRect.w = 0;
 	bgRect.h = 0;
 
-	// for (unsigned int i = 0; i < points.size(); ++i)
-	//{
-	// float newXValue = i * pointXGap;
-	// float newYValue = (points[i]->getY() - y_min) * pointYGap;
+	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
 
-	// add it to the background
-	// cPoint = new Point2(parent->getAxisOriginX() + newXValue,
-	//					parent->getAxisOriginY() + parent->getHeight() - newYValue);
+	float xRange = (float)points.size(); // points per x axis
+	float yRange = y_max - y_min;
+
+	float pointXGap = ((float)parent->getWidth()) / xRange;
+	float pointYGap = ((float)parent->getHeight()) / yRange;
+
+	Point2* cPoint = NULL;
+	Point2* prevPoint = NULL;
+	for (unsigned int i = 0; i < points.size(); ++i)
+	{
+		float newXValue = i * pointXGap;
+		float newYValue = (points[i]->getY() - y_min) * pointYGap;
+		// add it to the background
+		cPoint = new Point2(parent->getAxisOriginX() + newXValue,
+							parent->getAxisOriginY() + parent->getHeight() - newYValue);
+
+		// draw a thick line from the previous to the current point
+		if ((prevPoint) && (i > 0))
+		{
+			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
+							   cPoint->getX(), cPoint->getY() - 1);
+			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
+							   cPoint->getX(), cPoint->getY());
+			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
+							   cPoint->getX(), cPoint->getY() + 1);
+		}
+
+		// save the previous point for later
+		if (prevPoint)
+			delete prevPoint;
+		prevPoint = cPoint;
+	}
+
+	if (cPoint)
+		delete cPoint;
 
 	// SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
 
@@ -86,13 +102,6 @@ void GraphCandlestick::draw(gfxpp* cGfx)
 
 	// TODO: Update for Rectangle instead of Point
 	// save the previous point for later
-	// if (prevPoint)
-	//	delete prevPoint;
-	// prevPoint = cPoint;
-	//}
-
-	// if (cPoint)
-	//	delete cPoint;
 }
 
 std::string GraphCandlestick::getType() const

@@ -22,6 +22,7 @@
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/GType.h"
 #include "GraphLine.h"
+#include "GraphCandlestick.h"
 #include "GraphScatter.h"
 #include "Graphable.h"
 
@@ -58,7 +59,7 @@ void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector
 		newPlotter = lines[label];
 	else
 	{
-		return;//Only for now
+		newPlotter = new GraphCandlestick(this, lineColor);
 
 		if (newPlotter)
 			lines[label] = newPlotter;
@@ -78,7 +79,7 @@ void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const shmea::GLis
 		newPlotter = lines[label];
 	else
 	{
-		return;//Only for now
+		newPlotter = new GraphCandlestick(this, lineColor);
 
 		if (newPlotter)
 			lines[label] = newPlotter;
