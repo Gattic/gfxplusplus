@@ -39,7 +39,7 @@ private:
 	bool clickMode;
 	Circle* prevCircle;
 
-	std::vector<Circle*> circles;
+	std::vector<Circle*> circles;//when RUGraph is template type use this
 
 protected:
 	// events
@@ -68,6 +68,13 @@ public:
 
 	// Circle functions
 	void addCircle(const Point2*, double);
+
+	//
+	virtual void add(gfxpp*, const std::string&, const Point2&);
+	virtual void set(gfxpp*, const std::string&, const std::vector<Point2*>&,
+			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void set(gfxpp*, const std::string&, const shmea::GList&,
+			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 };
 
 #endif

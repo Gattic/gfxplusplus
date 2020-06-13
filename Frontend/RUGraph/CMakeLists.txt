@@ -13,6 +13,12 @@ set(GraphGUI_src_files
 	RUGraph.h
 	RUDrawComponent.cpp
 	RUDrawComponent.h
+	RULineGraph.cpp
+	RULineGraph.h
+	RUScatterGraph.cpp
+	RUScatterGraph.h
+	RUCandleGraph.cpp
+	RUCandleGraph.h
 )
 add_library(GraphGUI ${GraphGUI_src_files})
 

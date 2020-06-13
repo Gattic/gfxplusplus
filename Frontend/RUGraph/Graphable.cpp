@@ -242,8 +242,9 @@ void Graphable::clear()
 
 void Graphable::updateBackground(gfxpp* cGfx)
 {
-	if (!parent || !parent->isVisible() || !(parent->getWidth() > 0 && parent->getHeight() > 0))
-		return;
+	//Does this do anything?
+	//if (!parent || !parent->isVisible() || !(parent->getWidth() > 0 && parent->getHeight() > 0))
+	//	return;
 
 	// Set the render target to draw the cached texture
 	// RenderTarget

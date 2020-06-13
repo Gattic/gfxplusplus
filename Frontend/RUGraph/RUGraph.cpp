@@ -48,10 +48,6 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 	gridEnabled = false;
 	gridLineWidth = DEFAULT_GRIDLINE_WIDTH;
 
-	// plotter mutex
-	// plotMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	// pthread_mutex_init(plotMutex, NULL);
-
 	// checkbox label
 	titleLabel = new RULabel();
 	titleLabel->setWidth(350);
@@ -76,10 +72,6 @@ RUGraph::~RUGraph()
 	quadrants = QUADRANTS_ONE;
 
 	clear();
-
-	// plotter mutex
-	// pthread_mutex_destroy(plotMutex);
-	// free(plotMutex);
 }
 
 int RUGraph::getGraphSize() const
@@ -300,7 +292,6 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 	}
 
 	// draw the lines
-	// pthread_mutex_lock(plotMutex);
 	std::map<std::string, Graphable*>::iterator it;
 
 	for (it = lines.begin(); it != lines.end(); ++it)
@@ -309,148 +300,16 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 		if (g)
 			g->updateBackground(cGfx);
 	}
-	// pthread_mutex_unlock(plotMutex);
 }
-
-void RUGraph::addPoint(gfxpp* cGfx, const std::string& label, const Point2& newPoint)
-{
-	Point2* plotterPoint = new Point2(newPoint.getX(), newPoint.getY());
-
-	if (lines.find(label) == lines.end())
-		return;
-
-	Graphable* cPlotter = lines[label];
-	// cPlotter->addPoint(cGfx, newPoint);//Uncomment this when the class becomes RULineGraph
-
-	// trigger the draw update
-	drawUpdate = true;
-}
-
-void RUGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<Point2*>& graphPoints,
-				  int lineType, SDL_Color lineColor)
-{
-	Graphable* newPlotter;
-	if (lines.find(label) != lines.end())
-		newPlotter = lines[label];
-	else
-	{
-		if (lineType == Graphable::LINE)
-			newPlotter = new GraphLine(this, lineColor);
-		else if (lineType == Graphable::SCATTER)
-			newPlotter = new GraphScatter(this, lineColor);
-		else
-			return;
-
-		// pthread_mutex_lock(plotMutex);
-		if (newPlotter)
-			lines[label] = newPlotter;
-		// pthread_mutex_unlock(plotMutex);
-	}
-
-	newPlotter->set(cGfx, graphPoints);
-
-	// trigger the draw update
-	drawUpdate = true;
-}
-
-void RUGraph::set(gfxpp* cGfx, const std::string& label, const shmea::GList& graphPoints,
-				  int lineType, SDL_Color lineColor)
-{
-	Graphable* newPlotter;
-	if (lines.find(label) != lines.end())
-		newPlotter = lines[label];
-	else
-	{
-
-		if (lineType == Graphable::LINE)
-			newPlotter = new GraphLine(this, lineColor);
-		else if (lineType == Graphable::SCATTER)
-			newPlotter = new GraphScatter(this, lineColor);
-		else
-			return;
-
-		// pthread_mutex_lock(plotMutex);
-		if (newPlotter)
-			lines[label] = newPlotter;
-		// pthread_mutex_unlock(plotMutex);
-	}
-
-	newPlotter->set(cGfx, graphPoints);
-
-	// trigger the draw update
-	drawUpdate = true;
-}
-
-void RUGraph::addScatterPoints(gfxpp* cGfx, const shmea::GTable& graphPoints)
-{
-	// pairs of (expected, predicted)
-	if (graphPoints.numberOfCols() % 2 == 1)
-		return;
-
-	// set line colors
-	std::vector<SDL_Color> colorOpts;
-	colorOpts.push_back(RUColors::DEFAULT_COLOR_LINE);
-	colorOpts.push_back(RUColors::GRAPH_LINE_2);
-	colorOpts.push_back(RUColors::GRAPH_LINE_3);
-	colorOpts.push_back(RUColors::GRAPH_LINE_4);
-	colorOpts.push_back(RUColors::GRAPH_LINE_5);
-
-	// jump pairs
-	for (unsigned int i = 0; i < graphPoints.numberOfCols(); i += 2)
-	{
-		shmea::GList xPoints = graphPoints.getCol(i);
-		shmea::GList yPoints = graphPoints.getCol(i + 1);
-
-		// build the line
-		std::vector<Point2*> points;
-		for (unsigned int p = 0; p < xPoints.size(); ++p)
-			points.push_back(new Point2(xPoints.getDouble(p), yPoints.getDouble(p)));
-
-		// set the line
-		int pairIndex = i / 2;
-		set(cGfx, shmea::GType::intTOstring(pairIndex), points, 1, colorOpts[pairIndex % 5]);
-	}
-}
-
-/*void RUGraph::buildDotMatrix()
-{
-	// Lets create the dot grid
-	shmea::GTable graphPoints(',');
-	unsigned int dotCount = graphSize * DEFAULT_NUM_ZONES; // 20 spaces per axis
-
-	// build the dot matrix
-	shmea::GList xPoints;
-	shmea::GList yPoints;
-	for (unsigned int i = 0; i < dotCount; ++i)
-	{
-		for (unsigned int j = 0; j < dotCount; ++j)
-		{
-			xPoints.addInt(i);
-			yPoints.addInt(j);
-		}
-	}
-	graphPoints.addCol("Dots-x", xPoints);
-	graphPoints.addCol("Dots-y", yPoints);
-
-	// plot the dot grid
-	addScatterPoints(graphPoints);
-}*/
 
 void RUGraph::clear(bool toggleDraw)
 {
-	// pthread_mutex_lock(plotMutex);
 	std::map<std::string, Graphable*>::iterator it;
 
 	for (it = lines.begin(); it != lines.end(); ++it)
 		delete it->second;
 	lines.clear();
-	// pthread_mutex_unlock(plotMutex);
 
 	if (toggleDraw)
 		drawUpdate = true;
-}
-
-std::string RUGraph::getType() const
-{
-	return "RUGraph";
 }

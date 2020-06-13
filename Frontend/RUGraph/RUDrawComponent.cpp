@@ -40,10 +40,6 @@ RUDrawComponent::~RUDrawComponent()
 	clickMode = MODE_CIRCLES;
 
 	clear();
-
-	// plotter mutex
-	pthread_mutex_destroy(plotMutex);
-	free(plotMutex);
 }
 
 int RUDrawComponent::getMode() const
@@ -69,25 +65,21 @@ void RUDrawComponent::setPenWidth(float newPenWidth)
 void RUDrawComponent::updateBackground(gfxpp* cGfx)
 {
 	// draw the circles
-	pthread_mutex_lock(plotMutex);
 	for (unsigned int i = 0; i < circles.size(); ++i)
 	{
 		Graphable* g = circles[i];
 		if (g)
 			g->updateBackground(cGfx);
 	}
-	pthread_mutex_unlock(plotMutex);
 }
 
 void RUDrawComponent::clear(bool toggleDraw)
 {
-	pthread_mutex_lock(plotMutex);
 	std::map<std::string, Graphable*>::iterator it;
 
 	for (it = lines.begin(); it != lines.end(); ++it)
 		delete it->second;
 	lines.clear();
-	pthread_mutex_unlock(plotMutex);
 
 	// clearCircles();
 	circles.clear();
@@ -96,7 +88,7 @@ void RUDrawComponent::clear(bool toggleDraw)
 		drawUpdate = true;
 }
 
-void RUDrawComponent::addCircle(const Point2* focalPoint, double radius)
+void RUDrawComponent::addCircle(const Point2* focalPoint, double radius)//this will eventually be add()
 {
 	// printf("Circle(%f, %f, %f)\n", focalPoint->getX(), focalPoint->getY(), radius);
 
@@ -107,10 +99,8 @@ void RUDrawComponent::addCircle(const Point2* focalPoint, double radius)
 	newCircle->setRadius(radius);
 	prevCircle = newCircle;
 
-	pthread_mutex_lock(plotMutex);
 	lines.insert(std::pair<std::string, Graphable*>(newCircleName, newCircle));
 	circles.push_back(newCircle);
-	pthread_mutex_unlock(plotMutex);
 
 	drawUpdate = true;
 }
@@ -139,6 +129,23 @@ void RUDrawComponent::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int e
 			drawUpdate = true;
 		}
 	}
+}
+
+void RUDrawComponent::add(gfxpp* cGfx, const std::string& label, const Point2& newPoint)
+{
+	//
+}
+
+void RUDrawComponent::set(gfxpp* cGfx, const std::string& label, const std::vector<Point2*>& graphPoints,
+				  SDL_Color lineColor)
+{
+	//
+}
+
+void RUDrawComponent::set(gfxpp* cGfx, const std::string& label, const shmea::GList& graphPoints,
+				  SDL_Color lineColor)
+{
+	//
 }
 
 std::string RUDrawComponent::getType() const
