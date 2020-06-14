@@ -40,17 +40,9 @@ GraphCandlestick::~GraphCandlestick()
 
 void GraphCandlestick::draw(gfxpp* cGfx)
 {
-	// TODO: Create new container for rectangles. wxyz. Save in SDL_Rect.
-
-	SDL_Rect bgRect;
-	bgRect.x = 0;
-	bgRect.y = 0;
-	bgRect.w = 0;
-	bgRect.h = 0;
-
 	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
 
-	float xRange = (float)points.size(); // points per x axis
+	float xRange = (float)points.size() / 4; // points per x axis (4 values per candlestick)
 	float yRange = y_max - y_min;
 
 	float pointXGap = ((float)parent->getWidth()) / xRange;
@@ -58,9 +50,14 @@ void GraphCandlestick::draw(gfxpp* cGfx)
 
 	Point2* cPoint = NULL;
 	Point2* prevPoint = NULL;
-	for (unsigned int i = 0; i < points.size(); ++i)
+
+	// points[i]->getY() = float rawOpen,
+	// points[i+1]->getY() = float rawClose,
+	// points[i+2]->getY() = float rawHigh,
+	// points[i+3]->getY() = float rawLow
+	for (unsigned int i = 0; i < points.size(); i+4) // i+4 because each candlestick has four values
 	{
-		float newXValue = i * pointXGap;
+		float newXValue = (i/4) * pointXGap; // divide by 4 to account for 4 values per candlestick
 		float newYValue = (points[i]->getY() - y_min) * pointYGap;
 		// add it to the background
 		cPoint = new Point2(parent->getAxisOriginX() + newXValue,
@@ -69,12 +66,20 @@ void GraphCandlestick::draw(gfxpp* cGfx)
 		// draw a thick line from the previous to the current point
 		if ((prevPoint) && (i > 0))
 		{
-			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
-							   cPoint->getX(), cPoint->getY() - 1);
-			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
-							   cPoint->getX(), cPoint->getY());
-			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
-							   cPoint->getX(), cPoint->getY() + 1);
+			//SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1, cPoint->getX(), cPoint->getY() - 1);
+			//SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(), cPoint->getX(), cPoint->getY());
+			//SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1, cPoint->getX(), cPoint->getY() + 1);
+
+			// TODO: Create new container for rectangles. wxyz. Save in SDL_Rect.
+
+			//SDL_Rect bgRect;
+			//bgRect.x = 0;
+			//bgRect.y = 0;
+			//bgRect.w = 0;
+			//bgRect.h = 0;
+
+			// SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
+
 		}
 
 		// save the previous point for later
@@ -86,7 +91,6 @@ void GraphCandlestick::draw(gfxpp* cGfx)
 	if (cPoint)
 		delete cPoint;
 
-	// SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
 
 	// TODO:
 
@@ -97,8 +101,7 @@ void GraphCandlestick::draw(gfxpp* cGfx)
 
 	// Just above and below the real body are the "shadows" or "wicks." The wicks show the high
 	// and low prices of that day's trading. Use SDL_RenderDrawLine. Example:
-	// SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
-	// cPoint->getX(), cPoint->getY() - 1);
+	// SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1, cPoint->getX(), cPoint->getY() - 1);
 
 	// TODO: Update for Rectangle instead of Point
 	// save the previous point for later
