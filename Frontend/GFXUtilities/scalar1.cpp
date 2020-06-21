@@ -14,31 +14,39 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUGRAPHCANDLESTICK
-#define _RUGRAPHCANDLESTICK
+#include "scalar1.h"
 
-#include "../GItems/RUColors.h"
-#include "Graphable.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <vector>
-
-class gfxpp;
-class RUGraph;
-class Point2;
-
-class GraphCandlestick : public Graphable
+Scalar1::Scalar1()
 {
-public:
-	// constructors & destructor
-	GraphCandlestick(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	~GraphCandlestick();
-	virtual void draw(gfxpp*);
-	virtual std::string getType() const;
-};
+	set(0.0f);
+}
 
-#endif
+Scalar1::Scalar1(double newX)
+{
+	set(newX);
+}
+
+Scalar1::Scalar1(const Scalar1& p)
+{
+	set(p.x);
+}
+
+Scalar1::~Scalar1()
+{
+	set(0.0f);
+}
+
+double Scalar1::get() const
+{
+	return x;
+}
+
+double Scalar1::length() const
+{
+	return sqrt(x * x);
+}
+
+void Scalar1::set(double newX)
+{
+	x = newX;
+}

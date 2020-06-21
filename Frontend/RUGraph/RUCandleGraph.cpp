@@ -15,15 +15,8 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUCandleGraph.h"
-#include "../GFXUtilities/point2.h"
-#include "../GUI/Text/RULabel.h"
 #include "../Graphics/graphics.h"
-#include "Backend/Database/GList.h"
-#include "Backend/Database/GTable.h"
-#include "Backend/Database/GType.h"
-#include "GraphLine.h"
-#include "GraphCandlestick.h"
-#include "GraphScatter.h"
+#include "../GFXUtilities/Candle.h"
 #include "Graphable.h"
 
 RUCandleGraph::RUCandleGraph(int newWidth, int newHeight, int newQuadrants)
@@ -37,32 +30,33 @@ RUCandleGraph::~RUCandleGraph()
 	//
 }
 
-void RUCandleGraph::add(gfxpp* cGfx, const std::string& label, const Point2& newPoint)
+//Dont worry about this fnc
+void RUCandleGraph::add(gfxpp* cGfx, const std::string& label, const Candle& newPoint)
 {
-	Point2* plotterPoint = new Point2(newPoint.getX(), newPoint.getY());
+	Candle* plotterPoint = new Candle();//TODO PASS IN ALL 4 OCHL
 
-	if (lines.find(label) == lines.end())
+	if (candles.find(label) == candles.end())
 		return;
 
-	Graphable* cPlotter = lines[label];
-	// cPlotter->add(cGfx, newPoint);//Uncomment this when the class becomes RULineGraph
+	Graphable<Candle>* cPlotter = candles[label];
+	// cPlotter->add(cGfx, newPoint);//Leave this please n ty
 
 	// trigger the draw update
 	drawUpdate = true;
 }
 
-void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<Point2*>& graphPoints,
+void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<Candle*>& graphPoints,
 				  SDL_Color lineColor)
 {
-	Graphable* newPlotter;
-	if (lines.find(label) != lines.end())
-		newPlotter = lines[label];
+	Graphable<Candle>* newPlotter;
+	if (candles.find(label) != candles.end())
+		newPlotter = candles[label];
 	else
 	{
-		newPlotter = new GraphCandlestick(this, lineColor);
+		newPlotter = new Graphable<Candle>(this, lineColor);
 
 		if (newPlotter)
-			lines[label] = newPlotter;
+			candles[label] = newPlotter;
 	}
 
 	//TODO: Update or create new function to support candlestick
@@ -72,24 +66,31 @@ void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector
 	drawUpdate = true;
 }
 
-void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const shmea::GList& graphPoints,
-				  SDL_Color lineColor)
+void RUCandleGraph::updateBackground(gfxpp* cGfx)
 {
-	Graphable* newPlotter;
-	if (lines.find(label) != lines.end())
-		newPlotter = lines[label];
-	else
+	RUGraph::updateBackground(cGfx);
+
+	// draw the candles
+	std::map<std::string, Graphable<Candle>*>::iterator it;
+
+	for (it = candles.begin(); it != candles.end(); ++it)
 	{
-		newPlotter = new GraphCandlestick(this, lineColor);
-
-		if (newPlotter)
-			lines[label] = newPlotter;
+		Graphable<Candle>* g = it->second;
+		if (g)
+			g->updateBackground(cGfx);
 	}
+}
 
-	newPlotter->set(cGfx, graphPoints);
+void RUCandleGraph::clear(bool toggleDraw)
+{
+	std::map<std::string, Graphable<Candle>*>::iterator it;
 
-	// trigger the draw update
-	drawUpdate = true;
+	for (it = candles.begin(); it != candles.end(); ++it)
+		delete it->second;
+	candles.clear();
+
+	if (toggleDraw)
+		drawUpdate = true;
 }
 
 std::string RUCandleGraph::getType() const

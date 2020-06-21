@@ -19,6 +19,8 @@
 
 #include "RUGraph.h"
 #include "../GItems/RUColors.h"
+#include "../GFXUtilities/Candle.h"
+#include "Graphable.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <pthread.h>
@@ -28,8 +30,8 @@
 #include <vector>
 
 class gfxpp;
-class Graphable;
-class Point2;
+//class Graphable<Point2>;
+class Candle;
 
 namespace shmea {
 class GList;
@@ -37,6 +39,13 @@ class GList;
 
 class RUCandleGraph : public RUGraph
 {
+private:
+	std::map<std::string, Graphable<Candle>*> candles;
+
+protected:
+	// render
+	virtual void updateBackground(gfxpp*);
+
 public:
 
 	// constructors & destructor
@@ -44,11 +53,11 @@ public:
 	virtual ~RUCandleGraph();
 
 	virtual std::string getType() const;
-	virtual void add(gfxpp*, const std::string&, const Point2&);
-	virtual void set(gfxpp*, const std::string&, const std::vector<Point2*>&,
+	virtual void add(gfxpp*, const std::string&, const Candle&);
+	virtual void set(gfxpp*, const std::string&, const std::vector<Candle*>&,
 			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	virtual void set(gfxpp*, const std::string&, const shmea::GList&,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
+	void clear(bool = false);
 };
 
 #endif

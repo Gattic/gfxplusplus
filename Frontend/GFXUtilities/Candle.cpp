@@ -14,41 +14,4 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUSCATTERGRAPH
-#define _RUSCATTERGRAPH
-
-#include "RUGraph.h"
-#include "../GItems/RUColors.h"
-#include <SDL2/SDL.h>
-#include <map>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <vector>
-
-class gfxpp;
-class Graphable;
-class Point2;
-
-namespace shmea {
-class GList;
-}; // namespace shmea
-
-class RUScatterGraph : public RUGraph
-{
-public:
-
-	// constructors & destructor
-	RUScatterGraph(int, int, int = QUADRANTS_ONE);
-	virtual ~RUScatterGraph();
-
-	virtual std::string getType() const;
-	virtual void add(gfxpp*, const std::string&, const Point2&);
-	virtual void set(gfxpp*, const std::string&, const std::vector<Point2*>&,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	virtual void set(gfxpp*, const std::string&, const shmea::GList&,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-};
-
-#endif
+#include "Candle.h"

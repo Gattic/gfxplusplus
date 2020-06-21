@@ -5,6 +5,10 @@ set(GU_src_files
 	vec3.h
 	point2.cpp
 	point2.h
+	scalar1.cpp
+	scalar1.h
+	Candle.cpp
+	Candle.h
 	EventTracker.cpp
 	EventTracker.h
 )

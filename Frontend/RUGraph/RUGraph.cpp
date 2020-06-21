@@ -21,10 +21,6 @@
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/GType.h"
-#include "GraphLine.h"
-#include "GraphCandlestick.h"
-#include "GraphScatter.h"
-#include "Graphable.h"
 
 RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 {
@@ -71,8 +67,6 @@ RUGraph::~RUGraph()
 	gridEnabled = false;
 	gridLineWidth = 0;
 	quadrants = QUADRANTS_ONE;
-
-	clear();
 }
 
 int RUGraph::getGraphSize() const
@@ -291,26 +285,4 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 			SDL_RenderFillRect(cGfx->getRenderer(), &tickYRect);
 		}
 	}
-
-	// draw the lines
-	std::map<std::string, Graphable*>::iterator it;
-
-	for (it = lines.begin(); it != lines.end(); ++it)
-	{
-		Graphable* g = it->second;
-		if (g)
-			g->updateBackground(cGfx);
-	}
-}
-
-void RUGraph::clear(bool toggleDraw)
-{
-	std::map<std::string, Graphable*>::iterator it;
-
-	for (it = lines.begin(); it != lines.end(); ++it)
-		delete it->second;
-	lines.clear();
-
-	if (toggleDraw)
-		drawUpdate = true;
 }

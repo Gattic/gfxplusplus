@@ -1,22 +1,12 @@
 set(GraphGUI_src_files
 	Graphable.cpp
 	Graphable.h
-	GraphLine.cpp
-	GraphLine.h
-	GraphCandlestick.cpp
-	GraphCandlestick.h
-	GraphScatter.cpp
-	GraphScatter.h
-	Circle.cpp
-	Circle.h
 	RUGraph.cpp
 	RUGraph.h
-	RUDrawComponent.cpp
-	RUDrawComponent.h
+	#RUDrawComponent.cpp # And Reimplement Circle too
+	#RUDrawComponent.h
 	RULineGraph.cpp
 	RULineGraph.h
-	RUScatterGraph.cpp
-	RUScatterGraph.h
 	RUCandleGraph.cpp
 	RUCandleGraph.h
 )

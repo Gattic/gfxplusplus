@@ -14,41 +14,18 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GRAPHSCATTER_H
-#define _GRAPHSCATTER_H
+#ifndef _GCANDLE
+#define _GCANDLE
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <pthread.h>
+#include <float.h>
+#include <iostream>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
 #include <vector>
 
-#include "../GItems/RUColors.h"
-#include "Graphable.h"
-
-class gfxpp;
-class RUGraph;
-class Point2;
-
-class GraphScatter : public Graphable
+class Candle
 {
-private:
-	void drawPoint(gfxpp*, int, int, int = 0);
-	void drawPointOutline(gfxpp*, int, int, int = 0);
-	int pointSize;
-
-public:
-	// constructors & destructor
-	GraphScatter(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, int = 4);
-	~GraphScatter();
-
-	void setPointSize(int);
-	int getPointSize(int);
-
-	virtual void draw(gfxpp*);
-	virtual std::string getType() const;
 };
 
 #endif

@@ -19,7 +19,8 @@
 
 #include "RUGraph.h"
 #include "../GItems/RUColors.h"
-#include "../GItems/RUComponent.h"
+#include "../GFXUtilities/point2.h"
+#include "Graphable.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <pthread.h>
@@ -29,7 +30,7 @@
 #include <vector>
 
 class gfxpp;
-class Graphable;
+//class Graphable<Point2>;
 class Point2;
 
 namespace shmea {
@@ -38,6 +39,13 @@ class GList;
 
 class RULineGraph : public RUGraph
 {
+private:
+	std::map<std::string, Graphable<Point2>*> lines;
+
+protected:
+	// render
+	virtual void updateBackground(gfxpp*);
+
 public:
 
 	// constructors & destructor
@@ -48,8 +56,8 @@ public:
 	virtual void add(gfxpp*, const std::string&, const Point2&);
 	virtual void set(gfxpp*, const std::string&, const std::vector<Point2*>&,
 			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	virtual void set(gfxpp*, const std::string&, const shmea::GList&,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
+	void clear(bool = false);
 };
 
 #endif

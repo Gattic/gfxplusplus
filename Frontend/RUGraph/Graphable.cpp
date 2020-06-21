@@ -15,56 +15,9 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
-#include "../GFXUtilities/point2.h"
-#include "../Graphics/graphics.h"
-#include "Backend/Database/GList.h"
-#include "RUGraph.h"
 
-Graphable::Graphable(RUGraph* newParent, SDL_Color newColor)
-{
-	rawGraph = NULL;
-	parent = newParent;
-	setColor(newColor);
-	drawType = OPT_FULL;
-	drawWidth = 0;
-	drawHeight = 0;
-
-	x_max = 0.0f;
-	x_min = 0.0f;
-	y_max = 0.0f;
-	y_min = 0.0f;
-}
-
-Graphable::~Graphable()
-{
-	rawGraph = NULL;
-	drawType = OPT_NOTHING;
-	drawWidth = -1;
-	drawHeight = -1;
-
-	// dangling parent pointer (get it?)
-	parent = NULL;
-
-	x_max = 0.0f;
-	x_min = 0.0f;
-
-	y_min = 0.0f;
-	y_max = 0.0f;
-
-	clear();
-}
-
-SDL_Color Graphable::getColor() const
-{
-	return lineColor;
-}
-
-void Graphable::setColor(SDL_Color newColor)
-{
-	lineColor = newColor;
-}
-
-void Graphable::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
+template <>
+void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 {
 	if (!cGfx)
 		return;
@@ -152,14 +105,12 @@ void Graphable::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 		//	SDL_TEXTUREACCESS_TARGET, drawWidth, drawHeight);
 	}*/
 
-	/*if(fillOptimization)
-	{
-	}
+
 
 
 
 	// Redo the texture
-	if (drawType == OPT_FULL)
+	/*if (drawType == OPT_FULL)
 	{
 		// If there was a graph, then resize it
 		if (rawGraph)
@@ -186,70 +137,147 @@ void Graphable::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 	}*/
 }
 
-// This function is recommended for optimizations.
-void Graphable::addPoint(gfxpp* cGfx, const Point2* newPoint)
+template <>
+void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
+{
+	//
+}
+
+
+//===========================START ADD FUNCTIONS===========================
+// These function is recommended for optimizations.
+
+template <>
+void Graphable<Point2>::add(gfxpp* cGfx, const Point2* newPoint)
 {
 	if (!newPoint)
 		return;
 
-	points.push_back(new Point2(points.size(), newPoint->getY()));
-	drawType = OPT_FILL;
-	computeAxisRanges(cGfx, true); // add point optimization
+	//TODO: Separate Scalar1D from Point2D and implement this add fncality
+	//points.push_back(new T(points.size(), newPoint->getY()));
+	//drawType = OPT_FILL;
+	//computeAxisRanges(cGfx, true); // add point optimization
 }
 
-void Graphable::set(gfxpp* cGfx, const std::vector<Point2*>& newPoints)
+
+//===========================END ADD FUNCTIONS===========================
+
+//===========================START DRAW FUNCTIONS===========================
+
+template <>
+void Graphable<Point2>::draw(gfxpp* cGfx)
 {
-	if (newPoints.empty())
-		return;
+	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
+						   getColor().a);
 
-	points = newPoints;
-	drawType = OPT_FULL;
-	computeAxisRanges(cGfx);
-}
+	float xRange = (float)points.size(); // points per x axis
+	float yRange = y_max - y_min;
 
-void Graphable::set(gfxpp* cGfx, const shmea::GList& newLine)
-{
-	if (newLine.empty())
-		return;
+	float pointXGap = ((float)parent->getWidth()) / xRange;
+	float pointYGap = ((float)parent->getHeight()) / yRange;
 
-	points.clear();
-	for (unsigned int i = 0; i < newLine.size(); ++i)
-		points.push_back(new Point2(i, newLine.getFloat(i)));
-	computeAxisRanges(cGfx);
-	drawType = OPT_FULL;
-}
-
-void Graphable::clear()
-{
-	drawType = OPT_NOTHING;
+	Point2* cPoint = NULL;
+	Point2* prevPoint = NULL;
 	for (unsigned int i = 0; i < points.size(); ++i)
 	{
-		Point2* cPoint = points[i];
-		if (!cPoint)
-			continue;
-		delete cPoint;
-		points.erase(points.begin() + i);
+		float newXValue = i * pointXGap;
+		float newYValue = (points[i]->getY() - y_min) * pointYGap;
+		// add it to the background
+		cPoint = new Point2(parent->getAxisOriginX() + newXValue,
+							parent->getAxisOriginY() + parent->getHeight() - newYValue);
+
+		// draw a thick line from the previous to the current point
+		if ((prevPoint) && (i > 0))
+		{
+			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
+							   cPoint->getX(), cPoint->getY() - 1);
+			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
+							   cPoint->getX(), cPoint->getY());
+			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
+							   cPoint->getX(), cPoint->getY() + 1);
+		}
+
+		// save the previous point for later
+		if (prevPoint)
+			delete prevPoint;
+		prevPoint = cPoint;
 	}
 
-	points.clear();
-
-	parent = NULL;
-	x_max = 0.0f;
-	x_min = 0.0f;
-	y_max = 0.0f;
-	y_min = 0.0f;
+	if (cPoint)
+		delete cPoint;
 }
 
-void Graphable::updateBackground(gfxpp* cGfx)
+template <>
+void Graphable<Candle>::draw(gfxpp* cGfx)
 {
-	//Does this do anything?
-	//if (!parent || !parent->isVisible() || !(parent->getWidth() > 0 && parent->getHeight() > 0))
-	//	return;
+	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
 
-	// Set the render target to draw the cached texture
-	// RenderTarget
+	float xRange = (float)points.size() / 4; // points per x axis (4 values per candlestick)
+	float yRange = y_max - y_min;
 
-	// draw the line
-	draw(cGfx);
-	drawType = OPT_FULL;
+	float pointXGap = ((float)parent->getWidth()) / xRange;
+	float pointYGap = ((float)parent->getHeight()) / yRange;
+
+	Candle* cPoint = NULL;
+	Candle* prevPoint = NULL;
+
+	// points[i]->getY() = float rawOpen,
+	// points[i+1]->getY() = float rawClose,
+	// points[i+2]->getY() = float rawHigh,
+	// points[i+3]->getY() = float rawLow
+
+	//TODO: I COMMENTED THIS NEXT BLOCK OUT IN MY REFACTOR
+	/*for (unsigned int i = 0; i < points.size(); i+4) // i+4 because each candlestick has four values
+	{
+		float newXValue = (i/4) * pointXGap; // divide by 4 to account for 4 values per candlestick
+		float newYValue = (points[i]->getY() - y_min) * pointYGap;
+		// add it to the background
+		cPoint = new Point2(parent->getAxisOriginX() + newXValue,
+							parent->getAxisOriginY() + parent->getHeight() - newYValue);
+		cPoint = NULL;
+
+		// draw a thick line from the previous to the current point
+		if ((prevPoint) && (i > 0))
+		{
+			//SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1, cPoint->getX(), cPoint->getY() - 1);
+			//SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(), cPoint->getX(), cPoint->getY());
+			//SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1, cPoint->getX(), cPoint->getY() + 1);
+
+			// TODO: Create new container for rectangles. wxyz. Save in SDL_Rect.
+
+			//SDL_Rect bgRect;
+			//bgRect.x = 0;
+			//bgRect.y = 0;
+			//bgRect.w = 0;
+			//bgRect.h = 0;
+
+			// SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
+
+		}
+
+		// save the previous point for later
+		if (prevPoint)
+			delete prevPoint;
+		prevPoint = cPoint;
+	}
+
+	if (cPoint)
+		delete cPoint;*/
+
+
+	// TODO:
+
+	// SDL_RenderDrawRect for real body representing the price range between the open and close
+	// of that day's trading. When the real body is colored red, it means the close
+	// was lower than the open. If the real body is green, it means the close was higher than the
+	// open.
+
+	// Just above and below the real body are the "shadows" or "wicks." The wicks show the high
+	// and low prices of that day's trading. Use SDL_RenderDrawLine. Example:
+	// SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1, cPoint->getX(), cPoint->getY() - 1);
+
+	// TODO: Update for Rectangle instead of Point
+	// save the previous point for later
 }
+
+//===========================END DRAW FUNCTIONS===========================

@@ -15,11 +15,8 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RULineGraph.h"
-#include "../GFXUtilities/point2.h"
-#include "../GUI/Text/RULabel.h"
 #include "../Graphics/graphics.h"
-#include "Backend/Database/GList.h"
-#include "GraphLine.h"
+#include "../GFXUtilities/point2.h"
 #include "Graphable.h"
 
 RULineGraph::RULineGraph(int newWidth, int newHeight, int newQuadrants)
@@ -30,7 +27,7 @@ RULineGraph::RULineGraph(int newWidth, int newHeight, int newQuadrants)
 
 RULineGraph::~RULineGraph()
 {
-	//
+	clear();
 }
 
 void RULineGraph::add(gfxpp* cGfx, const std::string& label, const Point2& newPoint)
@@ -40,7 +37,7 @@ void RULineGraph::add(gfxpp* cGfx, const std::string& label, const Point2& newPo
 	if (lines.find(label) == lines.end())
 		return;
 
-	Graphable* cPlotter = lines[label];
+	Graphable<Point2>* cPlotter = lines[label];
 	// cPlotter->add(cGfx, newPoint);//Uncomment this when the class becomes RULineGraph
 
 	// trigger the draw update
@@ -50,12 +47,12 @@ void RULineGraph::add(gfxpp* cGfx, const std::string& label, const Point2& newPo
 void RULineGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<Point2*>& graphPoints,
 				  SDL_Color lineColor)
 {
-	Graphable* newPlotter;
+	Graphable<Point2>* newPlotter;
 	if (lines.find(label) != lines.end())
 		newPlotter = lines[label];
 	else
 	{
-		newPlotter = new GraphLine(this, lineColor);
+		newPlotter = new Graphable<Point2>(this, lineColor);
 		if (newPlotter)
 			lines[label] = newPlotter;
 	}
@@ -66,24 +63,31 @@ void RULineGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<P
 	drawUpdate = true;
 }
 
-void RULineGraph::set(gfxpp* cGfx, const std::string& label, const shmea::GList& graphPoints,
-				  SDL_Color lineColor)
+void RULineGraph::updateBackground(gfxpp* cGfx)
 {
-	Graphable* newPlotter = NULL;
-	if (lines.find(label) != lines.end())
-		newPlotter = lines[label];
-	else
+	RUGraph::updateBackground(cGfx);
+
+	// draw the lines
+	std::map<std::string, Graphable<Point2>*>::iterator it;
+
+	for (it = lines.begin(); it != lines.end(); ++it)
 	{
-		newPlotter = new GraphLine(this, lineColor);
-
-		if (newPlotter)
-			lines[label] = newPlotter;
+		Graphable<Point2>* g = it->second;
+		if (g)
+			g->updateBackground(cGfx);
 	}
+}
 
-	newPlotter->set(cGfx, graphPoints);
+void RULineGraph::clear(bool toggleDraw)
+{
+	std::map<std::string, Graphable<Point2>*>::iterator it;
 
-	// trigger the draw update
-	drawUpdate = true;
+	for (it = lines.begin(); it != lines.end(); ++it)
+		delete it->second;
+	lines.clear();
+
+	if (toggleDraw)
+		drawUpdate = true;
 }
 
 std::string RULineGraph::getType() const

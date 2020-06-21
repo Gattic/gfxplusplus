@@ -28,8 +28,6 @@
 #include <vector>
 
 class gfxpp;
-class Graphable;
-class Point2;
 class RULabel;
 
 namespace shmea {
@@ -49,8 +47,6 @@ private:
 	int quadrants;
 
 protected:
-	// std::vector<GraphLine*> lines;
-	std::map<std::string, Graphable*> lines;
 	RULabel* titleLabel;
 
 	// render
@@ -88,13 +84,6 @@ public:
 	void setGridLineWidth(int);
 	void setQuadrants(int);
 	void setTitleLabel(std::string);
-	void clear(bool = false);
-
-	virtual void add(gfxpp*, const std::string&, const Point2&) = 0;
-	virtual void set(gfxpp*, const std::string&, const std::vector<Point2*>&,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE) = 0;
-	virtual void set(gfxpp*, const std::string&, const shmea::GList&,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE) = 0;
 };
 
 #endif

@@ -24,19 +24,17 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include "../GFXUtilities/point2.h"
+#include "../GFXUtilities/Candle.h"
+#include "../Graphics/graphics.h"
+#include "Backend/Database/GList.h"
+#include "RUGraph.h"
 
-class gfxpp;
-class RUGraph;
-class Point2;
-
-namespace shmea {
-class GList;
-};
-
+template <class T>
 class Graphable
 {
 protected:
-	std::vector<Point2*> points;
+	std::vector<T*> points;
 	float x_max, x_min, y_max, y_min;
 	RUGraph* parent;
 
@@ -47,6 +45,8 @@ private:
 
 	SDL_Texture* rawGraph;
 	SDL_Color lineColor;
+
+	// Our canvas we edit
 	int drawType;
 	int drawWidth;
 	int drawHeight;
@@ -54,9 +54,6 @@ private:
 	void computeAxisRanges(gfxpp*, bool = false);
 
 public:
-	static const int LINE = 0;
-	static const int SCATTER = 1;
-
 	// constructors & destructor
 	Graphable(RUGraph*, SDL_Color);
 	virtual ~Graphable();
@@ -65,17 +62,128 @@ public:
 	SDL_Color getColor() const;
 
 	// sets
-	void setParent(RUGraph*);
 	void setColor(SDL_Color);
-	void addPoint(gfxpp*, const Point2*);
-	void set(gfxpp*, const std::vector<Point2*>&);
-	void set(gfxpp*, const shmea::GList&);
+	void add(gfxpp*, const T*);
+	void set(gfxpp*, const std::vector<T*>&);
 	virtual void clear();
 
 	// render
 	virtual void updateBackground(gfxpp*);
-	virtual void draw(gfxpp*) = 0;
-	virtual std::string getType() const = 0;
+	virtual void draw(gfxpp*);
 };
+
+template <class T>
+Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor)
+{
+	rawGraph = NULL;
+	parent = newParent;
+	setColor(newColor);
+	drawType = OPT_FULL;
+	drawWidth = 0;
+	drawHeight = 0;
+
+	x_max = 0.0f;
+	x_min = 0.0f;
+	y_max = 0.0f;
+	y_min = 0.0f;
+}
+
+template <class T>
+Graphable<T>::~Graphable()
+{
+	rawGraph = NULL;
+	drawType = OPT_NOTHING;
+	drawWidth = -1;
+	drawHeight = -1;
+
+	// dangling parent pointer (get it?)
+	parent = NULL;
+
+	x_max = 0.0f;
+	x_min = 0.0f;
+
+	y_min = 0.0f;
+	y_max = 0.0f;
+
+	clear();
+}
+
+template <class T>
+SDL_Color Graphable<T>::getColor() const
+{
+	return lineColor;
+}
+
+template <class T>
+void Graphable<T>::set(gfxpp* cGfx, const std::vector<T*>& newPoints)
+{
+	if (newPoints.empty())
+		return;
+
+	points = newPoints;
+	//drawType = OPT_FULL;
+	computeAxisRanges(cGfx);
+}
+
+template <class T>
+void Graphable<T>::setColor(SDL_Color newColor)
+{
+	lineColor = newColor;
+}
+
+/*
+ * @brief draw point
+ * @details draws a filled point on the renderer at (x,y) with radius r using the Midpoint circle
+ * algorithm. Scatter Helper fnc
+ * @param cGfx the central graphics object
+ * @param cx the desired central x-coordinate
+ * @param cy the desired central y-coordinate
+ * @param r the desired circle radius
+ */
+/*template <class T>
+void Graphable<T>::drawPoint(gfxpp* cGfx, int cx, int cy, int r)//Turn these 3 points into a class?
+{
+	if (r == 0)
+		r = pointSize / 2;
+	for (int i = 1; i <= r; ++i)
+		drawPointOutline(cGfx, cx, cy, i);
+}*/
+
+template <class T>
+void Graphable<T>::clear()
+{
+	//drawType = OPT_NOTHING;
+	for (unsigned int i = 0; i < points.size(); ++i)
+	{
+		T* cPoint = points[i];
+		if (!cPoint)
+			continue;
+		delete cPoint;
+		points.erase(points.begin() + i);
+	}
+
+	points.clear();
+
+	parent = NULL;
+	x_max = 0.0f;
+	x_min = 0.0f;
+	y_max = 0.0f;
+	y_min = 0.0f;
+}
+
+template <class T>
+void Graphable<T>::updateBackground(gfxpp* cGfx)
+{
+	//Does this do anything?
+	//if (!parent || !parent->isVisible() || !(parent->getWidth() > 0 && parent->getHeight() > 0))
+	//	return;
+
+	// Set the render target to draw the cached texture
+	// RenderTarget
+
+	// draw the line
+	draw(cGfx);
+	//drawType = OPT_FULL;
+}
 
 #endif
