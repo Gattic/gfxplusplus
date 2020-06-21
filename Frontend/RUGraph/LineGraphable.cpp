@@ -137,16 +137,8 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 	}*/
 }
 
-template <>
-void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
-{
-	//
-}
 
-
-//===========================START ADD FUNCTIONS===========================
-// These function is recommended for optimizations.
-
+// This function is recommended for optimizations.
 template <>
 void Graphable<Point2>::add(gfxpp* cGfx, const Point2* newPoint)
 {
@@ -159,10 +151,6 @@ void Graphable<Point2>::add(gfxpp* cGfx, const Point2* newPoint)
 	//computeAxisRanges(cGfx, true); // add point optimization
 }
 
-
-//===========================END ADD FUNCTIONS===========================
-
-//===========================START DRAW FUNCTIONS===========================
 
 template <>
 void Graphable<Point2>::draw(gfxpp* cGfx)
@@ -206,78 +194,3 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 	if (cPoint)
 		delete cPoint;
 }
-
-template <>
-void Graphable<Candle>::draw(gfxpp* cGfx)
-{
-	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
-
-	float xRange = (float)points.size() / 4; // points per x axis (4 values per candlestick)
-	float yRange = y_max - y_min;
-
-	float pointXGap = ((float)parent->getWidth()) / xRange;
-	float pointYGap = ((float)parent->getHeight()) / yRange;
-
-	Candle* cPoint = NULL;
-	Candle* prevPoint = NULL;
-
-	// points[i]->getY() = float rawOpen,
-	// points[i+1]->getY() = float rawClose,
-	// points[i+2]->getY() = float rawHigh,
-	// points[i+3]->getY() = float rawLow
-
-	//TODO: I COMMENTED THIS NEXT BLOCK OUT IN MY REFACTOR
-	/*for (unsigned int i = 0; i < points.size(); i+4) // i+4 because each candlestick has four values
-	{
-		float newXValue = (i/4) * pointXGap; // divide by 4 to account for 4 values per candlestick
-		float newYValue = (points[i]->getY() - y_min) * pointYGap;
-		// add it to the background
-		cPoint = new Point2(parent->getAxisOriginX() + newXValue,
-							parent->getAxisOriginY() + parent->getHeight() - newYValue);
-		cPoint = NULL;
-
-		// draw a thick line from the previous to the current point
-		if ((prevPoint) && (i > 0))
-		{
-			//SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1, cPoint->getX(), cPoint->getY() - 1);
-			//SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(), cPoint->getX(), cPoint->getY());
-			//SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1, cPoint->getX(), cPoint->getY() + 1);
-
-			// TODO: Create new container for rectangles. wxyz. Save in SDL_Rect.
-
-			//SDL_Rect bgRect;
-			//bgRect.x = 0;
-			//bgRect.y = 0;
-			//bgRect.w = 0;
-			//bgRect.h = 0;
-
-			// SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
-
-		}
-
-		// save the previous point for later
-		if (prevPoint)
-			delete prevPoint;
-		prevPoint = cPoint;
-	}
-
-	if (cPoint)
-		delete cPoint;*/
-
-
-	// TODO:
-
-	// SDL_RenderDrawRect for real body representing the price range between the open and close
-	// of that day's trading. When the real body is colored red, it means the close
-	// was lower than the open. If the real body is green, it means the close was higher than the
-	// open.
-
-	// Just above and below the real body are the "shadows" or "wicks." The wicks show the high
-	// and low prices of that day's trading. Use SDL_RenderDrawLine. Example:
-	// SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1, cPoint->getX(), cPoint->getY() - 1);
-
-	// TODO: Update for Rectangle instead of Point
-	// save the previous point for later
-}
-
-//===========================END DRAW FUNCTIONS===========================

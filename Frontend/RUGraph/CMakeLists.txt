@@ -1,5 +1,6 @@
 set(GraphGUI_src_files
-	Graphable.cpp
+	LineGraphable.cpp
+	CandleGraphable.cpp
 	Graphable.h
 	RUGraph.cpp
 	RUGraph.h
