@@ -58,7 +58,7 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 			return;
 
 		// Add an upper limit here to work on certain size images only
-		// if (newWidth >= SOMME_LARGE_NUMBER)
+		// if (newWidth >= SOME_LARGE_NUMBER)
 		// return;
 
 		if (newWidth == 0)

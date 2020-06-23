@@ -49,7 +49,10 @@ void RULineGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<P
 {
 	Graphable<Point2>* newPlotter;
 	if (lines.find(label) != lines.end())
+	{
 		newPlotter = lines[label];
+		newPlotter->setColor(lineColor);
+	}
 	else
 	{
 		newPlotter = new Graphable<Point2>(this, lineColor);

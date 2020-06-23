@@ -33,12 +33,11 @@
 template <class T>
 class Graphable
 {
-protected:
+private:
 	std::vector<T*> points;
 	float x_max, x_min, y_max, y_min;
 	RUGraph* parent;
 
-private:
 	const static int OPT_FULL = 0;
 	const static int OPT_FILL = 1;
 	const static int OPT_NOTHING = 2;
@@ -174,10 +173,6 @@ void Graphable<T>::clear()
 template <class T>
 void Graphable<T>::updateBackground(gfxpp* cGfx)
 {
-	//Does this do anything?
-	//if (!parent || !parent->isVisible() || !(parent->getWidth() > 0 && parent->getHeight() > 0))
-	//	return;
-
 	// Set the render target to draw the cached texture
 	// RenderTarget
 
