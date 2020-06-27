@@ -59,7 +59,6 @@ void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector
 			candles[label] = newPlotter;
 	}
 
-	//TODO: Update or create new function to support candlestick
 	newPlotter->set(cGfx, graphPoints);
 
 	// trigger the draw update

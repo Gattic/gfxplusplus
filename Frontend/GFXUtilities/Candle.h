@@ -26,6 +26,82 @@
 
 class Candle
 {
+private:
+	double open, close, high, low;
+
+public:
+	Candle();
+	Candle(double, double, double, double);
+	Candle(const Candle&);
+	~Candle();
+
+	// get
+	double getOpen() const;
+	double getClose() const;
+	double getHigh() const;
+	double getLow() const;
+
+	// set
+	void set(double, double, double, double);
+	void setOpen(double newOpen);
+	void setClose(double newClose);
+	void setHigh(double newHigh);
+	void setLow(double newLow);
+
+	// operators
+	inline Candle operator+(Candle c)
+	{
+		c.open += open;
+		c.close += close;
+		c.high += high;
+		c.low += low;
+		return c;
+	}
+
+	inline Candle operator-(Candle c)
+	{
+		c.open = open - c.open;
+		c.close = close - c.close;
+		c.high = high - c.high;
+		c.low = low - c.low;
+		return c;
+	}
+
+	inline Candle operator*(double scalar)
+	{
+		return Candle(scalar * open, scalar * close, scalar * high, scalar * low);
+	}
+
+	inline Candle operator/(double scalar)
+	{
+		return Candle(open / scalar, close / scalar, high / scalar, low / scalar);
+	}
+
+	void operator=(const Candle& c)
+	{
+		setOpen(c.open);
+		setClose(c.close);
+		setHigh(c.high);
+		setLow(c.low);
+	}
+
+	bool operator==(const Candle& c) const
+	{
+		// Open
+		double deltaOpen = c.open - open;
+		bool openChange = ((deltaOpen > -DBL_EPSILON) && (deltaOpen < DBL_EPSILON));
+		// Close
+		double deltaClose = c.close - close;
+		bool closeChange = ((deltaClose > -DBL_EPSILON) && (deltaClose < DBL_EPSILON));
+		// High
+		double deltaHigh = c.high - high;
+		bool highChange = ((deltaHigh > -DBL_EPSILON) && (deltaHigh < DBL_EPSILON));
+		// Low
+		double deltaLow = c.low - low;
+		bool lowChange = ((deltaLow > -DBL_EPSILON) && (deltaLow < DBL_EPSILON));
+
+		return (openChange && closeChange && highChange && lowChange);
+	}
 };
 
 #endif

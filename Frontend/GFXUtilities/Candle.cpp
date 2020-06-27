@@ -15,3 +15,84 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Candle.h"
+
+
+Candle::Candle()
+{
+	setOpen(0.0f);
+	setClose(0.0f);
+	setHigh(0.0f);
+	setLow(0.0f);
+}
+
+Candle::Candle(double newOpen, double newClose, double newHigh, double newLow)
+{
+	setOpen(newOpen);
+	setClose(newClose);
+	setHigh(newHigh);
+	setClose(newLow);
+}
+
+Candle::Candle(const Candle& c2)
+{
+	setOpen(c2.open);
+	setClose(c2.close);
+	setHigh(c2.high);
+	setLow(c2.low);
+}
+
+Candle::~Candle()
+{
+	setOpen(0.0f);
+	setClose(0.0f);
+	setHigh(0.0f);
+	setLow(0.0f);
+}
+
+double Candle::getOpen() const
+{
+	return open;
+}
+
+double Candle::getClose() const
+{
+	return close;
+}
+
+double Candle::getHigh() const
+{
+	return high;
+}
+
+double Candle::getLow() const
+{
+	return low;
+}
+
+void Candle::set(double newOpen, double newClose, double newHigh, double newLow)
+{
+	setOpen(newOpen);
+	setClose(newClose);
+	setHigh(newHigh);
+	setLow(newLow);
+}
+
+void Candle::setOpen(double newOpen)
+{
+	open = newOpen;
+}
+
+void Candle::setClose(double newClose)
+{
+	close = newClose;
+}
+
+void Candle::setHigh(double newHigh)
+{
+	high = newHigh;
+}
+
+void Candle::setLow(double newLow)
+{
+	low = newLow;
+}
