@@ -131,7 +131,7 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		{
 			//TODO: Make the rectangle red
 			float bgRectHeight = points[i]->getOpen() - points[i]->getClose();
-			bgRect.y = points[i]->getClose();
+			bgRect.y = 0; // TODO
 			bgRect.h = bgRectHeight; // TODO
 		}
 		else
