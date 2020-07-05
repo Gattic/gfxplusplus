@@ -22,65 +22,29 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 	if (!cGfx)
 		return;
 
+	if (!parent)
+		return;
+
 	if (points.empty())
 		return;
 
 	y_max = points[0]->getHigh();
-	y_min = y_max;
-	x_max = points.size();
-	x_min = x_max;
+	y_min = points[0]->getLow();
 
 	for (unsigned int i = 1; i < points.size(); ++i)
 	{
 		Candle* c = points[i];
-		float y_pt = c->getHigh();
+		float y_high = c->getHigh();
+		float y_low = c->getLow();
+		//float open_pt = c->getOpen();
+		//float close_pt = c->getClose();
 
-		if (y_pt > y_max)
-			y_max = y_pt;
+		if (y_high > y_max)
+			y_max = y_high;
 
-		else if (y_pt < y_min)
-			y_min = y_pt;
+		else if (y_low < y_min)
+			y_min = y_low;
 	}
-
-	int calculatedWidth = x_max - x_min;
-	int calculatedHeight = y_max - y_min;
-
-	// If we need more room, extend by doubling
-	int newWidth = drawWidth;
-	while (newWidth < calculatedWidth)
-	{
-		if (newWidth == -1)
-			return;
-
-		// Add an upper limit here to work on certain size images only
-		// if (newWidth >= SOME_LARGE_NUMBER)
-		// return;
-
-		if (newWidth == 0)
-			newWidth = 16;
-		else
-			newWidth *= 2;
-	}
-
-	// If we need more room, extend by doubling
-	int newHeight = drawHeight;
-	while (newHeight < calculatedHeight)
-	{
-		if (newHeight == -1)
-			return;
-
-		if (newHeight == 0)
-			newHeight = 16;
-		else
-			newHeight *= 2;
-	}
-
-	/*printf("Calculated(%d,%d)\n", calculatedWidth, calculatedHeight);
-	printf("New(%d,%d)\n", newWidth, newHeight);
-	printf("Draw(%d,%d)\n", drawWidth, drawHeight);
-	printf("---------------------------------------------------------------\n");*/
-	drawWidth = newWidth;
-	drawHeight = newHeight;
 }
 
 template <>
@@ -94,29 +58,34 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
 
-	Point2* cPoint = NULL;
-	Point2* prevPoint = NULL;
+	Candle* cCandle = NULL;
+	Candle* prevCandle = NULL;
 
 	for (unsigned int i = 0; i < points.size(); ++i)
 	{
 		float newXValue = i * pointXGap;
-		float newYValue = (points[i]->getHigh() - y_min) * pointYGap;
+		float newOpenValue = (points[i]->getOpen() - y_min) * pointYGap;
+		float newCloseValue = (points[i]->getClose() - y_min) * pointYGap;
+		float newHighValue = (points[i]->getHigh() - y_min) * pointYGap;
+		float newLowValue = (points[i]->getLow() - y_min) * pointYGap;
 
 		// add next point to the background
-		cPoint = new Point2(parent->getAxisOriginX() + newXValue,
-							parent->getAxisOriginY() + parent->getHeight() - newYValue);
+		cCandle = new Candle(parent->getAxisOriginY() + parent->getHeight() - newOpenValue,
+							parent->getAxisOriginY() + parent->getHeight() - newCloseValue,
+							parent->getAxisOriginY() + parent->getHeight() - newHighValue,
+							parent->getAxisOriginY() + parent->getHeight() - newLowValue);
 
 		// Wick 
 		// Just above and below the real body are the "wicks" or "shadows." 
 		// The wicks show the high and low prices of that day's trading.
 		// TODO: Maybe add second line with +1 x offset if too thin to see.
-		SDL_RenderDrawLine(cGfx->getRenderer(), cPoint->getX(), points[i]->getHigh(), 
-						   cPoint->getX(), points[i]->getLow());
+		SDL_RenderDrawLine(cGfx->getRenderer(), newXValue, points[i]->getHigh(), 
+						   newXValue, points[i]->getLow());
 
 		// TODO
 		// Draw a rectangle for the real body representing the price range between open and close
 		//SDL_Rect bgRect;
-		//bgRect.x = cPoint->getX() - 2; //TODO: Make global variable / 2
+		//bgRect.x = newXValue - 2; //TODO: Make global variable / 2
 		//bgRect.w = 4; //TODO: Make global variable
 
 		// If the close is higher than the open, make the real body green.
@@ -124,7 +93,7 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		{
 			//TODO: Make the rectangle green RUColors::DEFAULT_BUTTON_BORDER_GREEN
 			float bgRectHeight = points[i]->getClose() - points[i]->getOpen();
-			//bgRect.y = cPoint->getY() - bgRectHeight;
+			//bgRect.y = cCandle->getY() - bgRectHeight;
 			//bgRect.h = bgRectHeight; // TODO
 		}
 		// If the close is lower than the open, make the real body red.
@@ -143,11 +112,11 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		//SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
 
 		// save the previous point for later
-		if (prevPoint)
-			delete prevPoint;
-		prevPoint = cPoint;
+		if (prevCandle)
+			delete prevCandle;
+		prevCandle = cCandle;
 	}
 
-	if (cPoint)
-		delete cPoint;
+	if (cCandle)
+		delete cCandle;
 }
