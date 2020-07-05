@@ -25,7 +25,7 @@ Candle::Candle()
 	setLow(0.0f);
 }
 
-Candle::Candle(double newOpen, double newClose, double newHigh, double newLow)
+Candle::Candle(float newOpen, float newClose, float newHigh, float newLow)
 {
 	setOpen(newOpen);
 	setClose(newClose);
@@ -49,27 +49,27 @@ Candle::~Candle()
 	setLow(0.0f);
 }
 
-double Candle::getOpen() const
+float Candle::getOpen() const
 {
 	return open;
 }
 
-double Candle::getClose() const
+float Candle::getClose() const
 {
 	return close;
 }
 
-double Candle::getHigh() const
+float Candle::getHigh() const
 {
 	return high;
 }
 
-double Candle::getLow() const
+float Candle::getLow() const
 {
 	return low;
 }
 
-void Candle::set(double newOpen, double newClose, double newHigh, double newLow)
+void Candle::set(float newOpen, float newClose, float newHigh, float newLow)
 {
 	setOpen(newOpen);
 	setClose(newClose);
@@ -77,22 +77,22 @@ void Candle::set(double newOpen, double newClose, double newHigh, double newLow)
 	setLow(newLow);
 }
 
-void Candle::setOpen(double newOpen)
+void Candle::setOpen(float newOpen)
 {
 	open = newOpen;
 }
 
-void Candle::setClose(double newClose)
+void Candle::setClose(float newClose)
 {
 	close = newClose;
 }
 
-void Candle::setHigh(double newHigh)
+void Candle::setHigh(float newHigh)
 {
 	high = newHigh;
 }
 
-void Candle::setLow(double newLow)
+void Candle::setLow(float newLow)
 {
 	low = newLow;
 }
