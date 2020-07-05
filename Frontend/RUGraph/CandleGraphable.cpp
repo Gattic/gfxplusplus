@@ -113,33 +113,34 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		SDL_RenderDrawLine(cGfx->getRenderer(), cPoint->getX(), points[i]->getHigh(), 
 						   cPoint->getX(), points[i]->getLow());
 
+		// TODO
 		// Draw a rectangle for the real body representing the price range between open and close
-		SDL_Rect bgRect;
-		bgRect.x = cPoint->getX() - 2; //TODO: Make global variable / 2
-		bgRect.w = 4; //TODO: Make global variable
+		//SDL_Rect bgRect;
+		//bgRect.x = cPoint->getX() - 2; //TODO: Make global variable / 2
+		//bgRect.w = 4; //TODO: Make global variable
 
 		// If the close is higher than the open, make the real body green.
 		if (points[i]->getClose() > points[i]->getOpen())
 		{
-			//TODO: Make the rectangle green
+			//TODO: Make the rectangle green RUColors::DEFAULT_BUTTON_BORDER_GREEN
 			float bgRectHeight = points[i]->getClose() - points[i]->getOpen();
-			bgRect.y = cPoint->getY() - bgRectHeight;
-			bgRect.h = bgRectHeight; // TODO
+			//bgRect.y = cPoint->getY() - bgRectHeight;
+			//bgRect.h = bgRectHeight; // TODO
 		}
 		// If the close is lower than the open, make the real body red.
 		else if (points[i]->getClose() < points[i]->getOpen())
 		{
-			//TODO: Make the rectangle red
+			//TODO: Make the rectangle red RUColors::DEFAULT_BUTTON_BORDER_RED
 			float bgRectHeight = points[i]->getOpen() - points[i]->getClose();
-			bgRect.y = 0; // TODO
-			bgRect.h = bgRectHeight; // TODO
+			//bgRect.y = 0; // TODO
+			//bgRect.h = bgRectHeight; // TODO
 		}
 		else
 		{
 			// When open and close are the same, show no real body.
 		}
 
-		SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
+		//SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
 
 		// save the previous point for later
 		if (prevPoint)
