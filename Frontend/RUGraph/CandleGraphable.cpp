@@ -67,6 +67,7 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 	Candle* cCandle = NULL;
 	Candle* prevCandle = NULL;
 
+	//float yCurrentMP = 0.0f;
 	for (unsigned int i = 0; i < points.size(); ++i)
 	{
 		float newXValue = i * pointXGap;
@@ -74,6 +75,10 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		float newCloseValue = (points[i]->getClose() - y_min) * pointYGap;
 		float newHighValue = (points[i]->getHigh() - y_min) * pointYGap;
 		float newLowValue = (points[i]->getLow() - y_min) * pointYGap;
+		printf("RAW-CANDLE: %f:%f:%f:%f\n", points[i]->getOpen(), points[i]->getClose(), points[i]->getHigh(), points[i]->getLow());
+		printf("NRM-CANDLE: %f:%f:%f:%f\n", newOpenValue, newCloseValue, newHighValue, newLowValue);
+		printf("++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+		//yCurrentMP += (newHighValue + newLowValue) /2.0f;
 
 		// add next point to the background
 		cCandle = new Candle(parent->getAxisOriginY() + parent->getHeight() - newOpenValue,
@@ -85,9 +90,8 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		// Just above and below the real body are the "wicks" or "shadows." 
 		// The wicks show the high and low prices of that day's trading.
 		// TODO: Maybe add second line with +1 x offset if too thin to see.
-		SDL_RenderDrawLine(cGfx->getRenderer(), 
-						   parent->getAxisOriginX() + newXValue, cCandle->getHigh(), 
-						   parent->getAxisOriginX() + newXValue, cCandle->getLow());
+		SDL_RenderDrawLine(cGfx->getRenderer(), newXValue, newHighValue,
+						   newXValue, newLowValue);
 
 		// TODO
 		// Draw a rectangle for the real body representing the price range between open and close
