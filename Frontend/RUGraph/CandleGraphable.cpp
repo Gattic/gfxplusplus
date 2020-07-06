@@ -90,8 +90,10 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		// Just above and below the real body are the "wicks" or "shadows." 
 		// The wicks show the high and low prices of that day's trading.
 		// TODO: Maybe add second line with +1 x offset if too thin to see.
-		SDL_RenderDrawLine(cGfx->getRenderer(), newXValue, newHighValue,
-						   newXValue, newLowValue);
+		//SDL_RenderDrawLine(cGfx->getRenderer(), newXValue, newHighValue, newXValue, newLowValue);
+		SDL_RenderDrawLine(cGfx->getRenderer(), 
+						   parent->getAxisOriginX() + newXValue, cCandle->getHigh(), 
+						   parent->getAxisOriginX() + newXValue, cCandle->getLow());
 
 		// TODO
 		// Draw a rectangle for the real body representing the price range between open and close
