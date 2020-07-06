@@ -95,11 +95,10 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 						   parent->getAxisOriginX() + newXValue, cCandle->getHigh(), 
 						   parent->getAxisOriginX() + newXValue, cCandle->getLow());
 
-		// TODO
 		// Draw a rectangle for the real body representing the price range between open and close
 		SDL_Rect bgRect;
-		bgRect.x = parent->getAxisOriginX() + newXValue - 2; //TODO: Make constant global variable / 2
-		bgRect.w = 4; //TODO: Make constant global variable
+		bgRect.x = parent->getAxisOriginX() + newXValue - 2; //TODO: Make pointXGap / 2 or constant global variable / 2
+		bgRect.w = 4; //TODO: Make pointXGap width? or constant global variable
 
 		// If the close is higher than the open, make the real body green.
 		if (points[i]->getClose() > points[i]->getOpen())
@@ -117,11 +116,13 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 
 			float bgRectHeight = cCandle->getOpen() - cCandle->getClose();
 			bgRect.h = bgRectHeight; // Rendered down, not up
-			bgRect.y = cCandle->getOpen(); // TODO
+			bgRect.y = cCandle->getOpen();
 		}
 		else
 		{
 			// When open and close are the same, show no real body.
+			bgRect.y = cCandle->getOpen();
+			bgRect.h = 0;
 		}
 
 		SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
