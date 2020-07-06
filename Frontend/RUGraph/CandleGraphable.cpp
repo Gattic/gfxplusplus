@@ -55,8 +55,14 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 	float xRange = (float)points.size();
 	float yRange = y_max - y_min;
 
+	printf("xRange, yRange (%f,%f)\n", xRange, yRange);
+
+	// Scales coordinates based on graph size and data range.
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
+
+	printf("PointXGap, PointYGap (%f,%f)\n", pointXGap, pointYGap);
+	printf("Total Candles: %d\n", points.size());
 
 	Candle* cCandle = NULL;
 	Candle* prevCandle = NULL;
@@ -75,12 +81,13 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 							parent->getAxisOriginY() + parent->getHeight() - newHighValue,
 							parent->getAxisOriginY() + parent->getHeight() - newLowValue);
 
-		// Wick 
+		// Wick
 		// Just above and below the real body are the "wicks" or "shadows." 
 		// The wicks show the high and low prices of that day's trading.
 		// TODO: Maybe add second line with +1 x offset if too thin to see.
-		SDL_RenderDrawLine(cGfx->getRenderer(), newXValue, points[i]->getHigh(), 
-						   newXValue, points[i]->getLow());
+		SDL_RenderDrawLine(cGfx->getRenderer(), 
+						   parent->getAxisOriginX() + newXValue, cCandle->getHigh(), 
+						   parent->getAxisOriginX() + newXValue, cCandle->getLow());
 
 		// TODO
 		// Draw a rectangle for the real body representing the price range between open and close
