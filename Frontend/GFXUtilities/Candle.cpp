@@ -30,7 +30,7 @@ Candle::Candle(float newOpen, float newClose, float newHigh, float newLow)
 	setOpen(newOpen);
 	setClose(newClose);
 	setHigh(newHigh);
-	setClose(newLow);
+	setLow(newLow);
 }
 
 Candle::Candle(const Candle& c2)
