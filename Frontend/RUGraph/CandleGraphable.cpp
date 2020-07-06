@@ -30,12 +30,14 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 
 	y_max = points[0]->getHigh();
 	y_min = points[0]->getLow();
+	//printf("y_min, y_max (%f,%f)\n", y_min, y_max);
 
 	for (unsigned int i = 1; i < points.size(); ++i)
 	{
 		Candle* c = points[i];
 		float y_high = c->getHigh();
 		float y_low = c->getLow();
+		//printf("y_low, y_high (%f,%f)\n", y_low, y_high);
 		//float open_pt = c->getOpen();
 		//float close_pt = c->getClose();
 
@@ -50,24 +52,23 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 template <>
 void Graphable<Candle>::draw(gfxpp* cGfx)
 {
-	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
 
 	float xRange = (float)points.size();
 	float yRange = y_max - y_min;
 
-	printf("xRange, yRange (%f,%f)\n", xRange, yRange);
+	//printf("y_min, y_max (%f,%f)\n", y_min, y_max);
+	//printf("xRange, yRange (%f,%f)\n", xRange, yRange);
 
 	// Scales coordinates based on graph size and data range.
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
 
-	printf("PointXGap, PointYGap (%f,%f)\n", pointXGap, pointYGap);
-	printf("Total Candles: %d\n", points.size());
+	//printf("PointXGap, PointYGap (%f,%f)\n", pointXGap, pointYGap);
+	//printf("Total Candles: %d\n", points.size());
 
 	Candle* cCandle = NULL;
 	Candle* prevCandle = NULL;
 
-	//float yCurrentMP = 0.0f;
 	for (unsigned int i = 0; i < points.size(); ++i)
 	{
 		float newXValue = i * pointXGap;
@@ -75,10 +76,9 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		float newCloseValue = (points[i]->getClose() - y_min) * pointYGap;
 		float newHighValue = (points[i]->getHigh() - y_min) * pointYGap;
 		float newLowValue = (points[i]->getLow() - y_min) * pointYGap;
-		printf("RAW-CANDLE: %f:%f:%f:%f\n", points[i]->getOpen(), points[i]->getClose(), points[i]->getHigh(), points[i]->getLow());
-		printf("NRM-CANDLE: %f:%f:%f:%f\n", newOpenValue, newCloseValue, newHighValue, newLowValue);
-		printf("++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-		//yCurrentMP += (newHighValue + newLowValue) /2.0f;
+		//printf("RAW-CANDLE: %f:%f:%f:%f\n", points[i]->getOpen(), points[i]->getClose(), points[i]->getHigh(), points[i]->getLow());
+		//printf("NRM-CANDLE: %f:%f:%f:%f\n", newOpenValue, newCloseValue, newHighValue, newLowValue);
+		//printf("++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
 		// add next point to the background
 		cCandle = new Candle(parent->getAxisOriginY() + parent->getHeight() - newOpenValue,
@@ -86,43 +86,45 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 							parent->getAxisOriginY() + parent->getHeight() - newHighValue,
 							parent->getAxisOriginY() + parent->getHeight() - newLowValue);
 
-		// Wick
+		// Wick / Shadow
 		// Just above and below the real body are the "wicks" or "shadows." 
 		// The wicks show the high and low prices of that day's trading.
-		// TODO: Maybe add second line with +1 x offset if too thin to see.
-		//SDL_RenderDrawLine(cGfx->getRenderer(), newXValue, newHighValue, newXValue, newLowValue);
+		SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
+
 		SDL_RenderDrawLine(cGfx->getRenderer(), 
 						   parent->getAxisOriginX() + newXValue, cCandle->getHigh(), 
 						   parent->getAxisOriginX() + newXValue, cCandle->getLow());
 
 		// TODO
 		// Draw a rectangle for the real body representing the price range between open and close
-		//SDL_Rect bgRect;
-		//bgRect.x = newXValue - 2; //TODO: Make global variable / 2
-		//bgRect.w = 4; //TODO: Make global variable
+		SDL_Rect bgRect;
+		bgRect.x = parent->getAxisOriginX() + newXValue - 2; //TODO: Make constant global variable / 2
+		bgRect.w = 4; //TODO: Make constant global variable
 
 		// If the close is higher than the open, make the real body green.
 		if (points[i]->getClose() > points[i]->getOpen())
 		{
-			//TODO: Make the rectangle green RUColors::DEFAULT_BUTTON_BORDER_GREEN
-			float bgRectHeight = points[i]->getClose() - points[i]->getOpen();
-			//bgRect.y = cCandle->getY() - bgRectHeight;
-			//bgRect.h = bgRectHeight; // TODO
+			SDL_SetRenderDrawColor(cGfx->getRenderer(), 0, 209, 0, 255);
+
+			float bgRectHeight = cCandle->getClose() - cCandle->getOpen();
+			bgRect.h = bgRectHeight; // Rendered down, not up
+			bgRect.y = cCandle->getClose();
 		}
 		// If the close is lower than the open, make the real body red.
 		else if (points[i]->getClose() < points[i]->getOpen())
 		{
-			//TODO: Make the rectangle red RUColors::DEFAULT_BUTTON_BORDER_RED
-			float bgRectHeight = points[i]->getOpen() - points[i]->getClose();
-			//bgRect.y = 0; // TODO
-			//bgRect.h = bgRectHeight; // TODO
+			SDL_SetRenderDrawColor(cGfx->getRenderer(), 255, 0, 0, 255);
+
+			float bgRectHeight = cCandle->getOpen() - cCandle->getClose();
+			bgRect.h = bgRectHeight; // Rendered down, not up
+			bgRect.y = cCandle->getOpen(); // TODO
 		}
 		else
 		{
 			// When open and close are the same, show no real body.
 		}
 
-		//SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
+		SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
 
 		// save the previous point for later
 		if (prevCandle)
