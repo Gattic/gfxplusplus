@@ -14,11 +14,13 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUGRAPH
-#define _RUGRAPH
+#ifndef _RUCANDLEGRAPH
+#define _RUCNADLEGRAPH
 
+#include "RUGraph.h"
 #include "../GItems/RUColors.h"
-#include "../GItems/RUComponent.h"
+#include "../GFXUtilities/Candle.h"
+#include "Graphable.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <pthread.h>
@@ -28,62 +30,34 @@
 #include <vector>
 
 class gfxpp;
-class RULabel;
+//class Graphable<Point2>;
+class Candle;
 
 namespace shmea {
 class GList;
-class GTable;
 }; // namespace shmea
 
-class RUGraph : public RUComponent
+class RUCandleGraph : public RUGraph
 {
 private:
-	int graphSize;
-	int axisOriginX;
-	int axisOriginY;
-	int axisWidth;
-	bool gridEnabled;
-	int gridLineWidth;
-	int quadrants;
+	std::map<std::string, Graphable<Candle>*> candles;
 
 protected:
-	RULabel* titleLabel;
-
 	// render
 	virtual void updateBackground(gfxpp*);
 
 public:
-	static const unsigned int DEFAULT_NUM_ZONES = 10;
-
-	static const unsigned int DEFAULT_GRAPH_SIZE = 1;
-	static const unsigned int DEFAULT_AXIS_WIDTH = 3;
-	static const unsigned int DEFAULT_GRIDLINE_WIDTH = 1;
-
-	static const int QUADRANTS_ONE = 0;
-	static const int QUADRANTS_FOUR = 1;
 
 	// constructors & destructor
-	RUGraph(int, int, int = QUADRANTS_ONE);
-	virtual ~RUGraph();
+	RUCandleGraph(int, int, int = QUADRANTS_ONE);
+	virtual ~RUCandleGraph();
 
-	// gets
-	int getGraphSize() const;
-	int getAxisOriginX() const;
-	int getAxisOriginY() const;
-	int getAxisWidth() const;
-	bool getGridEnabled() const;
-	int getGridLineWidth() const;
-	int getQuadrants() const;
-	float getQuadrantOffsetX() const;
-	float getQuadrantOffsetY() const;
+	virtual std::string getType() const;
+	virtual void add(gfxpp*, const std::string&, const Candle&);
+	virtual void set(gfxpp*, const std::string&, const std::vector<Candle*>&,
+			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
-	// sets
-	void setGraphSize(int);
-	void setAxisWidth(int);
-	void setGridEnabled(bool);
-	void setGridLineWidth(int);
-	void setQuadrants(int);
-	void setTitleLabel(std::string);
+	void clear(bool = false);
 };
 
 #endif
