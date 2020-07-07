@@ -16,7 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUTextComponent.h"
 #include "../../Graphics/graphics.h"
-#include "Backend/Database/gtype.h"
+#include "Backend/Database/GType.h"
 #include "GFont.h"
 
 RUTextComponent::RUTextComponent()
@@ -141,6 +141,9 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 
 				int prevWidth = dimRatio * newWidth;
 				GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+				if (!cLetter)
+					continue;
+
 				newWidth += cLetter->getWidth();
 
 				// Move the cursor to the click
@@ -185,6 +188,9 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 			for (unsigned int i = 0; i < strDrawText.length(); ++i)
 			{
 				GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+				if (!cLetter)
+					continue;
+
 				newWidth += cLetter->getWidth();
 			}
 
@@ -232,8 +238,10 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 		for (unsigned int i = 0; i < strDrawText.length(); ++i)
 		{
 			GLetter* cLetter = cFont->getLetter(strDrawText[i]);
-			textRect.w = dimRatio * cLetter->getWidth();
+			if (!cLetter)
+				continue;
 
+			textRect.w = dimRatio * cLetter->getWidth();
 			SDL_RenderCopy(cGfx->getRenderer(), cLetter->getTexture(), NULL, &textRect);
 			textRect.x += textRect.w;
 		}

@@ -18,7 +18,7 @@
 #define _GSERIALIZABLE
 
 #include "GList.h"
-#include "gtable.h"
+#include "GTable.h"
 #include <algorithm>
 #include <dirent.h>
 #include <map>
@@ -63,6 +63,6 @@ public:
 	// static GTable Deserialize(const char*, int);	  // from byte stream
 	GTable toGTable() const;
 };
-};
+}; // namespace shmea
 
 #endif

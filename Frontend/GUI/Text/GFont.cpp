@@ -16,13 +16,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "GFont.h"
 #include "../../GItems/RUColors.h"
-#include "Backend/Database/gtype.h"
+#include "Backend/Database/GType.h"
 
 GFont::GFont()
 {
-	fontPath = "resources/fonts/carlenlund_helmet/Helmet-Regular.ttf";
+	fontPath = "resources/fonts/Open_Sans/OpenSans-SemiBold.ttf";
 	fontSize = DEFAULT_FONT_SIZE;
-	font = TTF_OpenFont(fontPath.c_str(), 100);
+	font = TTF_OpenFont(fontPath.c_str(), 10 * fontSize);
 	maxHeight = 0;
 
 	if (!font)
@@ -40,10 +40,10 @@ GFont::GFont(SDL_Renderer* newRenderer, std::string newFontPath)
 	cRenderer = newRenderer;
 	fontPath = newFontPath;
 	if (fontPath.length() == 0)
-		fontPath = "resources/fonts/carlenlund_helmet/Helmet-Regular.ttf";
+		fontPath = "resources/fonts/Open_Sans/OpenSans-SemiBold.ttf";
 
 	fontSize = DEFAULT_FONT_SIZE;
-	font = TTF_OpenFont(fontPath.c_str(), 100);
+	font = TTF_OpenFont(fontPath.c_str(), 10 * fontSize);
 	maxHeight = 0;
 
 	if (!font)
@@ -79,18 +79,15 @@ void GFont::loadLetters()
 		return;
 
 	maxHeight = 0;
-	for (unsigned char i = 0; i < 255; ++i)
+	for (unsigned char i = 1; i != 0; ++i)
 	{
-		if (!validChar(i))
-			continue;
-
 		SDL_Surface* textMessage =
 			TTF_RenderText_Solid(font, shmea::GType::charTOstring(i).c_str(), textColor);
 
 		if (!textMessage)
 		{
-			printf("[GUI] GFont create error: %s\n", SDL_GetError());
-			return;
+			printf("[GUI] GFont create error[%d]: %s\n", i, SDL_GetError());
+			continue;
 		}
 
 		SDL_Texture* textTex = SDL_CreateTextureFromSurface(cRenderer, textMessage);
@@ -106,7 +103,7 @@ void GFont::loadLetters()
 		int newWidth = 0;
 		int newHeight = 0;
 		std::string letterAsString = "";
-		letterAsString += i;
+		letterAsString += shmea::GType::charTOstring(i);
 		TTF_SizeText(getFont(), letterAsString.c_str(), &newWidth, &newHeight);
 
 		if (newHeight > maxHeight)

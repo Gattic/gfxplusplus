@@ -14,67 +14,58 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUDROPDOWN
-#define _RUDROPDOWN
+#ifndef _GSAVETABLE
+#define _GSAVETABLE
 
-#include "../GItems/RUComponent.h"
+#include "GTable.h"
+#include <fstream>
+#include <pthread.h>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
-class gfxpp;
-class RULabel;
-class RUImageComponent;
-class RUListbox;
-
-class RUDropdown : public RUComponent
+namespace shmea {
+class SaveTable
 {
+private:
+	int64_t id;
+	std::string dname;
+	std::string name;
+	GTable value;
+
+	std::string getPath() const;
 
 protected:
-	bool open;
-	unsigned int prevSelectedIndex;
-	unsigned int selectedIndex;
-	std::string arrowLocation;
+	friend class SaveList;
 
-	RULabel* selectedLabel;
-	RUListbox* lbItems;
-	RUImageComponent* arrow;
+	// Load functions
+	void loadByID(int64_t);
 
-	// events
-	void (GPanel::*OptionChangedListener)(int);
-	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
-	virtual void onMouseWheel(gfxpp*, GPanel*, int, int, int);
+	// Save Functions
+	void saveByID(const GTable&);
+
+	void clean();
 
 public:
-	static const int DEFAULT_SIDE_WIDTH = 24;
-
 	// constructors & destructor
-	RUDropdown();
-	~RUDropdown();
+	SaveTable(const std::string&, const std::string&);
+	~SaveTable();
+
+	// Database operations
+	void loadByName();
+	void saveByName(const GTable&) const;
+	bool deleteByName();
 
 	// gets
-	bool isOpen() const;
-	unsigned int getOptionsShown() const;
-	unsigned int getSelectedIndex();
-	std::string getSelectedText() const;
-
-	// sets
-	void toggleOpen();
-	void setWidth(int);
-	void setHeight(int);
-	void setOptionsShown(unsigned int);
-	void setSelectedIndex(unsigned int);
-	void addOption(std::string);
-	void clearOptions();
-	unsigned int size() const;
-
-	// events
-	void setOptionChangedListener(void (GPanel::*)(int));
-
-	// render
-	virtual void updateBackground(gfxpp*);
-	virtual std::string getType() const;
+	int64_t getID() const;
+	std::string getName() const;
+	GTable getTable() const;
+	void print() const;
 };
+}; // namespace shmea
 
 #endif

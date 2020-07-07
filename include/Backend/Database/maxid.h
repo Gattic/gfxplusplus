@@ -45,6 +45,6 @@ public:
 	static int64_t generateID(const std::string&);
 	static int64_t getMaxID(const std::string&);
 };
-};
+}; // namespace shmea
 
 #endif

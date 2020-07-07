@@ -14,67 +14,50 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUDROPDOWN
-#define _RUDROPDOWN
+#ifndef _RULINEGRAPH
+#define _RULINEGRAPH
 
-#include "../GItems/RUComponent.h"
+#include "RUGraph.h"
+#include "../GItems/RUColors.h"
+#include "../GFXUtilities/point2.h"
+#include "Graphable.h"
+#include <SDL2/SDL.h>
+#include <map>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
 
 class gfxpp;
-class RULabel;
-class RUImageComponent;
-class RUListbox;
+//class Graphable<Point2>;
+class Point2;
 
-class RUDropdown : public RUComponent
+namespace shmea {
+class GList;
+}; // namespace shmea
+
+class RULineGraph : public RUGraph
 {
+private:
+	std::map<std::string, Graphable<Point2>*> lines;
 
 protected:
-	bool open;
-	unsigned int prevSelectedIndex;
-	unsigned int selectedIndex;
-	std::string arrowLocation;
-
-	RULabel* selectedLabel;
-	RUListbox* lbItems;
-	RUImageComponent* arrow;
-
-	// events
-	void (GPanel::*OptionChangedListener)(int);
-	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
-	virtual void onMouseWheel(gfxpp*, GPanel*, int, int, int);
-
-public:
-	static const int DEFAULT_SIDE_WIDTH = 24;
-
-	// constructors & destructor
-	RUDropdown();
-	~RUDropdown();
-
-	// gets
-	bool isOpen() const;
-	unsigned int getOptionsShown() const;
-	unsigned int getSelectedIndex();
-	std::string getSelectedText() const;
-
-	// sets
-	void toggleOpen();
-	void setWidth(int);
-	void setHeight(int);
-	void setOptionsShown(unsigned int);
-	void setSelectedIndex(unsigned int);
-	void addOption(std::string);
-	void clearOptions();
-	unsigned int size() const;
-
-	// events
-	void setOptionChangedListener(void (GPanel::*)(int));
-
 	// render
 	virtual void updateBackground(gfxpp*);
+
+public:
+
+	// constructors & destructor
+	RULineGraph(int, int, int = QUADRANTS_ONE);
+	virtual ~RULineGraph();
+
 	virtual std::string getType() const;
+	virtual void add(gfxpp*, const std::string&, const Point2&);
+	virtual void set(gfxpp*, const std::string&, const std::vector<Point2*>&,
+			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
+	void clear(bool = false);
 };
 
 #endif

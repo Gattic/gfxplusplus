@@ -26,7 +26,7 @@ RULabel::RULabel()
 RULabel::RULabel(std::string newText)
 {
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
-	// setText(newText);
+	setText(newText);
 }
 
 RULabel::~RULabel()

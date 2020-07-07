@@ -14,49 +14,39 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GSERVICE
-#define _GSERVICE
+#include "scalar1.h"
 
-#include "../Database/GList.h"
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <time.h>
-#include <vector>
-
-namespace GNet {
-
-class GServer;
-class Sockets;
-class Connection;
-class newServiceArgs;
-
-class Service
+Scalar1::Scalar1()
 {
-	friend GServer;
-	friend Sockets;
+	set(0.0f);
+}
 
-private:
-	// timestamp variable to store service start and end time
-	static std::string name;
-	int64_t timeExecuted;
+Scalar1::Scalar1(double newX)
+{
+	set(newX);
+}
 
-	static void* launchService(void* y);
-	virtual shmea::GList execute(Connection*, const shmea::GList&) = 0;
-	void StartService(newServiceArgs*);
-	void ExitService(newServiceArgs*);
+Scalar1::Scalar1(const Scalar1& p)
+{
+	set(p.x);
+}
 
-	static void ExecuteService(GServer*, const shmea::GList&, Connection* = NULL);
+Scalar1::~Scalar1()
+{
+	set(0.0f);
+}
 
-public:
-	Service();
-	virtual ~Service();
+double Scalar1::get() const
+{
+	return x;
+}
 
-	virtual Service* MakeService(GServer*) const = 0;
-	virtual std::string getName() const = 0;
-};
-}; // namespace GNet
+double Scalar1::length() const
+{
+	return sqrt(x * x);
+}
 
-#endif
+void Scalar1::set(double newX)
+{
+	x = newX;
+}

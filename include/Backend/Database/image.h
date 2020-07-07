@@ -156,6 +156,6 @@ public:
 		data[y * width + x] = value;
 	}
 };
-};
+}; // namespace shmea
 
 #endif

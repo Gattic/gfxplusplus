@@ -14,8 +14,8 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GQL2_SAVELIST
-#define _GQL2_SAVELIST
+#ifndef _GSAVEFOLDER
+#define _GSAVEFOLDER
 
 #include <dirent.h>
 #include <pthread.h>
@@ -29,34 +29,34 @@
 namespace shmea {
 
 class GTable;
-class SaveItem;
+class SaveTable;
 
-class SaveList
+class SaveFolder
 {
 private:
-	std::vector<SaveItem*> saveItems;
+	std::vector<SaveTable*> saveItems;
 	std::string dname;
 
 	std::string getPath() const;
-	void addItem(SaveItem*);
+	void addItem(SaveTable*);
 	void clean();
 
 public:
 	// constructors & destructor
-	SaveList(const std::string&);
-	~SaveList();
+	SaveFolder(const std::string&);
+	~SaveFolder();
 
-	SaveItem* loadItem(const std::string&);
+	SaveTable* loadItem(const std::string&);
 	bool deleteItem(const std::string&);
-	SaveItem* newItem(const std::string&, const GTable&);
+	SaveTable* newItem(const std::string&, const GTable&);
 	void load();
-	static std::vector<SaveList*> loadFolders();
+	static std::vector<SaveFolder*> loadFolders();
 
 	// gets
 	std::string getName() const;
-	const std::vector<SaveItem*>& getItems() const;
+	const std::vector<SaveTable*>& getItems() const;
 	int size() const;
 };
-};
+}; // namespace shmea
 
 #endif

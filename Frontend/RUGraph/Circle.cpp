@@ -17,7 +17,6 @@
 #include "Circle.h"
 #include "../GFXUtilities/point2.h"
 #include "../Graphics/graphics.h"
-#include "../Graphics/graphics.h"
 #include "RUGraph.h"
 
 Circle::Circle(RUGraph* newParent, SDL_Color newColor) : Graphable(newParent, newColor)

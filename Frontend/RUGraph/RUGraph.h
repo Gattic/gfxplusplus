@@ -28,14 +28,12 @@
 #include <vector>
 
 class gfxpp;
-class Graphable;
-class Point2;
 class RULabel;
 
 namespace shmea {
 class GList;
 class GTable;
-};
+}; // namespace shmea
 
 class RUGraph : public RUComponent
 {
@@ -49,9 +47,6 @@ private:
 	int quadrants;
 
 protected:
-	// std::vector<GraphLine*> lines;
-	std::map<std::string, Graphable*> lines;
-	pthread_mutex_t* plotMutex;
 	RULabel* titleLabel;
 
 	// render
@@ -69,7 +64,7 @@ public:
 
 	// constructors & destructor
 	RUGraph(int, int, int = QUADRANTS_ONE);
-	~RUGraph();
+	virtual ~RUGraph();
 
 	// gets
 	int getGraphSize() const;
@@ -89,15 +84,6 @@ public:
 	void setGridLineWidth(int);
 	void setQuadrants(int);
 	void setTitleLabel(std::string);
-
-	virtual std::string getType() const;
-	void setPoints(const std::string&, const std::vector<Point2*>&, int = 0,
-				   SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	void setLine(const std::string&, const shmea::GList&, int = 0,
-				 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	void addScatterPoints(const shmea::GTable&);
-	void buildDotMatrix();
-	void clear(bool = false);
 };
 
 #endif

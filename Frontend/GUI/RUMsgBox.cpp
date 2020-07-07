@@ -69,7 +69,7 @@ RUMsgBox::RUMsgBox(GPanel* gPanel, std::string newTitle, std::string newMessage,
 		msgButtonOK = new RUButton();
 		msgButtonOK->setWidth(60);
 		msgButtonOK->setHeight(25);
-		msgButtonOK->setMarginX(DEFAULT_WIDTH - msgButtonOK->getWidth() - 6);   // -6 = padding
+		msgButtonOK->setMarginX(DEFAULT_WIDTH - msgButtonOK->getWidth() - 6);	// -6 = padding
 		msgButtonOK->setMarginY(DEFAULT_HEIGHT - msgButtonOK->getHeight() - 6); // -6 = padding
 		msgButtonOK->setText(" OK ");
 		msgButtonOK->setName(OK_BUTTON);

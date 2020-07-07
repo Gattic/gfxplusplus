@@ -14,41 +14,85 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GRAPHSCATTER_H
-#define _GRAPHSCATTER_H
+#include "Candle.h"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <vector>
 
-#include "../GItems/RUColors.h"
-#include "Graphable.h"
-
-class gfxpp;
-class RUGraph;
-class Point2;
-
-class GraphScatter : public Graphable
+Candle::Candle()
 {
-private:
-	void drawPoint(gfxpp*, int, int, int = 0);
-	void drawPointOutline(gfxpp*, int, int, int = 0);
-	int pointSize;
+	setOpen(0.0f);
+	setClose(0.0f);
+	setHigh(0.0f);
+	setLow(0.0f);
+}
 
-public:
-	// constructors & destructor
-	GraphScatter(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, int = 4);
-	~GraphScatter();
+Candle::Candle(float newOpen, float newClose, float newHigh, float newLow)
+{
+	setOpen(newOpen);
+	setClose(newClose);
+	setHigh(newHigh);
+	setLow(newLow);
+}
 
-	void setPointSize(int);
-	int getPointSize(int);
+Candle::Candle(const Candle& c2)
+{
+	setOpen(c2.open);
+	setClose(c2.close);
+	setHigh(c2.high);
+	setLow(c2.low);
+}
 
-	virtual void draw(gfxpp*);
-	virtual std::string getType() const;
-};
+Candle::~Candle()
+{
+	setOpen(0.0f);
+	setClose(0.0f);
+	setHigh(0.0f);
+	setLow(0.0f);
+}
 
-#endif
+float Candle::getOpen() const
+{
+	return open;
+}
+
+float Candle::getClose() const
+{
+	return close;
+}
+
+float Candle::getHigh() const
+{
+	return high;
+}
+
+float Candle::getLow() const
+{
+	return low;
+}
+
+void Candle::set(float newOpen, float newClose, float newHigh, float newLow)
+{
+	setOpen(newOpen);
+	setClose(newClose);
+	setHigh(newHigh);
+	setLow(newLow);
+}
+
+void Candle::setOpen(float newOpen)
+{
+	open = newOpen;
+}
+
+void Candle::setClose(float newClose)
+{
+	close = newClose;
+}
+
+void Candle::setHigh(float newHigh)
+{
+	high = newHigh;
+}
+
+void Candle::setLow(float newLow)
+{
+	low = newLow;
+}

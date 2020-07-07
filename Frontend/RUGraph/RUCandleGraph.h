@@ -14,58 +14,50 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GQL2_SAVEITEM
-#define _GQL2_SAVEITEM
+#ifndef _RUCANDLEGRAPH
+#define _RUCNADLEGRAPH
 
-#include "gtable.h"
-#include <fstream>
+#include "RUGraph.h"
+#include "../GItems/RUColors.h"
+#include "../GFXUtilities/Candle.h"
+#include "Graphable.h"
+#include <SDL2/SDL.h>
+#include <map>
 #include <pthread.h>
-#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <string>
-#include <unistd.h>
 #include <vector>
 
+class gfxpp;
+//class Graphable<Point2>;
+class Candle;
+
 namespace shmea {
-class SaveItem
+class GList;
+}; // namespace shmea
+
+class RUCandleGraph : public RUGraph
 {
 private:
-	int64_t id;
-	std::string dname;
-	std::string name;
-	GTable value;
-
-	std::string getPath() const;
+	std::map<std::string, Graphable<Candle>*> candles;
 
 protected:
-	friend class SaveList;
-
-	// Load functions
-	void loadByID(int64_t);
-
-	// Save Functions
-	void saveByID(const GTable&);
-
-	void clean();
+	// render
+	virtual void updateBackground(gfxpp*);
 
 public:
+
 	// constructors & destructor
-	SaveItem(const std::string&, const std::string&);
-	~SaveItem();
+	RUCandleGraph(int, int, int = QUADRANTS_ONE);
+	virtual ~RUCandleGraph();
 
-	// Database operations
-	void loadByName();
-	void saveByName(const GTable&) const;
-	bool deleteByName();
+	virtual std::string getType() const;
+	virtual void add(gfxpp*, const std::string&, const Candle&);
+	virtual void set(gfxpp*, const std::string&, const std::vector<Candle*>&,
+			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
-	// gets
-	int64_t getID() const;
-	std::string getName() const;
-	GTable getTable() const;
-	void print() const;
-};
+	void clear(bool = false);
 };
 
 #endif

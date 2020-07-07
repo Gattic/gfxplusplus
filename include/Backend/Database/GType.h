@@ -154,6 +154,6 @@ public:
 	static std::string timeTOstring(const int64_t);
 	static unsigned int cfind(const char, const char*, const unsigned int);
 };
-};
+}; // namespace shmea
 
 #endif
