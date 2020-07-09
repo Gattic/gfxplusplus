@@ -28,9 +28,9 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 	if (points.empty())
 		return;
 
-	y_max = points[0]->getHigh();
-	y_min = points[0]->getLow();
-	//printf("y_min, y_max (%f,%f)\n", y_min, y_max);
+	yMax = points[0]->getHigh();
+	yMin = points[0]->getLow();
+	//printf("yMin, yMax (%f,%f)\n", yMin, yMax);
 
 	for (unsigned int i = 1; i < points.size(); ++i)
 	{
@@ -41,11 +41,11 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 		//float open_pt = c->getOpen();
 		//float close_pt = c->getClose();
 
-		if (y_high > y_max)
-			y_max = y_high;
+		if (y_high > yMax)
+			yMax = y_high;
 
-		else if (y_low < y_min)
-			y_min = y_low;
+		else if (y_low < yMin)
+			yMin = y_low;
 	}
 }
 
@@ -54,9 +54,9 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 {
 
 	float xRange = (float)points.size();
-	float yRange = y_max - y_min;
+	float yRange = yMax - yMin;
 
-	//printf("y_min, y_max (%f,%f)\n", y_min, y_max);
+	//printf("yMin, yMax (%f,%f)\n", yMin, yMax);
 	//printf("xRange, yRange (%f,%f)\n", xRange, yRange);
 
 	// Scales coordinates based on graph size and data range.
@@ -72,10 +72,10 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 	for (unsigned int i = 0; i < points.size(); ++i)
 	{
 		float newXValue = i * pointXGap;
-		float newOpenValue = (points[i]->getOpen() - y_min) * pointYGap;
-		float newCloseValue = (points[i]->getClose() - y_min) * pointYGap;
-		float newHighValue = (points[i]->getHigh() - y_min) * pointYGap;
-		float newLowValue = (points[i]->getLow() - y_min) * pointYGap;
+		float newOpenValue = (points[i]->getOpen() - yMin) * pointYGap;
+		float newCloseValue = (points[i]->getClose() - yMin) * pointYGap;
+		float newHighValue = (points[i]->getHigh() - yMin) * pointYGap;
+		float newLowValue = (points[i]->getLow() - yMin) * pointYGap;
 		//printf("RAW-CANDLE: %f:%f:%f:%f\n", points[i]->getOpen(), points[i]->getClose(), points[i]->getHigh(), points[i]->getLow());
 		//printf("NRM-CANDLE: %f:%f:%f:%f\n", newOpenValue, newCloseValue, newHighValue, newLowValue);
 		//printf("++++++++++++++++++++++++++++++++++++++++++++++++++++\n");

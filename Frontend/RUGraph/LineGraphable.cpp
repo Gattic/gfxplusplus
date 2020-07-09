@@ -16,6 +16,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
 
+//TODO: Separate Scalar1D from Point2D and implement this add fncality
+
 template <>
 void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 {
@@ -25,10 +27,10 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 	if (points.empty())
 		return;
 
-	y_max = points[0]->getY();
-	y_min = y_max;
-	x_max = points[0]->getX();
-	x_min = x_max;
+	float y_max = points[0]->getY();
+	float y_min = y_max;
+	float x_max = points[0]->getX();
+	float x_min = x_max;
 
 	for (unsigned int i = 1; i < points.size(); ++i)
 	{
@@ -47,12 +49,21 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 			x_max = x_pt;
 	}
 
-	int calculatedWidth = x_max - x_min;
-	int calculatedHeight = y_max - y_min;
+	// Save the old values for an optimization later
+	float oldxMin = xMin;
+	float oldxMax = xMax;
+	float oldyMin = yMin;
+	float oldyMax = yMax;
 
+	//==============================================BELOW HERE PUT INTO WRAPPER HELPER FNC==============================================
+
+	int xRange = x_max - x_min;
+	int yRange = y_max - y_min;
+
+	// Canvas Size
 	// If we need more room, extend by doubling
-	int newWidth = drawWidth;
-	while (newWidth < calculatedWidth)
+	int newWidth = canvasWidth;
+	while (newWidth < xRange)
 	{
 		if (newWidth == -1)
 			return;
@@ -68,11 +79,15 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 	}
 
 	// If we need more room, extend by doubling
-	int newHeight = drawHeight;
-	while (newHeight < calculatedHeight)
+	int newHeight = canvasHeight;
+	while (newHeight < yRange)
 	{
 		if (newHeight == -1)
 			return;
+
+		// Add an upper limit here to work on certain size images only
+		// if (newWidth >= SOME_LARGE_NUMBER)
+		// return;
 
 		if (newHeight == 0)
 			newHeight = 16;
@@ -80,61 +95,71 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 			newHeight *= 2;
 	}
 
-	/*printf("Calculated(%d,%d)\n", calculatedWidth, calculatedHeight);
-	printf("New(%d,%d)\n", newWidth, newHeight);
-	printf("Draw(%d,%d)\n", drawWidth, drawHeight);
-	printf("---------------------------------------------------------------\n");*/
-	drawWidth = newWidth;
-	drawHeight = newHeight;
-
-	// Do we need to recreate the texutre?
-	/*if ((newWidth >= drawWidth) || (newHeight >= drawHeight))
+	if(((canvasWidth < newWidth) || (canvasHeight < newHeight)) &&
+		((newWidth > 0) && (newHeight > 0)))
 	{
+		printf("Canvas Texture(%d,%d)\n", canvasWidth, canvasHeight);
+		printf("New Texture(%d,%d)\n", newWidth, newHeight);
+		printf("=================================================\n");
+
+		//SDL_Texture* newGraph = NULL;
+		/*SDL_Texture* newGraph = SDL_CreateTexture(cGfx->getRenderer(),
+			SDL_PIXELFORMAT_RGBA8888,
+			SDL_TEXTUREACCESS_TARGET, newWidth, newHeight);
+
+		// Couldnt create a new texture
+		if(!newGraph)
+		{
+			newGraph = NULL;
+			printf("HOOPLA\n");
+			return;
+		}
+
+		// Shrink the old texture to fit the new point and avoid redrawing
+		//TODO COPY RECT HERE
+
 		// Delete the old texture
 		if (rawGraph)
-			free(rawGraph);
+			SDL_DestroyTexture(rawGraph);
+		rawGraph = newGraph;*/ // Replace the old texture
 
 		// Set the new raw graph size
-		drawWidth = newWidth;
-		drawHeight = newHeight;
+		canvasWidth = newWidth;
+		canvasHeight = newHeight;
+	}
 
+	// Canvas is big enough but is the drawing the same?
+	/*if((xRange == 0.0f) || (yRange == 0.0f))
+	{
+		// Unset so do nothing
+		drawType = OPT_NOTHING;
+	}
+	else if(prevSize == points.size() - 1)
+	{
+		// Time Series Assumption
+	}
+	else if((x_min < oldxMin) ||
+		(x_max > oldxMax) ||
+		(y_min < oldyMin) ||
+		(y_max > oldyMax))
+	{
 		// Create a new texture
-		printf("New Texture(%d,%d)\n", drawWidth, drawHeight);
-		//rawGraph = SDL_CreateTexture(cGfx->getRenderer(),
-		//	SDL_PIXELFORMAT_RGBA8888,
-		//	SDL_TEXTUREACCESS_TARGET, drawWidth, drawHeight);
+		printf("xMin(o,n)(%f,%f)\n", x_min, oldxMin);
+		printf("xMax(o,n)(%f,%f)\n", x_max, oldxMax);
+		printf("yMin(o,n)(%f,%f)\n", y_min, oldyMin);
+		printf("yMax(o,n)(%f,%f)\n", y_max, oldyMax);
+		printf("-------------------------------------------------\n");
 	}*/
 
+	//==============================================ABOVE HERE PUT INTO WRAPPER HELPER FNC==============================================
 
+	prevSize = points.size();
+	xMin = x_min;
+	xMax = x_max;
+	yMin = y_min;
+	yMax = y_max;
 
-
-
-	// Redo the texture
-	/*if (drawType == OPT_FULL)
-	{
-		// If there was a graph, then resize it
-		if (rawGraph)
-		{
-			//Render to different target?
-		}
-		else
-		{
-			// Create a new texture
-			rawGraph = SDL_CreateTexture(cGfx->getRenderer(),
-				SDL_PIXELFORMAT_RGBA8888,
-				SDL_TEXTUREACCESS_TARGET, x_max - x_min, y_max - y_min);
-		}
-	}
-	else if (drawType == OPT_FILL)
-	{
-		// Create or resize the new texture
-		// Set Render target to desitination texture
-		// RenderCopy source texture
-	}
-	else if (drawType == OPT_NOTHING)
-	{
-		// Do nothing, just refresh
-	}*/
+	//==============================================SCRATCH SPACE BELOW==============================================
 }
 
 
@@ -145,10 +170,8 @@ void Graphable<Point2>::add(gfxpp* cGfx, const Point2* newPoint)
 	if (!newPoint)
 		return;
 
-	//TODO: Separate Scalar1D from Point2D and implement this add fncality
-	//points.push_back(new T(points.size(), newPoint->getY()));
-	//drawType = OPT_FILL;
-	//computeAxisRanges(cGfx, true); // add point optimization
+	points.push_back(new Point2(points.size(), newPoint->getY()));
+	computeAxisRanges(cGfx, true); // add point optimization
 }
 
 
@@ -159,17 +182,24 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 						   getColor().a);
 
 	float xRange = (float)points.size(); // points per x axis
-	float yRange = y_max - y_min;
+	float yRange = yMax - yMin;
 
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
 
 	Point2* cPoint = NULL;
 	Point2* prevPoint = NULL;
-	for (unsigned int i = 0; i < points.size(); ++i)
+
+	// Short circuit the draw
+	// Time Series Assumption
+	unsigned int i = 0;
+	//if(prevSize == points.size() - 1)
+	//	i = prevSize - 1;
+
+	for (; i < points.size(); ++i)
 	{
 		float newXValue = i * pointXGap;
-		float newYValue = (points[i]->getY() - y_min) * pointYGap;
+		float newYValue = (points[i]->getY() - yMin) * pointYGap;
 		// add it to the background
 		cPoint = new Point2(parent->getAxisOriginX() + newXValue,
 							parent->getAxisOriginY() + parent->getHeight() - newYValue);

@@ -34,13 +34,17 @@ template <class T>
 class Graphable
 {
 private:
-	std::vector<T*> points;
-	float x_max, x_min, y_max, y_min;
 	RUGraph* parent;
+	std::vector<T*> points;
+	size_t prevSize;
+	float xMin;
+	float xMax;
+	float yMin;
+	float yMax;
 
-	const static int OPT_FULL = 0;
+	const static int OPT_NOTHING = 0;
 	const static int OPT_FILL = 1;
-	const static int OPT_NOTHING = 2;
+	const static int OPT_FULL = 2;
 
 	SDL_Texture* rawGraph;
 	SDL_Color lineColor;
@@ -49,6 +53,9 @@ private:
 	int drawType;
 	int drawWidth;
 	int drawHeight;
+
+	int canvasWidth;
+	int canvasHeight;
 
 	void computeAxisRanges(gfxpp*, bool = false);
 
@@ -77,14 +84,17 @@ Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor)
 	rawGraph = NULL;
 	parent = newParent;
 	setColor(newColor);
-	drawType = OPT_FULL;
+	drawType = OPT_NOTHING;
+	canvasWidth = 0;
+	canvasHeight = 0;
 	drawWidth = 0;
 	drawHeight = 0;
 
-	x_max = 0.0f;
-	x_min = 0.0f;
-	y_max = 0.0f;
-	y_min = 0.0f;
+	prevSize = 0;
+	xMin = 0.0f;
+	xMax = 0.0f;
+	yMin = 0.0f;
+	yMax = 0.0f;
 }
 
 template <class T>
@@ -92,17 +102,10 @@ Graphable<T>::~Graphable()
 {
 	rawGraph = NULL;
 	drawType = OPT_NOTHING;
-	drawWidth = -1;
-	drawHeight = -1;
-
-	// dangling parent pointer (get it?)
-	parent = NULL;
-
-	x_max = 0.0f;
-	x_min = 0.0f;
-
-	y_min = 0.0f;
-	y_max = 0.0f;
+	canvasWidth = 0;
+	canvasHeight = 0;
+	drawWidth = 0;
+	drawHeight = 0;
 
 	clear();
 }
@@ -120,7 +123,6 @@ void Graphable<T>::set(gfxpp* cGfx, const std::vector<T*>& newPoints)
 		return;
 
 	points = newPoints;
-	//drawType = OPT_FULL;
 	computeAxisRanges(cGfx);
 }
 
@@ -151,7 +153,6 @@ void Graphable<T>::drawPoint(gfxpp* cGfx, int cx, int cy, int r)//Turn these 3 p
 template <class T>
 void Graphable<T>::clear()
 {
-	//drawType = OPT_NOTHING;
 	for (unsigned int i = 0; i < points.size(); ++i)
 	{
 		T* cPoint = points[i];
@@ -164,21 +165,28 @@ void Graphable<T>::clear()
 	points.clear();
 
 	parent = NULL;
-	x_max = 0.0f;
-	x_min = 0.0f;
-	y_max = 0.0f;
-	y_min = 0.0f;
+	xMin = 0.0f;
+	xMax = 0.0f;
+	yMin = 0.0f;
+	yMax = 0.0f;
 }
 
 template <class T>
 void Graphable<T>::updateBackground(gfxpp* cGfx)
 {
-	// Set the render target to draw the cached texture
-	// RenderTarget
+	if(!cGfx)
+		return;
+
+	//if(!rawGraph)
+	//	return;
+
+	// Set the render target to draw the cached raw draw space
+	//SDL_SetRenderTarget(cGfx->getRenderer(), rawGraph);
+	//draw(cGfx);
 
 	// draw the line
+	SDL_SetRenderTarget(cGfx->getRenderer(), parent->getBackground());
 	draw(cGfx);
-	//drawType = OPT_FULL;
 }
 
 #endif

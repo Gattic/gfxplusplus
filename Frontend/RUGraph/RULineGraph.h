@@ -53,7 +53,8 @@ public:
 	virtual ~RULineGraph();
 
 	virtual std::string getType() const;
-	virtual void add(gfxpp*, const std::string&, const Point2&);
+	virtual void add(gfxpp*, const std::string&, const Point2*,
+			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 	virtual void set(gfxpp*, const std::string&, const std::vector<Point2*>&,
 			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 

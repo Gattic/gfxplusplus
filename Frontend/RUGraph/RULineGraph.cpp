@@ -30,15 +30,21 @@ RULineGraph::~RULineGraph()
 	clear();
 }
 
-void RULineGraph::add(gfxpp* cGfx, const std::string& label, const Point2& newPoint)
+void RULineGraph::add(gfxpp* cGfx, const std::string& label, const Point2* newPoint,
+				  SDL_Color lineColor)
 {
-	Point2* plotterPoint = new Point2(newPoint.getX(), newPoint.getY());
+	Point2* plotterPoint = new Point2(newPoint->getX(), newPoint->getY());
 
 	if (lines.find(label) == lines.end())
+	{
+		std::vector<Point2*> newPointVec;
+		newPointVec.push_back(plotterPoint);
+		set(cGfx, label, newPointVec, lineColor);
 		return;
+	}
 
 	Graphable<Point2>* cPlotter = lines[label];
-	// cPlotter->add(cGfx, newPoint);//Uncomment this when the class becomes RULineGraph
+	cPlotter->add(cGfx, plotterPoint);
 
 	// trigger the draw update
 	drawUpdate = true;

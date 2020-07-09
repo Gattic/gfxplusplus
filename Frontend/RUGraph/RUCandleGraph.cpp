@@ -31,18 +31,19 @@ RUCandleGraph::~RUCandleGraph()
 }
 
 //Dont worry about this fnc
-void RUCandleGraph::add(gfxpp* cGfx, const std::string& label, const Candle& newPoint)
+void RUCandleGraph::add(gfxpp* cGfx, const std::string& label, const Candle* newPoint,
+				  SDL_Color lineColor)
 {
-	Candle* plotterPoint = new Candle();//TODO PASS IN ALL 4 OCHL
+	//Candle* plotterPoint = new Candle();//TODO PASS IN ALL 4 OCHL
 
-	if (candles.find(label) == candles.end())
-		return;
+	//if (candles.find(label) == candles.end())
+		//return;
 
-	Graphable<Candle>* cPlotter = candles[label];
+	//Graphable<Candle>* cPlotter = candles[label];
 	// cPlotter->add(cGfx, newPoint);//Leave this please n ty
 
 	// trigger the draw update
-	drawUpdate = true;
+	//drawUpdate = true;
 }
 
 void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<Candle*>& graphPoints,
