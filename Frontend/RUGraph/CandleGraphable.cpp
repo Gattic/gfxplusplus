@@ -71,7 +71,9 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 
 	for (unsigned int i = 0; i < points.size(); ++i)
 	{
-		float newXValue = i * pointXGap;
+		// First point would be drawn at x = 0, so we need to add (pointXGap / 2)
+		// so that the bar can be drawn left and right.
+		float newXValue = i * pointXGap + (pointXGap / 2);
 		float newOpenValue = (points[i]->getOpen() - yMin) * pointYGap;
 		float newCloseValue = (points[i]->getClose() - yMin) * pointYGap;
 		float newHighValue = (points[i]->getHigh() - yMin) * pointYGap;
@@ -91,19 +93,10 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		// The wicks show the high and low prices of that day's trading.
 		SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
 
-		if (i == 0)
-		{
-			// First wick would be drawn at x = 0, so need to center line in bar
-			SDL_RenderDrawLine(cGfx->getRenderer(), 
-						   parent->getAxisOriginX() + newXValue + (pointXGap / 4), cCandle->getHigh(), 
-						   parent->getAxisOriginX() + newXValue + (pointXGap / 4), cCandle->getLow());
-		}
-		else
-		{
-			SDL_RenderDrawLine(cGfx->getRenderer(), 
+
+		SDL_RenderDrawLine(cGfx->getRenderer(), 
 				   parent->getAxisOriginX() + newXValue, cCandle->getHigh(), 
 				   parent->getAxisOriginX() + newXValue, cCandle->getLow());
-		}
 
 		// Draw a rectangle for the real body representing the price range between open and close
 		SDL_Rect bgRect;
