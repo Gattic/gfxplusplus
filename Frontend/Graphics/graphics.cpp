@@ -106,6 +106,8 @@ int gfxpp::initHelper(bool fullscreenMode, std::string title)
 		return -1;
 	}
 
+	//SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+
 	// Create a new window
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	if (fullscreenMode)
@@ -149,7 +151,7 @@ int gfxpp::initHelper(bool fullscreenMode, std::string title)
 int gfxpp::init2D()
 {
 	// Create a new renderer; -1 loads the default video driver we need
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	if (!renderer)
 	{
 		printf("[GFX] Renderer error: %s\n", SDL_GetError());

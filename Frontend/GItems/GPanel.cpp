@@ -153,6 +153,9 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 	if (!focus)
 		return;
 
+	if (!cGfx)
+		return;
+
 	if (!cGfx->getRenderer())
 		return;
 

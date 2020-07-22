@@ -60,6 +60,9 @@ private:
 	void computeAxisRanges(gfxpp*, bool = false);
 
 public:
+
+	const static int TEXTURE_MAX_DIM = 16384;
+
 	// constructors & destructor
 	Graphable(RUGraph*, SDL_Color);
 	virtual ~Graphable();

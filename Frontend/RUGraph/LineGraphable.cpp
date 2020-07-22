@@ -24,6 +24,9 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 	if (!cGfx)
 		return;
 
+	if (!cGfx->getRenderer())
+		return;
+
 	if (points.empty())
 		return;
 
@@ -62,8 +65,8 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 
 	// Canvas Size
 	// If we need more room, extend by doubling
-	int newWidth = canvasWidth;
-	while (newWidth < xRange)
+	/*int newWidth = canvasWidth;
+	while ((newWidth < xRange) && (newWidth < TEXTURE_MAX_DIM))
 	{
 		if (newWidth == -1)
 			return;
@@ -73,14 +76,14 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 		// return;
 
 		if (newWidth == 0)
-			newWidth = 16;
+			newWidth = 64;//Initial starting height for the texture
 		else
-			newWidth *= 2;
+			newWidth *= 8;//Scale this to toggle the frequency of the texture creation
 	}
 
 	// If we need more room, extend by doubling
 	int newHeight = canvasHeight;
-	while (newHeight < yRange)
+	while ((newHeight < yRange) && (newHeight < TEXTURE_MAX_DIM))
 	{
 		if (newHeight == -1)
 			return;
@@ -90,9 +93,9 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 		// return;
 
 		if (newHeight == 0)
-			newHeight = 16;
+			newHeight = 64;//Initial starting height for the texture
 		else
-			newHeight *= 2;
+			newHeight *= 8;//Scale this to toggle the frequency of the texture creation
 	}
 
 	if(((canvasWidth < newWidth) || (canvasHeight < newHeight)) &&
@@ -101,13 +104,40 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 		printf("Canvas Texture(%d,%d)\n", canvasWidth, canvasHeight);
 		printf("New Texture(%d,%d)\n", newWidth, newHeight);
 		printf("=================================================\n");
+		printf("[GFX] Renderer error HELP: %s\n", SDL_GetError());
+		printf("=================================================\n");
+
+
+		SDL_RendererInfo rInfo;
+		SDL_GetRendererInfo(cGfx->getRenderer(), &rInfo);
+
+		const char* rName = rInfo.name;
+		printf("the name of the renderer: %s\n", rName);
+
+		unsigned int rFlags = rInfo.flags;
+		printf("a mask of supported renderer flags: %d\n", rFlags);
+
+		unsigned int num_texture_formats = rInfo.num_texture_formats;
+		for(unsigned int i =0; i< num_texture_formats; ++i)
+			printf("the available texture formats[%d][%d]: %d/0x%08lX\n", num_texture_formats, i, rInfo.texture_formats[i], rInfo.texture_formats[i]);
+
+		int max_texture_width = rInfo.max_texture_width;
+		int max_texture_height = rInfo.max_texture_height;
+		printf("the maximum texture size: (%d,%d)\n", max_texture_width, max_texture_height);
+		printf("-------------------------------------\n");
+
+
+
 
 		//SDL_Texture* newGraph = NULL;
-		/*SDL_Texture* newGraph = SDL_CreateTexture(cGfx->getRenderer(),
+		printf("DERP0\n");
+		SDL_Texture* newGraph = SDL_CreateTexture(cGfx->getRenderer(),
 			SDL_PIXELFORMAT_RGBA8888,
+			//rInfo.texture_formats[2],
 			SDL_TEXTUREACCESS_TARGET, newWidth, newHeight);
 
 		// Couldnt create a new texture
+		printf("DERP1\n");
 		if(!newGraph)
 		{
 			newGraph = NULL;
@@ -119,14 +149,20 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 		//TODO COPY RECT HERE
 
 		// Delete the old texture
+		printf("DERP2\n");
 		if (rawGraph)
 			SDL_DestroyTexture(rawGraph);
-		rawGraph = newGraph;*/ // Replace the old texture
+		printf("DERP3\n");
+		rawGraph = newGraph; // Replace the old texture
+		printf("DERP4\n");
+
+
+
 
 		// Set the new raw graph size
 		canvasWidth = newWidth;
 		canvasHeight = newHeight;
-	}
+	}*/
 
 	// Canvas is big enough but is the drawing the same?
 	/*if((xRange == 0.0f) || (yRange == 0.0f))
