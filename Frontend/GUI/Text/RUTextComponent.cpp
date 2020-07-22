@@ -211,6 +211,9 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 	if (!cGfx)
 		return;
 
+	if (!cGfx->getRenderer())
+		return;
+
 	GFont* cFont = cGfx->cFont;
 	if (!cFont)
 		return;

@@ -34,6 +34,9 @@ RUCandleGraph::~RUCandleGraph()
 void RUCandleGraph::add(gfxpp* cGfx, const std::string& label, const Candle* newPoint,
 				  SDL_Color lineColor)
 {
+	if(!cGfx)
+		return;
+
 	//Candle* plotterPoint = new Candle();//TODO PASS IN ALL 4 OCHL
 
 	//if (candles.find(label) == candles.end())
@@ -49,6 +52,9 @@ void RUCandleGraph::add(gfxpp* cGfx, const std::string& label, const Candle* new
 void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<Candle*>& graphPoints,
 				  SDL_Color lineColor)
 {
+	if(!cGfx)
+		return;
+
 	Graphable<Candle>* newPlotter;
 	if (candles.find(label) != candles.end())
 		newPlotter = candles[label];
@@ -68,6 +74,9 @@ void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector
 
 void RUCandleGraph::updateBackground(gfxpp* cGfx)
 {
+	if(!cGfx)
+		return;
+
 	RUGraph::updateBackground(cGfx);
 
 	// draw the candles
