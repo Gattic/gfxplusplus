@@ -130,6 +130,17 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 
 		SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
 
+		if (i == points.size() - 1)
+		{
+			// Draw horizontal line in candle graph for the last close price.
+			SDL_SetRenderDrawColor(cGfx->getRenderer(), 209, 0, 118, 255);
+
+			SDL_RenderDrawLine(cGfx->getRenderer(), 
+				   parent->getAxisOriginX(), cCandle->getClose(), 
+				   parent->getAxisOriginX() + newXValue, cCandle->getClose());
+		}
+
+
 		// save the previous point for later
 		if (prevCandle)
 			delete prevCandle;
