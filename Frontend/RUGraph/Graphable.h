@@ -36,26 +36,12 @@ class Graphable
 private:
 	RUGraph* parent;
 	std::vector<T*> points;
-	size_t prevSize;
-	float xMin;
-	float xMax;
+	std::vector<T*> normalizedPoints;
 	float yMin;
 	float yMax;
 
-	const static int OPT_NOTHING = 0;
-	const static int OPT_FILL = 1;
-	const static int OPT_FULL = 2;
-
-	SDL_Texture* rawGraph;
+	bool redoRange;
 	SDL_Color lineColor;
-
-	// Our canvas we edit
-	int drawType;
-	int drawWidth;
-	int drawHeight;
-
-	int canvasWidth;
-	int canvasHeight;
 
 	void computeAxisRanges(gfxpp*, bool = false);
 
@@ -84,32 +70,18 @@ public:
 template <class T>
 Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor)
 {
-	rawGraph = NULL;
 	parent = newParent;
 	setColor(newColor);
-	drawType = OPT_NOTHING;
-	canvasWidth = 0;
-	canvasHeight = 0;
-	drawWidth = 0;
-	drawHeight = 0;
 
-	prevSize = 0;
-	xMin = 0.0f;
-	xMax = 0.0f;
 	yMin = 0.0f;
 	yMax = 0.0f;
+
+	redoRange = true;
 }
 
 template <class T>
 Graphable<T>::~Graphable()
 {
-	rawGraph = NULL;
-	drawType = OPT_NOTHING;
-	canvasWidth = 0;
-	canvasHeight = 0;
-	drawWidth = 0;
-	drawHeight = 0;
-
 	clear();
 }
 
@@ -126,7 +98,7 @@ void Graphable<T>::set(gfxpp* cGfx, const std::vector<T*>& newPoints)
 		return;
 
 	points = newPoints;
-	computeAxisRanges(cGfx);
+	computeAxisRanges(cGfx);//sets redoRange automatically
 }
 
 template <class T>
@@ -166,12 +138,13 @@ void Graphable<T>::clear()
 	}
 
 	points.clear();
+	normalizedPoints.clear();
 
 	parent = NULL;
-	xMin = 0.0f;
-	xMax = 0.0f;
 	yMin = 0.0f;
 	yMax = 0.0f;
+
+	redoRange = true;
 }
 
 template <class T>
@@ -190,6 +163,8 @@ void Graphable<T>::updateBackground(gfxpp* cGfx)
 	// draw the line
 	SDL_SetRenderTarget(cGfx->getRenderer(), parent->getBackground());
 	draw(cGfx);
+
+	redoRange = false;
 }
 
 #endif

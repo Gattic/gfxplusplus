@@ -19,7 +19,7 @@
 //TODO: Separate Scalar1D from Point2D and implement this add fncality
 
 template <>
-void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
+void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization)
 {
 	if (!cGfx)
 		return;
@@ -30,172 +30,60 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 	if (points.empty())
 		return;
 
-	float y_max = points[0]->getY();
-	float y_min = y_max;
-	float x_max = points[0]->getX();
-	float x_min = x_max;
-
-	for (unsigned int i = 1; i < points.size(); ++i)
+	redoRange = !additionOptimization;
+	if(additionOptimization)
 	{
-		Point2* pt = points[i];
-		float y_pt = pt->getY(), x_pt = pt->getX();
-		if (y_pt > y_max)
-			y_max = y_pt;
-
-		else if (y_pt < y_min)
-			y_min = y_pt;
-
-		if (x_pt < x_min)
-			x_min = x_pt;
-
-		else if (x_pt > x_max)
-			x_max = x_pt;
+		// Is the latest y not within the current range?
+		float cY = points[points.size()-1]->getY();
+		if(!((cY >= yMin) && (cY <= yMax)))
+			redoRange = true;
 	}
 
-	// Save the old values for an optimization later
-	float oldxMin = xMin;
-	float oldxMax = xMax;
-	float oldyMin = yMin;
-	float oldyMax = yMax;
 
-	//==============================================BELOW HERE PUT INTO WRAPPER HELPER FNC==============================================
-
-	int xRange = x_max - x_min;
-	int yRange = y_max - y_min;
-
-	// Canvas Size
-	// If we need more room, extend by doubling
-	/*int newWidth = canvasWidth;
-	while ((newWidth < xRange) && (newWidth < TEXTURE_MAX_DIM))
+	if(redoRange)
 	{
-		if (newWidth == -1)
-			return;
+		float y_max = points[0]->getY();
+		float y_min = y_max;
 
-		// Add an upper limit here to work on certain size images only
-		// if (newWidth >= SOME_LARGE_NUMBER)
-		// return;
-
-		if (newWidth == 0)
-			newWidth = 64;//Initial starting height for the texture
-		else
-			newWidth *= 8;//Scale this to toggle the frequency of the texture creation
-	}
-
-	// If we need more room, extend by doubling
-	int newHeight = canvasHeight;
-	while ((newHeight < yRange) && (newHeight < TEXTURE_MAX_DIM))
-	{
-		if (newHeight == -1)
-			return;
-
-		// Add an upper limit here to work on certain size images only
-		// if (newWidth >= SOME_LARGE_NUMBER)
-		// return;
-
-		if (newHeight == 0)
-			newHeight = 64;//Initial starting height for the texture
-		else
-			newHeight *= 8;//Scale this to toggle the frequency of the texture creation
-	}
-
-	if(((canvasWidth < newWidth) || (canvasHeight < newHeight)) &&
-		((newWidth > 0) && (newHeight > 0)))
-	{
-		printf("Canvas Texture(%d,%d)\n", canvasWidth, canvasHeight);
-		printf("New Texture(%d,%d)\n", newWidth, newHeight);
-		printf("=================================================\n");
-		printf("[GFX] Renderer error HELP: %s\n", SDL_GetError());
-		printf("=================================================\n");
-
-
-		SDL_RendererInfo rInfo;
-		SDL_GetRendererInfo(cGfx->getRenderer(), &rInfo);
-
-		const char* rName = rInfo.name;
-		printf("the name of the renderer: %s\n", rName);
-
-		unsigned int rFlags = rInfo.flags;
-		printf("a mask of supported renderer flags: %d\n", rFlags);
-
-		unsigned int num_texture_formats = rInfo.num_texture_formats;
-		for(unsigned int i =0; i< num_texture_formats; ++i)
-			printf("the available texture formats[%d][%d]: %d/0x%08lX\n", num_texture_formats, i, rInfo.texture_formats[i], rInfo.texture_formats[i]);
-
-		int max_texture_width = rInfo.max_texture_width;
-		int max_texture_height = rInfo.max_texture_height;
-		printf("the maximum texture size: (%d,%d)\n", max_texture_width, max_texture_height);
-		printf("-------------------------------------\n");
-
-
-
-
-		//SDL_Texture* newGraph = NULL;
-		printf("DERP0\n");
-		SDL_Texture* newGraph = SDL_CreateTexture(cGfx->getRenderer(),
-			SDL_PIXELFORMAT_RGBA8888,
-			//rInfo.texture_formats[2],
-			SDL_TEXTUREACCESS_TARGET, newWidth, newHeight);
-
-		// Couldnt create a new texture
-		printf("DERP1\n");
-		if(!newGraph)
+		for (unsigned int i = 1; i < points.size(); ++i)
 		{
-			newGraph = NULL;
-			printf("HOOPLA\n");
-			return;
+			Point2* pt = points[i];
+			float y_pt = pt->getY(), x_pt = pt->getX();
+
+			if (y_pt > y_max)
+				y_max = y_pt;
+
+			else if (y_pt < y_min)
+				y_min = y_pt;
 		}
 
-		// Shrink the old texture to fit the new point and avoid redrawing
-		//TODO COPY RECT HERE
-
-		// Delete the old texture
-		printf("DERP2\n");
-		if (rawGraph)
-			SDL_DestroyTexture(rawGraph);
-		printf("DERP3\n");
-		rawGraph = newGraph; // Replace the old texture
-		printf("DERP4\n");
-
-
-
-
-		// Set the new raw graph size
-		canvasWidth = newWidth;
-		canvasHeight = newHeight;
-	}*/
-
-	// Canvas is big enough but is the drawing the same?
-	/*if((xRange == 0.0f) || (yRange == 0.0f))
-	{
-		// Unset so do nothing
-		drawType = OPT_NOTHING;
+		yMin = y_min;
+		yMax = y_max;
 	}
-	else if(prevSize == points.size() - 1)
+
+
+	//==============================================Normalize the points==============================================
+
+	float xRange = (float)points.size();
+	float yRange = yMax - yMin;
+
+	float pointXGap = ((float)parent->getWidth()) / xRange;
+	float pointYGap = ((float)parent->getHeight()) / yRange;
+
+	unsigned int i = 0;
+	if(redoRange)
+		normalizedPoints.clear();
+	else
+		i = points.size()-1;
+
+	for (; i < points.size(); ++i)
 	{
-		// Time Series Assumption
+		float newXValue = i * pointXGap;
+		float newYValue = (points[i]->getY() - yMin) * pointYGap;
+		normalizedPoints.push_back(new Point2(parent->getAxisOriginX() + newXValue,
+							parent->getAxisOriginY() + parent->getHeight() - newYValue));
 	}
-	else if((x_min < oldxMin) ||
-		(x_max > oldxMax) ||
-		(y_min < oldyMin) ||
-		(y_max > oldyMax))
-	{
-		// Create a new texture
-		printf("xMin(o,n)(%f,%f)\n", x_min, oldxMin);
-		printf("xMax(o,n)(%f,%f)\n", x_max, oldxMax);
-		printf("yMin(o,n)(%f,%f)\n", y_min, oldyMin);
-		printf("yMax(o,n)(%f,%f)\n", y_max, oldyMax);
-		printf("-------------------------------------------------\n");
-	}*/
 
-	//==============================================ABOVE HERE PUT INTO WRAPPER HELPER FNC==============================================
-
-	prevSize = points.size();
-	xMin = x_min;
-	xMax = x_max;
-	yMin = y_min;
-	yMax = y_max;
-
-	//==============================================SCRATCH SPACE BELOW==============================================
 }
 
 
@@ -207,7 +95,7 @@ void Graphable<Point2>::add(gfxpp* cGfx, const Point2* newPoint)
 		return;
 
 	points.push_back(new Point2(points.size(), newPoint->getY()));
-	computeAxisRanges(cGfx, true); // add point optimization
+	computeAxisRanges(cGfx, true);
 }
 
 
@@ -223,40 +111,50 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
 
-	Point2* cPoint = NULL;
-	Point2* prevPoint = NULL;
-
-	// Short circuit the draw
-	// Time Series Assumption
-	unsigned int i = 0;
-	//if(prevSize == points.size() - 1)
-	//	i = prevSize - 1;
-
-	for (; i < points.size(); ++i)
+	if((redoRange) || (normalizedPoints.size() < 2))
 	{
-		float newXValue = i * pointXGap;
-		float newYValue = (points[i]->getY() - yMin) * pointYGap;
-		// add it to the background
-		cPoint = new Point2(parent->getAxisOriginX() + newXValue,
-							parent->getAxisOriginY() + parent->getHeight() - newYValue);
-
-		// draw a thick line from the previous to the current point
-		if ((prevPoint) && (i > 0))
+		Point2* prevPoint = NULL;
+		unsigned int i = 0;
+		for (; i < normalizedPoints.size(); ++i)
 		{
-			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
-							   cPoint->getX(), cPoint->getY() - 1);
-			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
-							   cPoint->getX(), cPoint->getY());
-			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
-							   cPoint->getX(), cPoint->getY() + 1);
+			// add it to the background
+			Point2* cPoint = normalizedPoints[i];
+
+			// draw a thick line from the previous to the current point
+			if ((prevPoint) && (i > 0))
+			{
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
+								   cPoint->getX(), cPoint->getY() - 1);
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
+								   cPoint->getX(), cPoint->getY());
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
+								   cPoint->getX(), cPoint->getY() + 1);
+			}
+
+			prevPoint = cPoint;
 		}
-
-		// save the previous point for later
-		if (prevPoint)
-			delete prevPoint;
-		prevPoint = cPoint;
 	}
+	else
+	{
+		unsigned int i = normalizedPoints.size()-1;
+		Point2* prevPoint = normalizedPoints[i-1];
+		for (; i < normalizedPoints.size(); ++i)
+		{
+			// add it to the background
+			Point2* cPoint = normalizedPoints[i];
 
-	if (cPoint)
-		delete cPoint;
+			// draw a thick line from the previous to the current point
+			if ((prevPoint) && (i > 0))
+			{
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
+								   cPoint->getX(), cPoint->getY() - 1);
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
+								   cPoint->getX(), cPoint->getY());
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
+								   cPoint->getX(), cPoint->getY() + 1);
+			}
+
+			prevPoint = cPoint;
+		}
+	}
 }
