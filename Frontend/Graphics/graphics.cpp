@@ -168,6 +168,7 @@ int gfxpp::init2D()
 	}
 
 	cFont = new GFont(renderer);
+	graphicsFonts.insert(std::pair<std::string, GFont*>("default", cFont));
 
 	// Load support for the PNG, TIF, and JPG image formats
 	int flags = IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_JPG;
@@ -674,6 +675,15 @@ void gfxpp::clean2D()
 	if (cFont)
 		delete cFont;
 	cFont = NULL;
+
+	// Iterate GFonts in graphicsFonts
+	std::map<std::string, GFont*>::iterator itr = graphicsFonts.begin();
+	for (; itr != graphicsFonts.end(); ++itr)
+	{
+		if (itr->second)
+			delete itr->second;
+		itr->second = NULL;
+	}
 }
 
 void gfxpp::clean3D()

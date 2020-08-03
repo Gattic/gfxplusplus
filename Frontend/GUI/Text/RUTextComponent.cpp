@@ -211,7 +211,15 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 	if (!cGfx)
 		return;
 
-	GFont* cFont = cGfx->cFont;
+	GFont* cFont;
+	std::map<std::string,GFont*>::iterator it;
+
+	it = cGfx->graphicsFonts.find("default");
+	if (it != cGfx->graphicsFonts.end())
+	{
+		cFont = it->second;
+	}
+
 	if (!cFont)
 		return;
 
@@ -255,7 +263,16 @@ void RUTextComponent::drawCursor(gfxpp* cGfx, float cursorYGap)
 	if (!cGfx)
 		return;
 
-	GFont* cFont = cGfx->cFont;
+	GFont* cFont;
+	std::map<std::string,GFont*>::iterator it;
+
+	//TODO: Use protected variable with get / set instead of "default"
+	it = cGfx->graphicsFonts.find("default");
+	if (it != cGfx->graphicsFonts.end())
+	{
+		cFont = it->second;
+	}
+
 	if (!cFont)
 		return;
 
