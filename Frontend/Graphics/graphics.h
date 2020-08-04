@@ -134,6 +134,8 @@ public:
 
 	// 2D
 	GFont* cFont;
+	std::map<int, GFont*> graphicsFonts;
+
 	GPanel* focusedPanel;
 	void addGradient(int, int, int);
 	void addItem(GItem*);

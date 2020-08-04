@@ -56,14 +56,25 @@ GFont::GFont(SDL_Renderer* newRenderer, std::string newFontPath)
 	loadLetters();
 }
 
+GFont::GFont(const GFont& otherFont)
+{
+	fontPath = otherFont.fontPath;
+	font = otherFont.font;
+	fontSize = otherFont.fontSize;
+	textColor = otherFont.textColor;
+	textureMap = otherFont.textureMap;
+	cRenderer = otherFont.cRenderer;
+	maxHeight = otherFont.maxHeight;
+}
+
 GFont::~GFont()
 {
 	maxHeight = 0;
 	fontPath = "";
 	fontSize = DEFAULT_FONT_SIZE;
 
-	if (font)
-		TTF_CloseFont(font);
+	//if (font)
+	//	TTF_CloseFont(font);
 	font = NULL;
 
 	// DONT FREE THIS
