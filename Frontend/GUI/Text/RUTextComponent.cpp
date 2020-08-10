@@ -104,9 +104,14 @@ void RUTextComponent::setReadOnly(bool newReadOnly)
 	readOnly = newReadOnly;
 }
 
-void RUTextComponent::calculateRenderInfo(GFont* cFont)
+void RUTextComponent::setFont(GFont* newTextFont)
 {
-	if ((!cFont) || (!cFont->getFont()))
+	textFont = newTextFont;
+}
+
+void RUTextComponent::calculateRenderInfo(GFont* textFont)
+{
+	if ((!textFont) || (!textFont->getFont()))
 		return;
 
 	// set the text to draw
@@ -119,7 +124,7 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 
 	if (text.length())
 	{
-		int newHeight = cFont->getMaxHeight();
+		int newHeight = textFont->getMaxHeight();
 		dimRatio = (((float)(getHeight())) / ((float)(newHeight)));
 
 		// Text has not tested it bounds
@@ -140,7 +145,7 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 				}
 
 				int prevWidth = dimRatio * newWidth;
-				GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+				GLetter* cLetter = textFont->getLetter(strDrawText[i]);
 				if (!cLetter)
 					continue;
 
@@ -187,7 +192,7 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 			strDrawText = text.substr(cursor.index, cursor.maxLen);
 			for (unsigned int i = 0; i < strDrawText.length(); ++i)
 			{
-				GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+				GLetter* cLetter = textFont->getLetter(strDrawText[i]);
 				if (!cLetter)
 					continue;
 
@@ -214,24 +219,24 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 	if (!cGfx->getRenderer())
 		return;
 
-	GFont* cFont = NULL;
-	std::map<int, GFont*>::iterator it = cGfx->graphicsFonts.find(0);
+	GFont* textFont = NULL;
+	std::map<int, GFont*>::iterator it = cGfx->graphicsFonts.find(FONT_DEFAULT);
 	if (it != cGfx->graphicsFonts.end())
 	{
-		cFont = it->second;
+		textFont = it->second;
 	}
 
-	if (!cFont)
+	if (!textFont)
 		return;
 
-	float cursorYGap = (getHeight() - cFont->getFontSize());
-	calculateRenderInfo(cFont);
+	float cursorYGap = (getHeight() - textFont->getFontSize());
+	calculateRenderInfo(textFont);
 
 	// Draw the string
 	if (strDrawText.length() > 0)
 	{
 		// Check the font
-		if (!cFont->getFont())
+		if (!textFont->getFont())
 		{
 			printf("[GUI] TTF Font load error 2: %s\n", SDL_GetError());
 			return;
@@ -246,7 +251,7 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 		SDL_SetRenderTarget(cGfx->getRenderer(), getBackground());
 		for (unsigned int i = 0; i < strDrawText.length(); ++i)
 		{
-			GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+			GLetter* cLetter = textFont->getLetter(strDrawText[i]);
 			if (!cLetter)
 				continue;
 
@@ -267,15 +272,14 @@ void RUTextComponent::drawCursor(gfxpp* cGfx, float cursorYGap)
 	if (!cGfx->getRenderer())
 		return;
 
-	//TODO: Use protected variable with get / set instead of "default"
-	GFont* cFont = NULL;
-	std::map<int, GFont*>::iterator it = cGfx->graphicsFonts.find(0);
+	GFont* textFont = NULL;
+	std::map<int, GFont*>::iterator it = cGfx->graphicsFonts.find(FONT_DEFAULT);
 	if (it != cGfx->graphicsFonts.end())
 	{
-		cFont = it->second;
+		textFont = it->second;
 	}
 
-	if (!cFont)
+	if (!textFont)
 		return;
 
 	if (readOnly)
@@ -287,9 +291,9 @@ void RUTextComponent::drawCursor(gfxpp* cGfx, float cursorYGap)
 	unsigned int cursorCounter = (time(NULL) - cursorStart) % 2;
 	if ((cursorStart > 0) && (cursorCounter == 0))
 	{
-		SDL_SetRenderDrawColor(cGfx->getRenderer(), cFont->getTextColor().r,
-							   cFont->getTextColor().g, cFont->getTextColor().b,
-							   cFont->getTextColor().a);
+		SDL_SetRenderDrawColor(cGfx->getRenderer(), textFont->getTextColor().r,
+							   textFont->getTextColor().g, textFont->getTextColor().b,
+							   textFont->getTextColor().a);
 
 		SDL_Rect cursorRect;
 		cursorRect.x = cursorX;

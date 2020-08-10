@@ -172,6 +172,14 @@ int gfxpp::init2D()
 	cFont = new GFont(renderer);
 	graphicsFonts.insert(std::pair<int, GFont*>(0, cFont));
 
+	GFont* fontGreen = new GFont(renderer);
+	fontGreen->setTextColor(RUColors::DEFAULT_BUTTON_BORDER_GREEN);
+	graphicsFonts.insert(std::pair<int, GFont*>(1, fontGreen));
+
+	GFont* fontRed = new GFont(renderer);
+	fontRed->setTextColor(RUColors::DEFAULT_BUTTON_BORDER_RED);
+	graphicsFonts.insert(std::pair<int, GFont*>(2, fontRed));
+
 	// Load support for the PNG, TIF, and JPG image formats
 	int flags = IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_JPG;
 	int imgInitStatus = IMG_Init(flags);
