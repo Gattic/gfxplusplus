@@ -104,6 +104,12 @@ void RUTextComponent::setReadOnly(bool newReadOnly)
 	readOnly = newReadOnly;
 }
 
+void RUTextComponent::setFontColor(int newFontColor)
+{
+	FONT_COLOR = newFontColor;
+	drawUpdate = true;
+}
+
 void RUTextComponent::calculateRenderInfo(GFont* cFont)
 {
 	if ((!cFont) || (!cFont->getFont()))
@@ -215,7 +221,8 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 		return;
 
 	GFont* cFont = NULL;
-	std::map<int, GFont*>::iterator it = cGfx->graphicsFonts.find(0);
+	int fontColor = FONT_COLOR;
+	std::map<int, GFont*>::iterator it = cGfx->graphicsFonts.find(fontColor);
 	if (it != cGfx->graphicsFonts.end())
 	{
 		cFont = it->second;
@@ -268,7 +275,8 @@ void RUTextComponent::drawCursor(gfxpp* cGfx, float cursorYGap)
 		return;
 
 	GFont* cFont = NULL;
-	std::map<int, GFont*>::iterator it = cGfx->graphicsFonts.find(0);
+	int fontColor = FONT_COLOR;
+	std::map<int, GFont*>::iterator it = cGfx->graphicsFonts.find(fontColor);
 	if (it != cGfx->graphicsFonts.end())
 	{
 		cFont = it->second;

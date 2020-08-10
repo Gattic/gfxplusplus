@@ -29,6 +29,10 @@ SDL_Color RUColors::DEFAULT_COMPONENT_HIGHLIGHT = {0x4C, 0x68, 0xAD, 0xFF};
 SDL_Color RUColors::DEFAULT_DROPDOWN_ARROW = {0xCC, 0x5C, 0x4E, 0xFF};
 SDL_Color RUColors::DEFAULT_TEXT_COLOR = {0xE0, 0xE0, 0xE0, 0xFF};
 
+// Alternative Text Colors
+SDL_Color RUColors::TEXT_COLOR_GREEN = { 0x00, 0xD1, 0x00, 0xFF };
+SDL_Color RUColors::TEXT_COLOR_RED = { 0xFF, 0x00, 0x00, 0xFF };
+
 // Buttons
 SDL_Color RUColors::DEFAULT_BUTTON_GREEN = {0x41, 0x50, 0x46, 0xFF};
 SDL_Color RUColors::DEFAULT_BUTTON_BORDER_GREEN = {0x75, 0xB5, 0x66, 0xFF};
