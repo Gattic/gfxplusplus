@@ -68,7 +68,6 @@ protected:
 	bool passwordField;
 	unsigned int cursorStart;
 	bool readOnly;
-	GFont* textFont;
 
 	// render
 	void calculateRenderInfo(GFont*);
@@ -81,11 +80,6 @@ protected:
 	void (GPanel::*KeyListener)(char);
 
 public:
-
-	static const int FONT_DEFAULT = 0;
-	static const int FONT_GREEN = 1;
-	static const int FONT_RED = 2;
-	
 	// constructor
 	RUTextComponent();
 	~RUTextComponent();
