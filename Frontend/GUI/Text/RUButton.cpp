@@ -70,8 +70,6 @@ void RUButton::updateBackground(gfxpp* cGfx)
 
 void RUButton::hover(gfxpp* cGfx)
 {
-	printf("RUBUTTON HOVERED\n");
-
 	if (buttonColor == "red")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_HOVER_RED);
@@ -98,8 +96,6 @@ void RUButton::hover(gfxpp* cGfx)
 
 void RUButton::unhover(gfxpp* cGfx)
 {
-	printf("RUBUTTON UNHOVERED\n");
-
 	if (buttonColor == "red")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_RED);

@@ -41,16 +41,18 @@ std::string RUTextbox::getType() const
 	return "RUTextbox";
 }
 
-void RUTextbox::hover()
+void RUTextbox::hover(gfxpp* cGfx)
 {
 	// setBorderColor(RUColors::DEFAULT_COMPONENT_HIGHLIGHT);
 	toggleBorder(true);
 }
 
-void RUTextbox::unhover()
+void RUTextbox::unhover(gfxpp* cGfx)
 {
 	if (!isFocused() && !staticBorder)
+	{
 		toggleBorder(false);
+	}
 }
 
 void RUTextbox::setStaticBorder(bool staticBorder_)
