@@ -68,8 +68,10 @@ void RUButton::updateBackground(gfxpp* cGfx)
 	drawText(cGfx);
 }
 
-void RUButton::hover()
+void RUButton::hover(gfxpp* cGfx)
 {
+	printf("RUBUTTON HOVERED\n");
+
 	if (buttonColor == "red")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_HOVER_RED);
@@ -91,10 +93,13 @@ void RUButton::hover()
 		setBGColor(RUColors::DEFAULT_BUTTON_HOVER_BLUE);
 		// setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_HIGHLIGHT_BLUE);
 	}
+	drawUpdate = true;
 }
 
-void RUButton::unhover()
+void RUButton::unhover(gfxpp* cGfx)
 {
+	printf("RUBUTTON UNHOVERED\n");
+
 	if (buttonColor == "red")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_RED);
@@ -116,6 +121,7 @@ void RUButton::unhover()
 		setBGColor(RUColors::DEFAULT_BUTTON_BLUE);
 		// setTextColor(RUColors::DEFAULT_BUTTON_COLOR_TEXT_BLUE);
 	}
+	drawUpdate = true;
 }
 
 std::string RUButton::getType() const
