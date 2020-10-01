@@ -17,7 +17,7 @@
 #include "Graphable.h"
 
 template <>
-void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
+void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization)
 {
 	if (!cGfx)
 		return;
@@ -25,52 +25,63 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
 	if (!parent)
 		return;
 
+	if (!cGfx->getRenderer())
+		return;
+
 	if (points.empty())
 		return;
 
-	yMax = points[0]->getHigh();
-	yMin = points[0]->getLow();
-	//printf("yMin, yMax (%f,%f)\n", yMin, yMax);
-
-	for (unsigned int i = 1; i < points.size(); ++i)
+	redoRange = !additionOptimization;
+	if(additionOptimization)
 	{
-		Candle* c = points[i];
-		float y_high = c->getHigh();
-		float y_low = c->getLow();
-		//printf("y_low, y_high (%f,%f)\n", y_low, y_high);
-		//float open_pt = c->getOpen();
-		//float close_pt = c->getClose();
-
-		if (y_high > yMax)
-			yMax = y_high;
-
-		else if (y_low < yMin)
-			yMin = y_low;
+		// Is the latest y not within the current range?
+		float cY1 = points[points.size()-1]->getHigh();
+		float cY2 = points[points.size()-1]->getLow();
+		if(!((cY2 >= yMin) && (cY1 <= yMax)))
+			redoRange = true;
 	}
-}
 
-template <>
-void Graphable<Candle>::draw(gfxpp* cGfx)
-{
+	if(redoRange)
+	{
+		yMax = points[0]->getHigh();
+		yMin = points[0]->getLow();
+		//printf("yMin, yMax (%f,%f)\n", yMin, yMax);
+
+		for (unsigned int i = 1; i < points.size(); ++i)
+		{
+			Candle* c = points[i];
+			float y_high = c->getHigh();
+			float y_low = c->getLow();
+			//printf("y_low, y_high (%f,%f)\n", y_low, y_high);
+			//float open_pt = c->getOpen();
+			//float close_pt = c->getClose();
+
+			if (y_high > yMax)
+				yMax = y_high;
+
+			else if (y_low < yMin)
+				yMin = y_low;
+		}
+	}
+
+	//==============================================Normalize the points==============================================
 
 	float xRange = (float)points.size();
 	float yRange = yMax - yMin;
-
-	//printf("yMin, yMax (%f,%f)\n", yMin, yMax);
-	//printf("xRange, yRange (%f,%f)\n", xRange, yRange);
 
 	// Scales coordinates based on graph size and data range.
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
 
-	//printf("PointXGap, PointYGap (%f,%f)\n", pointXGap, pointYGap);
-	//printf("Total Candles: %d\n", points.size());
+	unsigned int i = 0;
+	if(redoRange)
+		normalizedPoints.clear();
+	else
+		i = points.size()-1;
 
-	Candle* cCandle = NULL;
-	Candle* prevCandle = NULL;
-
-	for (unsigned int i = 0; i < points.size(); ++i)
+	for (; i < points.size(); ++i)
 	{
+
 		// First point would be drawn at x = 0, so we need to add (pointXGap / 2)
 		// so that the bar can be drawn left and right.
 		float newXValue = i * pointXGap + (pointXGap / 2);
@@ -78,21 +89,47 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		float newCloseValue = (points[i]->getClose() - yMin) * pointYGap;
 		float newHighValue = (points[i]->getHigh() - yMin) * pointYGap;
 		float newLowValue = (points[i]->getLow() - yMin) * pointYGap;
-		//printf("RAW-CANDLE: %f:%f:%f:%f\n", points[i]->getOpen(), points[i]->getClose(), points[i]->getHigh(), points[i]->getLow());
-		//printf("NRM-CANDLE: %f:%f:%f:%f\n", newOpenValue, newCloseValue, newHighValue, newLowValue);
-		//printf("++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
-		// add next point to the background
-		cCandle = new Candle(parent->getAxisOriginY() + parent->getHeight() - newOpenValue,
+		Candle* newCandle = new Candle(parent->getAxisOriginY() + parent->getHeight() - newOpenValue,
 							parent->getAxisOriginY() + parent->getHeight() - newCloseValue,
 							parent->getAxisOriginY() + parent->getHeight() - newHighValue,
 							parent->getAxisOriginY() + parent->getHeight() - newLowValue);
 
+		normalizedPoints.push_back(newCandle);
+	}
+}
+
+template <>
+void Graphable<Candle>::draw(gfxpp* cGfx)
+{
+
+	float xRange = (float)normalizedPoints.size();
+	float yRange = yMax - yMin;
+
+	// Scales coordinates based on graph size and data range.
+	float pointXGap = ((float)parent->getWidth()) / xRange;
+	float pointYGap = ((float)parent->getHeight()) / yRange;
+
+	//printf("PointXGap, PointYGap (%f,%f)\n", pointXGap, pointYGap);
+	//printf("Total Candles: %d\n", normalizedPoints.size());
+
+	Candle* cCandle = NULL;
+	Candle* prevCandle = NULL;
+
+	for (unsigned int i = 0; i < normalizedPoints.size(); ++i)//TODO: REPLACE THIS LOOP
+	{
+		float newXValue = i * pointXGap + (pointXGap / 2);
+
+		// Add next point to the background
+		cCandle = normalizedPoints[i];
+		if(!cCandle)
+			continue;
+
 		// Wick / Shadow
 		// Just above and below the real body are the "wicks" or "shadows." 
 		// The wicks show the high and low prices of that day's trading.
-		SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
-
+		SDL_SetRenderDrawColor(cGfx->getRenderer(),
+			getColor().r, getColor().g, getColor().b, getColor().a);
 
 		SDL_RenderDrawLine(cGfx->getRenderer(), 
 				   parent->getAxisOriginX() + newXValue, cCandle->getHigh(), 
@@ -104,7 +141,7 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		bgRect.w = pointXGap;
 
 		// If the close is higher than the open, make the real body green.
-		if (points[i]->getClose() > points[i]->getOpen())
+		if (normalizedPoints[i]->getClose() > normalizedPoints[i]->getOpen())
 		{
 			SDL_SetRenderDrawColor(cGfx->getRenderer(), 0, 209, 0, 255);
 
@@ -113,7 +150,7 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 			bgRect.y = cCandle->getClose();
 		}
 		// If the close is lower than the open, make the real body red.
-		else if (points[i]->getClose() < points[i]->getOpen())
+		else if (normalizedPoints[i]->getClose() < normalizedPoints[i]->getOpen())
 		{
 			SDL_SetRenderDrawColor(cGfx->getRenderer(), 255, 0, 0, 255);
 
@@ -130,7 +167,7 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 
 		SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
 
-		if (i == points.size() - 1)
+		if (i == normalizedPoints.size() - 1)
 		{
 			// Draw horizontal line in candle graph for the last close price.
 			SDL_SetRenderDrawColor(cGfx->getRenderer(), 209, 0, 118, 255);
@@ -141,12 +178,6 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		}
 
 
-		// save the previous point for later
-		if (prevCandle)
-			delete prevCandle;
 		prevCandle = cCandle;
 	}
-
-	if (cCandle)
-		delete cCandle;
 }

@@ -101,6 +101,18 @@ void Graphable<T>::set(gfxpp* cGfx, const std::vector<T*>& newPoints)
 	computeAxisRanges(cGfx);//sets redoRange automatically
 }
 
+// This function is recommended for TimeSeries optimizations.
+template <class T>
+void Graphable<T>::add(gfxpp* cGfx, const T* newPoint)
+{
+	if (!newPoint)
+		return;
+
+	points.push_back(new T(*newPoint));
+	computeAxisRanges(cGfx, true);
+}
+
+
 template <class T>
 void Graphable<T>::setColor(SDL_Color newColor)
 {

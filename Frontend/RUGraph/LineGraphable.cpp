@@ -24,6 +24,9 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 	if (!cGfx)
 		return;
 
+	if (!parent)
+		return;
+
 	if (!cGfx->getRenderer())
 		return;
 
@@ -38,7 +41,6 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 		if(!((cY >= yMin) && (cY <= yMax)))
 			redoRange = true;
 	}
-
 
 	if(redoRange)
 	{
@@ -61,7 +63,6 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 		yMax = y_max;
 	}
 
-
 	//==============================================Normalize the points==============================================
 
 	float xRange = (float)points.size();
@@ -83,21 +84,7 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 		normalizedPoints.push_back(new Point2(parent->getAxisOriginX() + newXValue,
 							parent->getAxisOriginY() + parent->getHeight() - newYValue));
 	}
-
 }
-
-
-// This function is recommended for optimizations.
-template <>
-void Graphable<Point2>::add(gfxpp* cGfx, const Point2* newPoint)
-{
-	if (!newPoint)
-		return;
-
-	points.push_back(new Point2(points.size(), newPoint->getY()));
-	computeAxisRanges(cGfx, true);
-}
-
 
 template <>
 void Graphable<Point2>::draw(gfxpp* cGfx)
@@ -136,6 +123,15 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 	}
 	else
 	{
+		//
+		SDL_Rect dRect;
+		dRect.x = 0;
+		dRect.y = 0;
+		dRect.w = parent->getWidth() - pointXGap;
+		dRect.h = parent->getHeight();
+		SDL_RenderCopy(cGfx->getRenderer(), parent->getBackground(), NULL, &dRect);
+		printf("normalizedPoints.size(): %d\n", normalizedPoints.size());
+
 		unsigned int i = normalizedPoints.size()-1;
 		Point2* prevPoint = normalizedPoints[i-1];
 		for (; i < normalizedPoints.size(); ++i)
