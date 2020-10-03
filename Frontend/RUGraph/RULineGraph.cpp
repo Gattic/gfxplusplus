@@ -30,7 +30,7 @@ RULineGraph::~RULineGraph()
 	clear();
 }
 
-void RULineGraph::add(gfxpp* cGfx, const std::string& label, const Point2* newPoint,
+void RULineGraph::add(gfxpp* cGfx, std::string label, const Point2* newPoint,
 				  SDL_Color lineColor)
 {
 	if(!cGfx)

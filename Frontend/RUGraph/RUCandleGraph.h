@@ -53,7 +53,7 @@ public:
 	virtual ~RUCandleGraph();
 
 	virtual std::string getType() const;
-	virtual void add(gfxpp*, const std::string&, const Candle*,
+	virtual void add(gfxpp*, std::string, const Candle*,
 			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 	virtual void set(gfxpp*, const std::string&, const std::vector<Candle*>&,
 			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
