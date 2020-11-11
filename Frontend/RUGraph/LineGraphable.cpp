@@ -130,7 +130,6 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 		dRect.w = parent->getWidth() - pointXGap;
 		dRect.h = parent->getHeight();
 		SDL_RenderCopy(cGfx->getRenderer(), parent->getBackground(), NULL, &dRect);
-		printf("normalizedPoints.size(): %d\n", normalizedPoints.size());
 
 		unsigned int i = normalizedPoints.size()-1;
 		Point2* prevPoint = normalizedPoints[i-1];
