@@ -27,7 +27,7 @@ RUCandleGraph::RUCandleGraph(int newWidth, int newHeight, int newQuadrants)
 
 RUCandleGraph::~RUCandleGraph()
 {
-	//
+	clear();
 }
 
 //Dont worry about this fnc

@@ -43,9 +43,9 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 
 	if(redoRange)
 	{
-		yMax = points[0]->getHigh();
-		yMin = points[0]->getLow();
-		//printf("yMin, yMax (%f,%f)\n", yMin, yMax);
+		float y_max = points[0]->getHigh();
+		float y_min = points[0]->getLow();
+		//printf("y_min, y_max (%f,%f)\n", y_min, y_max);
 
 		for (unsigned int i = 1; i < points.size(); ++i)
 		{
@@ -56,12 +56,15 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 			//float open_pt = c->getOpen();
 			//float close_pt = c->getClose();
 
-			if (y_high > yMax)
-				yMax = y_high;
+			if (y_high > y_max)
+				y_max = y_high;
 
-			else if (y_low < yMin)
-				yMin = y_low;
+			else if (y_low < y_min)
+				y_min = y_low;
 		}
+
+		yMin = y_min;
+		yMax = y_max;
 	}
 
 	//==============================================Normalize the points==============================================
@@ -102,7 +105,6 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 template <>
 void Graphable<Candle>::draw(gfxpp* cGfx)
 {
-
 	float xRange = (float)normalizedPoints.size();
 	float yRange = yMax - yMin;
 
