@@ -67,7 +67,7 @@ void GPanel::unhover(gfxpp* cGfx)
 	//
 }
 
-void GPanel::addSubItem(GItem* newItem, int newZIndex)
+void GPanel::addSubItem(GItem* newItem, unsigned int newZIndex)
 {
 	if (!newItem)
 		return;

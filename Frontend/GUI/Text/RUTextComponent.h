@@ -56,7 +56,7 @@ protected:
 	static const int CUROSR_LEFT = 0;
 	static const int CURSOR_RIGHT = 1;
 
-	int FONT_COLOR = 0;
+	int FONT_COLOR;
 
 	SlidingFocusWindow cursor;
 

@@ -126,7 +126,11 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 	// Draw the line and give it thickness
 	for (unsigned int i=0; i < normalizedPoints.size(); ++i)
 	{
+		// Add next point to the background
 		Point2* cPoint = normalizedPoints[i];
+		if(!cPoint)
+			continue;
+
 		int cX = ((unsigned int)cPoint->getX());
 		int cY = ((unsigned int)cPoint->getY());
 
@@ -151,12 +155,6 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 			row[cX] = cColor;
 		}
 	}
-
-	SDL_Rect dRect;
-	dRect.x = parent->getAxisOriginX();
-	dRect.y = parent->getAxisOriginY();
-	dRect.w = parent->getWidth();
-	dRect.h = parent->getHeight();
 
 	SDL_UpdateTexture(parent->getBackground(), NULL, pixels, width * sizeof(*pixels));
 }

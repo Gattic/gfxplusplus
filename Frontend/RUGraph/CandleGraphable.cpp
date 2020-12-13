@@ -67,6 +67,17 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 		yMax = y_max;
 	}
 
+	// Set the pixels array
+	int width = parent->getWidth();
+	int height = parent->getHeight();
+	if((oldWidth*oldHeight != width*height) || (!pixels))
+	{
+		pixels = (unsigned int*)malloc(width * height * sizeof(*pixels));
+	}
+
+	oldWidth = width;
+	oldHeight = height;
+
 	//==============================================Normalize the points==============================================
 
 	float xRange = (float)points.size();
@@ -87,24 +98,31 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 
 		// First point would be drawn at x = 0, so we need to add (pointXGap / 2)
 		// so that the bar can be drawn left and right.
-		float newXValue = i * pointXGap + (pointXGap / 2);
+		float newXValue = (i * pointXGap) + (pointXGap / 2);
 		float newOpenValue = (points[i]->getOpen() - yMin) * pointYGap;
 		float newCloseValue = (points[i]->getClose() - yMin) * pointYGap;
 		float newHighValue = (points[i]->getHigh() - yMin) * pointYGap;
 		float newLowValue = (points[i]->getLow() - yMin) * pointYGap;
 
-		Candle* newCandle = new Candle(parent->getAxisOriginY() + parent->getHeight() - newOpenValue,
+		//printf("[%d]: %f; %d + %f == %f\n", i, pointXGap, parent->getAxisOriginX(), newXValue, (parent->getAxisOriginX() + newXValue));
+		//printf("[%d]: %f; %d + %d - %f == %f\n", i, pointYGap, parent->getAxisOriginY(), parent->getHeight(), newOpenValue, (parent->getAxisOriginY() + parent->getHeight() - newOpenValue));
+		Candle* newCandle = new Candle(parent->getAxisOriginX() + newXValue,
+							parent->getAxisOriginY() + parent->getHeight() - newOpenValue,
 							parent->getAxisOriginY() + parent->getHeight() - newCloseValue,
 							parent->getAxisOriginY() + parent->getHeight() - newHighValue,
 							parent->getAxisOriginY() + parent->getHeight() - newLowValue);
 
 		normalizedPoints.push_back(newCandle);
+		//printf("Candle[%ld][%d, %d]: %f : (%f, %f) :: (%f, %f)\n", normalizedPoints.size()-1, width, height, newCandle->getX(), newCandle->getOpen(), newCandle->getClose(), newCandle->getHigh(), newCandle->getLow());
 	}
 }
 
 template <>
 void Graphable<Candle>::draw(gfxpp* cGfx)
 {
+	int width = parent->getWidth();
+	int height = parent->getHeight();
+
 	float xRange = (float)normalizedPoints.size();
 	float yRange = yMax - yMin;
 
@@ -115,71 +133,115 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 	//printf("PointXGap, PointYGap (%f,%f)\n", pointXGap, pointYGap);
 	//printf("Total Candles: %d\n", normalizedPoints.size());
 
-	Candle* cCandle = NULL;
-	Candle* prevCandle = NULL;
+	unsigned int cBGColor = parent->getBGColor().r;
+	cBGColor = cBGColor*0x100 + parent->getBGColor().g;
+	cBGColor = cBGColor*0x100 + parent->getBGColor().b;
+	cBGColor = cBGColor*0x100 + parent->getBGColor().a;
 
-	for (unsigned int i = 0; i < normalizedPoints.size(); ++i)//TODO: REPLACE THIS LOOP
+	unsigned int wickColor = getColor().r;
+	wickColor = wickColor*0x100 + getColor().g;
+	wickColor = wickColor*0x100 + getColor().b;
+	wickColor = wickColor*0x100 + getColor().a;
+
+	unsigned int lineColor = 0xD10076FF;
+	unsigned int candleGreenColor = 0x00D100FF;
+	unsigned int candleRedColor = 0xFF0000FF;
+
+	// The background color
+	for (int y = 0; y < height; ++y)
 	{
-		float newXValue = i * pointXGap + (pointXGap / 2);
+		unsigned int* row = pixels + y * width;
+		for (int x = 0; x < width; ++x)
+		{
+			row[x] = cBGColor;
+		}
+	}
 
+	Candle* lastCandle = NULL;
+	for (unsigned int i = 0; i < normalizedPoints.size(); ++i)
+	{
 		// Add next point to the background
-		cCandle = normalizedPoints[i];
+		Candle* cCandle = normalizedPoints[i];
 		if(!cCandle)
 			continue;
 
 		// Wick / Shadow
 		// Just above and below the real body are the "wicks" or "shadows." 
 		// The wicks show the high and low prices of that day's trading.
-		SDL_SetRenderDrawColor(cGfx->getRenderer(),
-			getColor().r, getColor().g, getColor().b, getColor().a);
-
-		SDL_RenderDrawLine(cGfx->getRenderer(), 
-				   parent->getAxisOriginX() + newXValue, cCandle->getHigh(), 
-				   parent->getAxisOriginX() + newXValue, cCandle->getLow());
+		/*int wickX = ((int)cCandle->getX());
+		if((wickX < width) && (wickX >= 0))
+		{
+			for(int wickY = cCandle->getLow(); wickY < cCandle->getHigh(); ++i)
+			{
+				if((wickY < width) && (wickY >= 0))
+				{
+					printf("wick: (%d,%d)\n", wickX, wickY);
+					//break;
+					unsigned int* row = pixels + ((wickY) * width);
+					row[wickX] = wickColor;
+				}
+			}
+		}*/
 
 		// Draw a rectangle for the real body representing the price range between open and close
-		SDL_Rect bgRect;
-		bgRect.x = parent->getAxisOriginX() + newXValue - (pointXGap / 2);
-		bgRect.w = pointXGap;
-
-		// If the close is higher than the open, make the real body green.
-		if (normalizedPoints[i]->getClose() > normalizedPoints[i]->getOpen())
+		//printf("candleX[%d]: (%f,%f)\n", i,
+			//cCandle->getX() - (pointXGap / 2), cCandle->getX() + (pointXGap / 2));
+		for(int cX = cCandle->getX(); cX < cCandle->getX() + pointXGap; ++cX)
 		{
-			SDL_SetRenderDrawColor(cGfx->getRenderer(), 0, 209, 0, 255);
+			if((cX >= width) || (cX < 0))
+				continue;
 
-			float bgRectHeight = cCandle->getClose() - cCandle->getOpen();
-			bgRect.h = bgRectHeight; // Rendered down, not up
-			bgRect.y = cCandle->getClose();
+			int yStart = -1;
+			int cY = -1;
+			int bodyMaxY = -1;
+			unsigned int cColor = 0;
+
+			if (normalizedPoints[i]->getClose() > normalizedPoints[i]->getOpen())
+			{
+				// If the close is higher than the open, make the real body green.
+				cY = cCandle->getClose(); // Rendered down, not up
+				yStart = cY;
+				bodyMaxY = cCandle->getClose() - cCandle->getOpen();
+				cColor = candleGreenColor;
+			}
+			else if (normalizedPoints[i]->getClose() < normalizedPoints[i]->getOpen())
+			{
+				// If the close is lower than the open, make the real body red.
+				cY = cCandle->getOpen(); // Rendered down, not up
+				yStart = cY;
+				bodyMaxY = cCandle->getOpen() - cCandle->getClose();
+				cColor = candleRedColor;
+			}
+			else
+				continue;
+
+			for(;cY < yStart + bodyMaxY; ++cY)
+			{
+				if((cY < 0) || (bodyMaxY < 0))
+					continue;
+
+				unsigned int* row = pixels + ((cY) * width);
+				row[cX] = cColor;
+			}
 		}
-		// If the close is lower than the open, make the real body red.
-		else if (normalizedPoints[i]->getClose() < normalizedPoints[i]->getOpen())
-		{
-			SDL_SetRenderDrawColor(cGfx->getRenderer(), 255, 0, 0, 255);
 
-			float bgRectHeight = cCandle->getOpen() - cCandle->getClose();
-			bgRect.h = bgRectHeight; // Rendered down, not up
-			bgRect.y = cCandle->getOpen();
-		}
-		else
-		{
-			// When open and close are the same, show no real body.
-			bgRect.y = cCandle->getOpen();
-			bgRect.h = 0;
-		}
-
-		SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
-
-		if (i == normalizedPoints.size() - 1)
-		{
-			// Draw horizontal line in candle graph for the last close price.
-			SDL_SetRenderDrawColor(cGfx->getRenderer(), 209, 0, 118, 255);
-
-			SDL_RenderDrawLine(cGfx->getRenderer(), 
-				   parent->getAxisOriginX(), cCandle->getClose(), 
-				   parent->getAxisOriginX() + newXValue, cCandle->getClose());
-		}
-
-
-		prevCandle = cCandle;
+		lastCandle = cCandle;
 	}
+
+	// Draw horizontal line in candle graph for the last close price.
+	if(lastCandle)
+	{
+		int cY = parent->getAxisOriginY() + lastCandle->getClose();
+		if((cY < width) && (cY >= 0))
+		{
+			for(int cX = parent->getAxisOriginX(); cX < width; ++ cX)
+			{
+				unsigned int* row = pixels + ((cY) * width);
+				row[cX] = lineColor;
+			}
+		}
+	}
+
+	// Update the texture with the new pixel data
+	SDL_UpdateTexture(parent->getBackground(), NULL, pixels, width * sizeof(*pixels));
 }

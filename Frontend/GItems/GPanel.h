@@ -48,7 +48,7 @@ protected:
 public:
 	GPanel(const std::string&, int, int);
 
-	virtual void addSubItem(GItem*, int = Z_FRONT);
+	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
 	// events

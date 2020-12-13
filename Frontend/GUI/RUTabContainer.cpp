@@ -35,7 +35,7 @@ RUTabContainer::~RUTabContainer()
 			delete items[i].first;
 		items[i].first = NULL;
 
-		for (int j = 0; j < items[i].second.size(); ++j)
+		for (unsigned int j = 0; j < items[i].second.size(); ++j)
 		{
 			if (items[i].second[j])
 				delete items[i].second[j];
@@ -238,7 +238,7 @@ void RUTabContainer::setSelectedTab(std::string tabName)
 	bool tabFound = false;
 	if (size() > 0)
 	{
-		for (int i = 0; i < items.size(); ++i)
+		for (unsigned int i = 0; i < items.size(); ++i)
 		{
 			RULabel* tabItem = items[i].first;
 			if (!tabItem)
@@ -277,7 +277,7 @@ void RUTabContainer::updateBackground(gfxpp* cGfx)
 {
 	if (optionsShown > 0)
 	{
-		for (int i = 0; i < items.size(); ++i)
+		for (unsigned int i = 0; i < items.size(); ++i)
 		{
 			// If selected tab changed last frame...
 			if (tabSelected != prevTabSelected)
@@ -286,7 +286,7 @@ void RUTabContainer::updateBackground(gfxpp* cGfx)
 				{
 					std::vector<GItem*> selectedTabContainer = items[i].second;
 					// Show selected tab items
-					for (int j = 0; j < selectedTabContainer.size(); ++j)
+					for (unsigned int j = 0; j < selectedTabContainer.size(); ++j)
 						selectedTabContainer[j]->setVisible(true);
 				}
 				else
@@ -299,7 +299,7 @@ void RUTabContainer::updateBackground(gfxpp* cGfx)
 
 					std::vector<GItem*> tabContainer = items[i].second;
 					// Hide unselected tabs' GItems
-					for (int j = 0; j < tabContainer.size(); ++j)
+					for (unsigned int j = 0; j < tabContainer.size(); ++j)
 						tabContainer[j]->setVisible(false);
 				}
 			}

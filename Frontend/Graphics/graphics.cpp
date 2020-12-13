@@ -277,12 +277,12 @@ void gfxpp::display()
 				running = false;
 
 			SDL_Keycode keyPressed = 0x00;
-			Uint16 keyModPressed = 0x00;
+			//Uint16 keyModPressed = 0x00;
 			if ((event.type == SDL_KEYUP) || (event.type == SDL_KEYDOWN))
 			{
 				// set the key event vars
 				keyPressed = event.key.keysym.sym;
-				keyModPressed = event.key.keysym.mod;
+				//keyModPressed = event.key.keysym.mod;
 
 				// if((keyModPressed & KMOD_CTRL) || (keyModPressed & KMOD_LCTRL) || (keyModPressed
 				// & KMOD_RCTRL))

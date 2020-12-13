@@ -14,6 +14,8 @@ Linux/Cygwin:
 
 `g++`
 
+libgl1-mesa-dev
+
 `libGL-devel`
 
 `libGL1`

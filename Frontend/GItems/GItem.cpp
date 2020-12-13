@@ -84,7 +84,7 @@ GItem* GItem::getItemByName(const std::string& compName)
 	return NULL;
 }
 
-int GItem::getZIndex() const
+unsigned int GItem::getZIndex() const
 {
 	return zindex;
 }
@@ -125,7 +125,7 @@ void GItem::setHeight(int newHeight)
 	drawUpdate = true;
 }
 
-void GItem::setZIndex(int newZIndex)
+void GItem::setZIndex(unsigned int newZIndex)
 {
 	zindex = newZIndex;
 }
@@ -140,7 +140,7 @@ void GItem::setZIndex(int newZIndex)
 		drawUpdate = true;
 }*/
 
-void GItem::addSubItem(GItem* newItem, int newZIndex)
+void GItem::addSubItem(GItem* newItem, unsigned int newZIndex)
 {
 	if (!newItem)
 		return;

@@ -27,22 +27,24 @@
 class Candle
 {
 private:
-	float open, close, high, low;
+	float x, open, close, high, low;
 
 public:
 	Candle();
-	Candle(float, float, float, float);
+	Candle(float, float, float, float, float);
 	Candle(const Candle&);
 	~Candle();
 
 	// get
+	float getX() const;
 	float getOpen() const;
 	float getClose() const;
 	float getHigh() const;
 	float getLow() const;
 
 	// set
-	void set(float, float, float, float);
+	void set(float, float, float, float, float);
+	void setX(float);
 	void setOpen(float newOpen);
 	void setClose(float newClose);
 	void setHigh(float newHigh);
@@ -51,6 +53,7 @@ public:
 	// operators
 	inline Candle operator+(Candle c)
 	{
+		c.x += x;
 		c.open += open;
 		c.close += close;
 		c.high += high;
@@ -60,6 +63,7 @@ public:
 
 	inline Candle operator-(Candle c)
 	{
+		c.x = x - c.x;
 		c.open = open - c.open;
 		c.close = close - c.close;
 		c.high = high - c.high;
@@ -69,16 +73,17 @@ public:
 
 	inline Candle operator*(float scalar)
 	{
-		return Candle(scalar * open, scalar * close, scalar * high, scalar * low);
+		return Candle(scalar * x, scalar * open, scalar * close, scalar * high, scalar * low);
 	}
 
 	inline Candle operator/(float scalar)
 	{
-		return Candle(open / scalar, close / scalar, high / scalar, low / scalar);
+		return Candle(x / scalar, open / scalar, close / scalar, high / scalar, low / scalar);
 	}
 
 	void operator=(const Candle& c)
 	{
+		setX(c.x);
 		setOpen(c.open);
 		setClose(c.close);
 		setHigh(c.high);
@@ -87,6 +92,9 @@ public:
 
 	bool operator==(const Candle& c) const
 	{
+		// X
+		float deltaX = c.x - x;
+		bool xChange = ((deltaX > -DBL_EPSILON) && (deltaX < DBL_EPSILON));
 		// Open
 		float deltaOpen = c.open - open;
 		bool openChange = ((deltaOpen > -DBL_EPSILON) && (deltaOpen < DBL_EPSILON));
@@ -100,7 +108,7 @@ public:
 		float deltaLow = c.low - low;
 		bool lowChange = ((deltaLow > -DBL_EPSILON) && (deltaLow < DBL_EPSILON));
 
-		return (openChange && closeChange && highChange && lowChange);
+		return (xChange && openChange && closeChange && highChange && lowChange);
 	}
 };
 

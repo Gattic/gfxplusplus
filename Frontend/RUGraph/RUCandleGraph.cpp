@@ -37,7 +37,7 @@ void RUCandleGraph::add(gfxpp* cGfx, std::string label, const Candle* newPoint,
 	if(!cGfx)
 		return;
 
-	Candle* plotterPoint = new Candle(newPoint->getOpen(), newPoint->getClose(),
+	Candle* plotterPoint = new Candle(newPoint->getX(), newPoint->getOpen(), newPoint->getClose(),
 		newPoint->getHigh(), newPoint->getLow());
 
 	//if (candles.find(label) == candles.end())
