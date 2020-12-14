@@ -217,7 +217,10 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 
 			for(;cY < yStart + bodyMaxY; ++cY)
 			{
-				if((cY < 0) || (bodyMaxY < 0))
+				if((cY < 0) || (cY >= height))
+					continue;
+
+				if(bodyMaxY < 0)
 					continue;
 
 				unsigned int* row = pixels + ((cY) * width);
