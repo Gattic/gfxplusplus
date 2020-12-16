@@ -42,6 +42,7 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 			redoRange = true;
 	}
 
+	redoRange = true;
 	if(redoRange)
 	{
 		float y_max = points[0]->getY();
