@@ -24,6 +24,7 @@ RUTabContainer::RUTabContainer()
 	orientation = HORIZONTAL_TABS;
 	optionsShown = 0;
 	itemHovered = (unsigned int)-1;
+	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 }
 
 RUTabContainer::~RUTabContainer()
