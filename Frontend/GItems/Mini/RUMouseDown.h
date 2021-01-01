@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <string>
 
+typedef void (*MouseDownEvent)(const std::string&, int, int);
+
 class gfxpp;
 class GItem;
 class GPanel;

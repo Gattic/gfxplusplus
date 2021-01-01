@@ -28,6 +28,7 @@
 #include "Mini/RUMouseUp.h"
 #include "Mini/RUMouseWheel.h"
 #include "RUItemArea.h"
+#include "GeneralListener.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <stdio.h>
@@ -51,6 +52,16 @@ class GItem : public RUBackgroundComponent,
 			  public RULoseFocus
 {
 protected:
+
+	/*std::map<std::string, GeneralListener> MouseDownEvents;
+	std::map<std::string, GeneralListener> MouseUpEvents;
+	std::map<std::string, GeneralListener> MouseMotionEvents;
+	std::map<std::string, GeneralListener> MouseWheelEvents;
+	std::map<std::string, GeneralListener> KeyUpEvents;
+	std::map<std::string, GeneralListener> KeyDownEvents;
+	std::map<std::string, GeneralListener> LoseFocusEvents;
+	std::map<std::string, GeneralListener> OptionChangedEvents;*/
+
 	int id;
 	unsigned int zindex;
 	std::string name;
@@ -61,6 +72,7 @@ protected:
 	virtual void updateBackground(gfxpp*) = 0;
 
 public:
+
 	static const unsigned int Z_FRONT = -1; // max unsigned int
 	static const unsigned int Z_BACK = -2; // max unsigned int -1
 

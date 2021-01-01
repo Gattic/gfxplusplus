@@ -24,6 +24,8 @@
 #include <utility>
 #include <vector>
 
+typedef void (*OptionChangedEvent)(int);
+
 class gfxpp;
 class RULabel;
 

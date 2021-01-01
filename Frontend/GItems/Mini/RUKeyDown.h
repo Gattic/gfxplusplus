@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <string>
 
+typedef void (*KeyDownEvent)(const std::string&);
+
 class gfxpp;
 class GItem;
 class GPanel;

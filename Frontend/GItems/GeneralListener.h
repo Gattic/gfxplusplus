@@ -14,53 +14,69 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUMOUSEMOTION
-#define _RUMOUSEMOTION
 
-#include "../RUItemArea.h"
-#include <SDL2/SDL.h>
+#ifndef _RUGENERALLISTENER
+#define _RUGENERALLISTENER
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <string>
+#include <vector>
+#include <map>
 
-typedef void (*MouseMotionEvent)(int, int);
+class Weapon {};
+class Armor {};
+class Helmet {};
+class Scroll {};
+class Potion {};
 
-class gfxpp;
-class GItem;
-class GPanel;
-class EventTracker;
-
-class RUMouseMotion : public virtual RUItemArea
+// Replicate a vtable with virtual functions.
+// Could also do this with function pointers
+//class GeneralListener
+class GeneralListener
 {
-protected:
-	bool unhovered;
-	SDL_SystemCursor cursor;
-	bool customCursor;
+	class ListenerConcept
+	{
+	public:
+		virtual ~ListenerConcept()
+		{
+			//
+		}
+	};
 
-	// events
-	virtual void onMouseMotion(gfxpp*, GPanel*, int, int);
+	template< typename T > class ListenerModel : public ListenerConcept
+	{
 
-	// event listeners
-	void (GPanel::*MouseMotionListener)(int, int);
+		T listener;
+
+	public:
+		ListenerModel(const T& t) : listener(t)
+		{
+			//
+		}
+
+		virtual ~ListenerModel()
+		{
+			//
+		}
+	};
+
+	ListenerConcept* listener;
 
 public:
-	// constructors & destructor
-	RUMouseMotion();
-	virtual ~RUMouseMotion();
 
-	// gets
-	SDL_SystemCursor getCursor() const;
+	template< typename T > GeneralListener(const T& newListener)
+	{
+		listener = new ListenerModel<T>(newListener);
+	}
 
-	// sets
-	void setCursor(SDL_SystemCursor);
-
-	// event functions
-	void setMouseMotionListener(void (GPanel::*)(int, int));
-
-	// events
-	void onMouseMotionHelper(gfxpp*, EventTracker*, GPanel*, int, int, bool = false);
-	virtual void hover(gfxpp*) = 0;
-	virtual void unhover(gfxpp*) = 0;
+	virtual ~GeneralListener()
+	{
+		//
+	}
 };
+
+void lExample();
 
 #endif

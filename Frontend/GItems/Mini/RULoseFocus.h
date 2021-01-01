@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <string>
 
+typedef void (*LoseFocusEvent)(void);
+
 class GItem;
 class GPanel;
 class EventTracker;

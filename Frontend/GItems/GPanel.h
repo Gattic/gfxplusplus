@@ -35,8 +35,8 @@ class GLayout;
 // GPanel is highest-level abstraction for rendering.
 class GPanel : public GItem
 {
-
 protected:
+
 	// Lifetime (virtual) functions
 	virtual void onStart() = 0;
 	virtual void onShow(gfxpp*);

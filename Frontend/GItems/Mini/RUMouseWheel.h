@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <string>
 
+typedef void (*MouseWheelEvent)(int);
+
 class gfxpp;
 class GItem;
 class GPanel;

@@ -14,53 +14,14 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUMOUSEMOTION
-#define _RUMOUSEMOTION
+#include "GeneralListener.h"
 
-#include "../RUItemArea.h"
-#include <SDL2/SDL.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-
-typedef void (*MouseMotionEvent)(int, int);
-
-class gfxpp;
-class GItem;
-class GPanel;
-class EventTracker;
-
-class RUMouseMotion : public virtual RUItemArea
+void lExample()
 {
-protected:
-	bool unhovered;
-	SDL_SystemCursor cursor;
-	bool customCursor;
-
-	// events
-	virtual void onMouseMotion(gfxpp*, GPanel*, int, int);
-
-	// event listeners
-	void (GPanel::*MouseMotionListener)(int, int);
-
-public:
-	// constructors & destructor
-	RUMouseMotion();
-	virtual ~RUMouseMotion();
-
-	// gets
-	SDL_SystemCursor getCursor() const;
-
-	// sets
-	void setCursor(SDL_SystemCursor);
-
-	// event functions
-	void setMouseMotionListener(void (GPanel::*)(int, int));
-
-	// events
-	void onMouseMotionHelper(gfxpp*, EventTracker*, GPanel*, int, int, bool = false);
-	virtual void hover(gfxpp*) = 0;
-	virtual void unhover(gfxpp*) = 0;
-};
-
-#endif
+	std::vector<GeneralListener> backpack;
+	backpack.push_back(GeneralListener(Weapon()));
+	backpack.push_back(GeneralListener(Armor()));
+	backpack.push_back(GeneralListener(Potion()));
+	backpack.push_back(GeneralListener(Scroll()));
+	printf("Backpack size(): %ld\n", backpack.size());
+}
