@@ -54,10 +54,7 @@ class GeneralListener
 	protected:
 
 		T cbPanel;
-		void (T::*listener)();
-		//void (T::*listener)();
-		//void (GPanel::*MouseDownListener)(const std::string&, int, int);
- 		//(void (*)())&SimulationPanel::GuiCommander1)
+		void (T::*listener)() = NULL;
 
 	public:
 		ListenerModel(const T& t, void (T::*newListener)()) : cbPanel(t), listener((void (T::*)())newListener)
@@ -87,30 +84,45 @@ class GeneralListener
 
 		void call()
 		{
+			if(!listener)
+				return;
+
 			void (T::*typedListener)() = listener;
 			(&cbPanel->*typedListener)();
 		}
 
 		void call(int scrollType)
 		{
+			if(!listener)
+				return;
+
 			void (T::*typedListener)(int) = (void (T::*)(int))listener;
 			(cbPanel.*typedListener)(scrollType);
 		}
 
 		void call(int x, int y)
 		{
+			if(!listener)
+				return;
+
 			void (T::*typedListener)(int, int) = (void (T::*)(int, int))listener;
 			(cbPanel.*typedListener)(x, y);
 		}
 
 		void call(const std::string& str, int x, int y)
 		{
+			if(!listener)
+				return;
+
 			void (T::*typedListener)(const std::string&, int, int) = (void (T::*)(const std::string&, int, int))listener;
 			(cbPanel.*typedListener)(str, x, y);
 		}
 
 		void call(const std::string& str)
 		{
+			if(!listener)
+				return;
+
 			void (T::*typedListener)(const std::string&) = (void (T::*)(const std::string&))listener;
 			(cbPanel.*typedListener)(str);
 		}
@@ -156,12 +168,6 @@ public:
 
 	template< typename T>
 	GeneralListener(const T& callbackPanel, void (T::*newListener)(const std::string&))
-	{
-		object = new ListenerModel<T>(callbackPanel, newListener);
-	}
-
-	template< typename T, typename U >
-	void set(const T& callbackPanel, const U& newListener)
 	{
 		object = new ListenerModel<T>(callbackPanel, newListener);
 	}
