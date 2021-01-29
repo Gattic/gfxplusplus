@@ -8,7 +8,6 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 set(GFXItem_src_files
 	RUColors.cpp
 	RUColors.h
-	GeneralListener.cpp
 	GeneralListener.h
 	GItem.cpp
 	GItem.h

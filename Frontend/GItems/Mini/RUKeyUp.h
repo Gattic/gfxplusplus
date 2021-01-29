@@ -18,12 +18,11 @@
 #define _RUKEYUP
 
 #include "../RUItemArea.h"
+#include "../GeneralListener.h"
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-
-typedef void (*KeyUpEvent)(const std::string&);
 
 class gfxpp;
 class GItem;
@@ -37,7 +36,7 @@ protected:
 	virtual void onKeyUp(gfxpp*, GPanel*, SDL_Keycode, Uint16);
 
 	// event listeners
-	void (GPanel::*KeyUpListener)(const std::string&);
+	GeneralListener KeyUpListener;
 
 public:
 	// constructors & destructor
@@ -45,7 +44,7 @@ public:
 	virtual ~RUKeyUp();
 
 	// event functions
-	void setKeyUpListener(void (GPanel::*)(const std::string&));
+	void setKeyUpListener(GeneralListener);
 
 	// events
 	void onKeyUpHelper(gfxpp*, EventTracker*, GPanel*, SDL_Keycode, Uint16);

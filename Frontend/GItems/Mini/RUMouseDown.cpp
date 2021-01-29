@@ -22,16 +22,16 @@
 RUMouseDown::RUMouseDown()
 {
 	// event listeners
-	MouseDownListener = 0;
+	MouseDownListener = GeneralListener();
 }
 
 RUMouseDown::~RUMouseDown()
 {
 	// event listeners
-	MouseDownListener = 0;
+	MouseDownListener = GeneralListener();
 }
 
-void RUMouseDown::setMouseDownListener(void (GPanel::*f)(const std::string&, int, int))
+void RUMouseDown::setMouseDownListener(GeneralListener f)
 {
 	MouseDownListener = f;
 }
@@ -65,8 +65,8 @@ void RUMouseDown::onMouseDownHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPa
 	// pass on the event
 	onMouseDown(cGfx, cPanel, eventX - getX(), eventY - getY());
 
-	if (MouseDownListener != 0)
-		(cPanel->*MouseDownListener)(cItem->getName(), eventX - getX(), eventY - getY());
+	// Call the callback we saved
+	MouseDownListener.call(cItem->getName(), eventX - getX(), eventY - getY());
 
 	eventsStatus->downClicked = true;
 }

@@ -25,11 +25,8 @@
 #include <vector>
 #include <map>
 
-class Weapon {};
-class Armor {};
-class Helmet {};
-class Scroll {};
-class Potion {};
+//TODO:
+// MAKE GITEMS = EVENTS (use operators)
 
 // Replicate a vtable with virtual functions.
 // Could also do this with function pointers
@@ -43,17 +40,79 @@ class GeneralListener
 		{
 			//
 		}
+
+		virtual void call()=0;
+		virtual void call(int scrollType)=0;
+		virtual void call(int x, int y)=0;
+		virtual void call(const std::string& str, int x, int y)=0;
+		virtual void call(const std::string& str)=0;
 	};
 
-	template< typename T > class ListenerModel : public ListenerConcept
+	template< typename T>
+	class ListenerModel : public ListenerConcept
 	{
+	protected:
 
-		T listener;
+		T cbPanel;
+		void (T::*listener)();
+		//void (T::*listener)();
+		//void (GPanel::*MouseDownListener)(const std::string&, int, int);
+ 		//(void (*)())&SimulationPanel::GuiCommander1)
 
 	public:
-		ListenerModel(const T& t) : listener(t)
+		ListenerModel(const T& t, void (T::*newListener)()) : cbPanel(t), listener((void (T::*)())newListener)
 		{
 			//
+		}
+
+		ListenerModel(const T& t, void (T::*newListener)(int)) : cbPanel(t), listener((void (T::*)())newListener)
+		{
+			//
+		}
+
+		ListenerModel(const T& t, void (T::*newListener)(int, int)) : cbPanel(t), listener((void (T::*)())newListener)
+		{
+			//
+		}
+
+		ListenerModel(const T& t, void (T::*newListener)(const std::string&, int, int)) : cbPanel(t), listener((void (T::*)())newListener)
+		{
+			//
+		}
+
+		ListenerModel(const T& t, void (T::*newListener)(const std::string&)) : cbPanel(t), listener((void (T::*)())newListener)
+		{
+			//
+		}
+
+		void call()
+		{
+			void (T::*typedListener)() = listener;
+			(&cbPanel->*typedListener)();
+		}
+
+		void call(int scrollType)
+		{
+			void (T::*typedListener)(int) = (void (T::*)(int))listener;
+			(cbPanel.*typedListener)(scrollType);
+		}
+
+		void call(int x, int y)
+		{
+			void (T::*typedListener)(int, int) = (void (T::*)(int, int))listener;
+			(cbPanel.*typedListener)(x, y);
+		}
+
+		void call(const std::string& str, int x, int y)
+		{
+			void (T::*typedListener)(const std::string&, int, int) = (void (T::*)(const std::string&, int, int))listener;
+			(cbPanel.*typedListener)(str, x, y);
+		}
+
+		void call(const std::string& str)
+		{
+			void (T::*typedListener)(const std::string&) = (void (T::*)(const std::string&))listener;
+			(cbPanel.*typedListener)(str);
 		}
 
 		virtual ~ListenerModel()
@@ -62,13 +121,79 @@ class GeneralListener
 		}
 	};
 
-	ListenerConcept* listener;
+	ListenerConcept* object;
 
 public:
 
-	template< typename T > GeneralListener(const T& newListener)
+	GeneralListener()
 	{
-		listener = new ListenerModel<T>(newListener);
+		object = NULL;
+	}
+
+	template< typename T>
+	GeneralListener(const T& callbackPanel, void (T::*newListener)())
+	{
+		object = new ListenerModel<T>(callbackPanel, newListener);
+	}
+
+	template< typename T>
+	GeneralListener(const T& callbackPanel, void (T::*newListener)(int))
+	{
+		object = new ListenerModel<T>(callbackPanel, newListener);
+	}
+
+	template< typename T>
+	GeneralListener(const T& callbackPanel, void (T::*newListener)(int, int))
+	{
+		object = new ListenerModel<T>(callbackPanel, newListener);
+	}
+
+	template< typename T>
+	GeneralListener(const T& callbackPanel, void (T::*newListener)(const std::string&, int, int))
+	{
+		object = new ListenerModel<T>(callbackPanel, newListener);
+	}
+
+	template< typename T>
+	GeneralListener(const T& callbackPanel, void (T::*newListener)(const std::string&))
+	{
+		object = new ListenerModel<T>(callbackPanel, newListener);
+	}
+
+	template< typename T, typename U >
+	void set(const T& callbackPanel, const U& newListener)
+	{
+		object = new ListenerModel<T>(callbackPanel, newListener);
+	}
+
+	void call()
+	{
+		if(object)
+			object->call();
+	}
+
+	void call(int scrollType)
+	{
+		if(object)
+			object->call(scrollType);
+	}
+
+	void call(int x, int y)
+	{
+		if(object)
+			object->call(x, y);
+	}
+
+	void call(const std::string& str, int x, int y)
+	{
+		if(object)
+			object->call(str, x, y);
+	}
+
+	void call(const std::string& str)
+	{
+		if(object)
+			object->call(str);
 	}
 
 	virtual ~GeneralListener()

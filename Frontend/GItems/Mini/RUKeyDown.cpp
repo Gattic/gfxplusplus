@@ -23,16 +23,16 @@
 RUKeyDown::RUKeyDown()
 {
 	// event listeners
-	KeyDownListener = 0;
+	KeyDownListener = GeneralListener();
 }
 
 RUKeyDown::~RUKeyDown()
 {
 	// event listeners
-	KeyDownListener = 0;
+	KeyDownListener = GeneralListener();
 }
 
-void RUKeyDown::setKeyDownListener(void (GPanel::*f)(const std::string&))
+void RUKeyDown::setKeyDownListener(GeneralListener f)
 {
 	KeyDownListener = f;
 }
@@ -65,9 +65,10 @@ void RUKeyDown::onKeyDownHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel*
 	// pass on the event
 	onKeyDown(cGfx, cPanel, keyPressed, keyModPressed);
 
-	if (KeyDownListener != 0)
-		(cPanel->*KeyDownListener)(cItem->getName());
+	// Call the callback we saved
+	KeyDownListener.call(cItem->getName());
 
+	// Special textbox event
 	if ((cGfx->focusedItem->getType() == "RUTextbox") && (!cGfx->CTRLPressed) &&
 		(!cGfx->ALTPressed))
 	{

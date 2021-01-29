@@ -18,12 +18,11 @@
 #define _RUMOUSEWHEEL
 
 #include "../RUItemArea.h"
+#include "../GeneralListener.h"
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-
-typedef void (*MouseWheelEvent)(int);
 
 class gfxpp;
 class GItem;
@@ -37,7 +36,7 @@ protected:
 	virtual void onMouseWheel(gfxpp*, GPanel*, int, int, int);
 
 	// event listeners
-	void (GPanel::*MouseWheelListener)(int);
+	GeneralListener MouseWheelListener;
 
 public:
 	static const int SCROLL_DOWN = 0;
@@ -50,7 +49,7 @@ public:
 	virtual ~RUMouseWheel();
 
 	// event functions
-	void setMouseWheelListener(void (GPanel::*)(int));
+	void setMouseWheelListener(GeneralListener);
 
 	// events
 	void onMouseWheelHelper(gfxpp*, EventTracker*, GPanel*, int, int, int, bool = false);

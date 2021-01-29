@@ -53,15 +53,6 @@ class GItem : public RUBackgroundComponent,
 {
 protected:
 
-	/*std::map<std::string, GeneralListener> MouseDownEvents;
-	std::map<std::string, GeneralListener> MouseUpEvents;
-	std::map<std::string, GeneralListener> MouseMotionEvents;
-	std::map<std::string, GeneralListener> MouseWheelEvents;
-	std::map<std::string, GeneralListener> KeyUpEvents;
-	std::map<std::string, GeneralListener> KeyDownEvents;
-	std::map<std::string, GeneralListener> LoseFocusEvents;
-	std::map<std::string, GeneralListener> OptionChangedEvents;*/
-
 	int id;
 	unsigned int zindex;
 	std::string name;

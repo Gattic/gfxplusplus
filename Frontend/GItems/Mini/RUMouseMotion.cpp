@@ -22,7 +22,7 @@
 RUMouseMotion::RUMouseMotion()
 {
 	// event listeners
-	MouseMotionListener = 0;
+	MouseMotionListener = GeneralListener();
 	unhovered = false;
 	cursor = SDL_SYSTEM_CURSOR_ARROW;
 	customCursor = false;
@@ -31,7 +31,7 @@ RUMouseMotion::RUMouseMotion()
 RUMouseMotion::~RUMouseMotion()
 {
 	// event listeners
-	MouseMotionListener = 0;
+	MouseMotionListener = GeneralListener();
 	unhovered = false;
 	cursor = SDL_SYSTEM_CURSOR_ARROW;
 	customCursor = false;
@@ -48,7 +48,7 @@ void RUMouseMotion::setCursor(SDL_SystemCursor newCursor)
 	customCursor = true;
 }
 
-void RUMouseMotion::setMouseMotionListener(void (GPanel::*f)(int, int))
+void RUMouseMotion::setMouseMotionListener(GeneralListener f)
 {
 	MouseMotionListener = f;
 }
@@ -84,8 +84,8 @@ void RUMouseMotion::onMouseMotionHelper(gfxpp* cGfx, EventTracker* eventsStatus,
 	unhovered = false;
 	onMouseMotion(cGfx, cPanel, eventX - getX(), eventY - getY());
 
-	if (MouseMotionListener != 0)
-		(cPanel->*MouseMotionListener)(eventX - getX(), eventY - getY());
+	// Call the callback we saved
+	MouseMotionListener.call(eventX - getX(), eventY - getY());
 
 	eventsStatus->hovered = true;
 }

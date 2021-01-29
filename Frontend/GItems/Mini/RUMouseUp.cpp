@@ -22,13 +22,18 @@
 RUMouseUp::RUMouseUp()
 {
 	// event listeners
-	MouseUpListener = 0;
+	MouseUpListener = GeneralListener();
 }
 
 RUMouseUp::~RUMouseUp()
 {
 	// event listeners
-	MouseUpListener = 0;
+	MouseUpListener = GeneralListener();
+}
+
+void RUMouseUp::setMouseUpListener(GeneralListener f)
+{
+	MouseUpListener = f;
 }
 
 void RUMouseUp::onMouseUpHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPanel, int eventX,
@@ -55,8 +60,8 @@ void RUMouseUp::onMouseUpHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel*
 	// pass on the event
 	onMouseUp(cGfx, cPanel, eventX - getX(), eventY - getY());
 
-	if (MouseUpListener != 0)
-		(cPanel->*MouseUpListener)(eventX - getX(), eventY - getY());
+	// Call the callback we saved
+	MouseUpListener.call(eventX - getX(), eventY - getY());
 
 	eventsStatus->upClicked = true;
 }

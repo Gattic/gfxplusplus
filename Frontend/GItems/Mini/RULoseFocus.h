@@ -18,12 +18,11 @@
 #define _RULOSEFOCUS
 
 #include "../RUItemArea.h"
+#include "../GeneralListener.h"
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-
-typedef void (*LoseFocusEvent)(void);
 
 class GItem;
 class GPanel;
@@ -35,7 +34,7 @@ protected:
 	bool focus;
 
 	// event listeners
-	void (GPanel::*LoseFocusListener)(void);
+	GeneralListener LoseFocusListener;
 
 public:
 	// constructors & destructor
@@ -46,7 +45,7 @@ public:
 	bool isFocused() const;
 
 	// event functions
-	void setLoseFocusListener(void (GPanel::*)(void));
+	void setLoseFocusListener(GeneralListener);
 
 	// events
 	void triggerLoseFocusEvent(GPanel*);

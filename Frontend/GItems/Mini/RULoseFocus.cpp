@@ -22,14 +22,14 @@
 RULoseFocus::RULoseFocus()
 {
 	// event listeners
-	LoseFocusListener = 0;
+	LoseFocusListener = GeneralListener();
 	focus = false;
 }
 
 RULoseFocus::~RULoseFocus()
 {
 	// event listeners
-	LoseFocusListener = 0;
+	LoseFocusListener = GeneralListener();
 	focus = false;
 }
 
@@ -38,15 +38,15 @@ bool RULoseFocus::isFocused() const
 	return focus;
 }
 
-void RULoseFocus::setLoseFocusListener(void (GPanel::*f)(void))
+void RULoseFocus::setLoseFocusListener(GeneralListener f)
 {
 	LoseFocusListener = f;
 }
 
 void RULoseFocus::triggerLoseFocusEvent(GPanel* cPanel)
 {
-	if (LoseFocusListener != 0)
-		(cPanel->*LoseFocusListener)();
+	// Call the callback we saved
+	LoseFocusListener.call();
 }
 
 void RULoseFocus::setFocus()
