@@ -84,7 +84,7 @@ protected:
 public:
 	// constructor
 	RUTextComponent();
-	~RUTextComponent();
+	virtual ~RUTextComponent();
 
 	// gets
 	std::string getText() const;

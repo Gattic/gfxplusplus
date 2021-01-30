@@ -53,78 +53,77 @@ class GeneralListener
 	{
 	protected:
 
-		T cbPanel;
-		void (T::*listener)() = NULL;
+		T* cbPanel;
+		void (T::*listener0)() = NULL;
+		void (T::*listener1)(int) = NULL;
+		void (T::*listener2)(int, int) = NULL;
+		void (T::*listener3)(const std::string&, int, int) = NULL;
+		void (T::*listener4)(const std::string&) = NULL;
 
 	public:
-		ListenerModel(const T& t, void (T::*newListener)()) : cbPanel(t), listener((void (T::*)())newListener)
+		ListenerModel(T* t, void (T::*newListener)()) : cbPanel(t), listener0(newListener)
 		{
 			//
 		}
 
-		ListenerModel(const T& t, void (T::*newListener)(int)) : cbPanel(t), listener((void (T::*)())newListener)
+		ListenerModel(T* t, void (T::*newListener)(int)) : cbPanel(t), listener1(newListener)
 		{
 			//
 		}
 
-		ListenerModel(const T& t, void (T::*newListener)(int, int)) : cbPanel(t), listener((void (T::*)())newListener)
+		ListenerModel(T* t, void (T::*newListener)(int, int)) : cbPanel(t), listener2(newListener)
 		{
 			//
 		}
 
-		ListenerModel(const T& t, void (T::*newListener)(const std::string&, int, int)) : cbPanel(t), listener((void (T::*)())newListener)
+		ListenerModel(T* t, void (T::*newListener)(const std::string&, int, int)) : cbPanel(t), listener3(newListener)
 		{
 			//
 		}
 
-		ListenerModel(const T& t, void (T::*newListener)(const std::string&)) : cbPanel(t), listener((void (T::*)())newListener)
+		ListenerModel(T* t, void (T::*newListener)(const std::string&)) : cbPanel(t), listener4(newListener)
 		{
 			//
 		}
 
 		void call()
 		{
-			if(!listener)
+			if(!listener0)
 				return;
 
-			void (T::*typedListener)() = listener;
-			(&cbPanel->*typedListener)();
+			(cbPanel->*listener0)();
 		}
 
 		void call(int scrollType)
 		{
-			if(!listener)
+			if(!listener1)
 				return;
 
-			void (T::*typedListener)(int) = (void (T::*)(int))listener;
-			(cbPanel.*typedListener)(scrollType);
+			(cbPanel->*listener1)(scrollType);
 		}
 
 		void call(int x, int y)
 		{
-			if(!listener)
+			if(!listener2)
 				return;
 
-			void (T::*typedListener)(int, int) = (void (T::*)(int, int))listener;
-			(cbPanel.*typedListener)(x, y);
+			(cbPanel->*listener2)(x, y);
 		}
 
 		void call(const std::string& str, int x, int y)
 		{
-			if(!listener)
+			if(!listener3)
 				return;
 
-			void (T::*typedListener)(const std::string&, int, int) = (void (T::*)(const std::string&, int, int))listener;
-			(cbPanel.*typedListener)(str, x, y);
+			(cbPanel->*listener3)(str, x, y);
 		}
 
 		void call(const std::string& str)
 		{
-			if(!listener)
+			if(!listener4)
 				return;
 
-			void (T::*typedListener)(const std::string&) = (void (T::*)(const std::string&))listener;
-			(cbPanel.*typedListener)(str);
+			(cbPanel->*listener4)(str);
 		}
 
 		virtual ~ListenerModel()
@@ -143,31 +142,31 @@ public:
 	}
 
 	template< typename T>
-	GeneralListener(const T& callbackPanel, void (T::*newListener)())
+	GeneralListener(T* callbackPanel, void (T::*newListener)())
 	{
 		object = new ListenerModel<T>(callbackPanel, newListener);
 	}
 
 	template< typename T>
-	GeneralListener(const T& callbackPanel, void (T::*newListener)(int))
+	GeneralListener(T* callbackPanel, void (T::*newListener)(int))
 	{
 		object = new ListenerModel<T>(callbackPanel, newListener);
 	}
 
 	template< typename T>
-	GeneralListener(const T& callbackPanel, void (T::*newListener)(int, int))
+	GeneralListener(T* callbackPanel, void (T::*newListener)(int, int))
 	{
 		object = new ListenerModel<T>(callbackPanel, newListener);
 	}
 
 	template< typename T>
-	GeneralListener(const T& callbackPanel, void (T::*newListener)(const std::string&, int, int))
+	GeneralListener(T* callbackPanel, void (T::*newListener)(const std::string&, int, int))
 	{
 		object = new ListenerModel<T>(callbackPanel, newListener);
 	}
 
 	template< typename T>
-	GeneralListener(const T& callbackPanel, void (T::*newListener)(const std::string&))
+	GeneralListener(T* callbackPanel, void (T::*newListener)(const std::string&))
 	{
 		object = new ListenerModel<T>(callbackPanel, newListener);
 	}
