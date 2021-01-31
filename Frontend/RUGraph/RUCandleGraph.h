@@ -40,6 +40,8 @@ class GList;
 class RUCandleGraph : public RUGraph
 {
 private:
+	int period;
+	int agg; //aggregate
 	std::map<std::string, Graphable<Candle>*> candles;
 
 protected:
@@ -48,9 +50,37 @@ protected:
 
 public:
 
+	const static unsigned int P_ALL = 0;
+	const static unsigned int P_1D = 1;
+	const static unsigned int P_5D = 2;
+	const static unsigned int P_1M = 3;
+	const static unsigned int P_3M = 4;
+	const static unsigned int P_6M = 5;
+	const static unsigned int P_YTD = 6;
+	const static unsigned int P_1Y = 7;
+	const static unsigned int P_5Y = 8;
+
+	const static unsigned int AGG_1m = 1;
+	const static unsigned int AGG_2m = 2;
+	const static unsigned int AGG_3m = 3;
+	const static unsigned int AGG_5m = 5;
+	const static unsigned int AGG_15m = 15;
+	const static unsigned int AGG_30m = 30;
+	const static unsigned int AGG_1h = 60;
+	const static unsigned int AGG_4h = 240;
+	const static unsigned int AGG_1D = 390;
+	const static unsigned int AGG_1W = 1950;
+	const static unsigned int AGG_3W = 5850;
+
 	// constructors & destructor
 	RUCandleGraph(int, int, int = QUADRANTS_ONE);
 	virtual ~RUCandleGraph();
+
+	unsigned int getPeriod();
+	unsigned int getAggregate();
+
+	void setPeriod(unsigned int newPeriod);
+	void setAggregate(unsigned int newAggregate);
 
 	virtual std::string getType() const;
 	virtual void add(gfxpp*, std::string, const Candle*,

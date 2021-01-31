@@ -22,12 +22,33 @@
 RUCandleGraph::RUCandleGraph(int newWidth, int newHeight, int newQuadrants)
 	: RUGraph(newWidth, newHeight, newQuadrants)
 {
-	//
+	period = P_1Y;
+	agg = AGG_1D;
 }
 
 RUCandleGraph::~RUCandleGraph()
 {
 	clear();
+}
+
+unsigned int RUCandleGraph::getPeriod()
+{
+	return period;
+}
+
+unsigned int RUCandleGraph::getAggregate()
+{
+	return agg;
+}
+
+void RUCandleGraph::setPeriod(unsigned int newPeriod)
+{
+	period = newPeriod;
+}
+
+void RUCandleGraph::setAggregate(unsigned int newAggregate)
+{
+	agg = newAggregate;
 }
 
 //Dont worry about this fnc
@@ -100,6 +121,8 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 
 void RUCandleGraph::clear(bool toggleDraw)
 {
+	period = P_1Y;
+	agg = AGG_1D;
 	std::map<std::string, Graphable<Candle>*>::iterator it;
 
 	for (it = candles.begin(); it != candles.end(); ++it)

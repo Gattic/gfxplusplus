@@ -15,6 +15,7 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
+#include "RUCandleGraph.h"
 
 template <>
 void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization)
@@ -81,12 +82,18 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 
 	//==============================================Normalize the points==============================================
 
-	float xRange = (float)points.size();
+	unsigned int agg = ((RUCandleGraph*)parent)->getAggregate();
+	float xRange = (float)points.size() / (float)agg;
 	float yRange = yMax - yMin;
 
 	// Scales coordinates based on graph size and data range.
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
+	if(isinf(pointXGap))
+	{
+		normalizedPoints.clear();
+		return;
+	}
 
 	unsigned int i = 0;
 	if(redoRange)
@@ -94,27 +101,55 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 	else
 		i = points.size()-1;
 
+		// Aggregate helpers
+	unsigned int aggCounter = 0;
+	float aggOpenValue = 0.0f;
+	float aggCloseValue = 0.0f;
+	float aggHighValue = 0.0f;
+	float aggLowValue = 0.0f;
+
 	for (; i < points.size(); ++i)
 	{
 
 		// First point would be drawn at x = 0, so we need to add (pointXGap / 2)
 		// so that the bar can be drawn left and right.
-		float newXValue = (i * pointXGap) + (pointXGap / 2);
 		float newOpenValue = (points[i]->getOpen() - yMin) * pointYGap;
 		float newCloseValue = (points[i]->getClose() - yMin) * pointYGap;
 		float newHighValue = (points[i]->getHigh() - yMin) * pointYGap;
 		float newLowValue = (points[i]->getLow() - yMin) * pointYGap;
 
-		//printf("[%d]: %f; %d + %f == %f\n", i, pointXGap, parent->getAxisOriginX(), newXValue, (parent->getAxisOriginX() + newXValue));
-		//printf("[%d]: %f; %d + %d - %f == %f\n", i, pointYGap, parent->getAxisOriginY(), parent->getHeight(), newOpenValue, (parent->getAxisOriginY() + parent->getHeight() - newOpenValue));
-		Candle* newCandle = new Candle(parent->getAxisOriginX() + newXValue,
-							parent->getAxisOriginY() + parent->getHeight() - newOpenValue,
-							parent->getAxisOriginY() + parent->getHeight() - newCloseValue,
-							parent->getAxisOriginY() + parent->getHeight() - newHighValue,
-							parent->getAxisOriginY() + parent->getHeight() - newLowValue);
+		// Time to Aggreagate
+		++aggCounter;
+		if(aggCounter == 1)
+			aggOpenValue=newOpenValue;
+		if(aggCounter >= agg)
+			aggCloseValue=newCloseValue;
+		if(newHighValue > aggHighValue)
+			aggHighValue=newHighValue;
+		if(newLowValue < aggLowValue)
+			aggLowValue=newLowValue;
 
+		// Are we done aggregating data yet?
+		if(aggCounter < agg)
+			continue;
+
+		// Our aggregated candle
+		float newXValue = ((i/agg) * pointXGap) + (pointXGap / 2);
+		Candle* newCandle = new Candle(parent->getAxisOriginX() + newXValue,
+							parent->getAxisOriginY() + parent->getHeight() - aggOpenValue,
+							parent->getAxisOriginY() + parent->getHeight() - aggCloseValue,
+							parent->getAxisOriginY() + parent->getHeight() - aggHighValue,
+							parent->getAxisOriginY() + parent->getHeight() - aggLowValue);
+
+		// The draw container
 		normalizedPoints.push_back(newCandle);
-		//printf("Candle[%ld][%d, %d]: %f : (%f, %f) :: (%f, %f)\n", normalizedPoints.size()-1, width, height, newCandle->getX(), newCandle->getOpen(), newCandle->getClose(), newCandle->getHigh(), newCandle->getLow());
+
+		// Reset the agg helpers
+		aggCounter = 0;
+		aggOpenValue = 0.0f;
+		aggCloseValue = 0.0f;
+		aggHighValue = 0.0f;
+		aggLowValue = 0.0f;
 	}
 }
 
@@ -130,6 +165,8 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 	// Scales coordinates based on graph size and data range.
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
+	if(isinf(pointXGap))
+		return;
 
 	//printf("PointXGap, PointYGap (%f,%f)\n", pointXGap, pointYGap);
 	//printf("Total Candles: %d\n", normalizedPoints.size());

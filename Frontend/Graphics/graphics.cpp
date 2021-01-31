@@ -678,7 +678,7 @@ void gfxpp::clean2D()
 
 	if (renderer)
 	{
-		SDL_DestroyRenderer(renderer);
+		//SDL_DestroyRenderer(renderer); // TODO: CRASHES
 		renderer = NULL;
 	}
 
