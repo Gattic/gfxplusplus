@@ -134,7 +134,7 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 			continue;
 
 		// Our aggregated candle
-		float newXValue = ((i/agg) * pointXGap) + (pointXGap / 2);
+		float newXValue = ((i/agg) * pointXGap);
 		Candle* newCandle = new Candle(parent->getAxisOriginX() + newXValue,
 							parent->getAxisOriginY() + parent->getHeight() - aggOpenValue,
 							parent->getAxisOriginY() + parent->getHeight() - aggCloseValue,
