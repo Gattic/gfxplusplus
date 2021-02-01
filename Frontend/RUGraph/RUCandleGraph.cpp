@@ -75,7 +75,7 @@ void RUCandleGraph::add(gfxpp* cGfx, std::string label, const Candle* newPoint,
 	cPlotter->add(cGfx, plotterPoint);
 
 	// trigger the draw update
-	drawUpdate = true;
+	// drawUpdate = true;
 }
 
 void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<Candle*>& graphPoints,

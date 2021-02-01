@@ -151,6 +151,8 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 		aggHighValue = 0.0f;
 		aggLowValue = 0.0f;
 	}
+
+	parent->requireDrawUpdate();
 }
 
 template <>
