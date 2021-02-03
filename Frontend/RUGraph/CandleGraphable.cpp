@@ -65,17 +65,6 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 		yMax = y_max;
 	}
 
-	// Set the pixels array
-	int width = parent->getWidth();
-	int height = parent->getHeight();
-	if((oldWidth*oldHeight != width*height) || (!pixels))
-	{
-		pixels = (unsigned int*)malloc(width * height * sizeof(*pixels));
-	}
-
-	oldWidth = width;
-	oldHeight = height;
-
 	//==============================================Normalize the points==============================================
 
 	unsigned int agg = ((RUCandleGraph*)parent)->getAggregate();

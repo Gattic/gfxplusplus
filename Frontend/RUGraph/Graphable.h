@@ -35,13 +35,10 @@ class Graphable
 {
 private:
 	RUGraph* parent;
-	unsigned int* pixels;
 	std::vector<T*> points;
 	std::vector<T*> normalizedPoints;
 	float yMin;
 	float yMax;
-	float oldWidth;
-	float oldHeight;
 
 	bool redoRange;
 	SDL_Color lineColor;
@@ -74,13 +71,10 @@ template <class T>
 Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor)
 {
 	parent = newParent;
-	pixels = NULL;
 	setColor(newColor);
 
 	yMin = 0.0f;
 	yMax = 0.0f;
-	oldWidth = 0;
-	oldHeight = 0;
 
 	redoRange = true;
 }
@@ -158,15 +152,9 @@ void Graphable<T>::clear()
 	points.clear();
 	normalizedPoints.clear();
 
-	if(pixels)
-		free(pixels);
-	pixels = NULL;
-
 	parent = NULL;
 	yMin = 0.0f;
 	yMax = 0.0f;
-	oldWidth = 0;
-	oldHeight = 0;
 
 	redoRange = true;
 }

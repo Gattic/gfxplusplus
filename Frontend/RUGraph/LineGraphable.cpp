@@ -64,17 +64,6 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 		yMax = y_max;
 	}
 
-	// Set the pixels array
-	int width = parent->getWidth();
-	int height = parent->getHeight();
-	if((oldWidth*oldHeight != width*height) || (!pixels))
-	{
-		pixels = (unsigned int*)malloc(width * height * sizeof(*pixels));
-	}
-
-	oldWidth = width;
-	oldHeight = height;
-
 	//==============================================Normalize the points==============================================
 
 	float xRange = (float)points.size();
@@ -101,61 +90,67 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 template <>
 void Graphable<Point2>::draw(gfxpp* cGfx)
 {
-	int width = parent->getWidth();
-	int height = parent->getHeight();
+	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
+						   getColor().a);
 
-	unsigned int cBGColor = parent->getBGColor().r;
-	cBGColor = cBGColor*0x100 + parent->getBGColor().g;
-	cBGColor = cBGColor*0x100 + parent->getBGColor().b;
-	cBGColor = cBGColor*0x100 + parent->getBGColor().a;
+	float xRange = (float)normalizedPoints.size(); // normalizedPoints per x axis
+	float yRange = yMax - yMin;
 
-	unsigned int cColor = getColor().r;
-	cColor = cColor*0x100 + getColor().g;
-	cColor = cColor*0x100 + getColor().b;
-	cColor = cColor*0x100 + getColor().a;
+	float pointXGap = ((float)parent->getWidth()) / xRange;
+	float pointYGap = ((float)parent->getHeight()) / yRange;
 
-	// The background color
-	for (int y = 0; y < height; ++y)
+	if((redoRange) || (normalizedPoints.size() < 2))
 	{
-		unsigned int* row = pixels + y * width;
-		for (int x = 0; x < width; ++x)
+		Point2* prevPoint = NULL;
+		unsigned int i = 0;
+		for (; i < normalizedPoints.size(); ++i)
 		{
-			row[x] = cBGColor;
+			// add it to the background
+			Point2* cPoint = normalizedPoints[i];
+
+			// draw a thick line from the previous to the current point
+			if ((prevPoint) && (i > 0))
+			{
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
+								   cPoint->getX(), cPoint->getY() - 1);
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
+								   cPoint->getX(), cPoint->getY());
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
+								   cPoint->getX(), cPoint->getY() + 1);
+			}
+
+			prevPoint = cPoint;
 		}
 	}
-
-	// Draw the line and give it thickness
-	for (unsigned int i=0; i < normalizedPoints.size(); ++i)
+	else
 	{
-		// Add next point to the background
-		Point2* cPoint = normalizedPoints[i];
-		if(!cPoint)
-			continue;
+		//
+		SDL_Rect dRect;
+		dRect.x = 0;
+		dRect.y = 0;
+		dRect.w = parent->getWidth() - pointXGap;
+		dRect.h = parent->getHeight();
+		SDL_RenderCopy(cGfx->getRenderer(), parent->getBackground(), NULL, &dRect);
 
-		int cX = ((unsigned int)cPoint->getX());
-		int cY = ((unsigned int)cPoint->getY());
-
-		// Line - 1
-		if((cX < width) && (cY-1 < height) && (cY-1 > 0))
+		unsigned int i = normalizedPoints.size()-1;
+		Point2* prevPoint = normalizedPoints[i-1];
+		for (; i < normalizedPoints.size(); ++i)
 		{
-			unsigned int* row = pixels + ((cY-1) * width);
-			row[cX] = cColor;
-		}
+			// add it to the background
+			Point2* cPoint = normalizedPoints[i];
 
-		// Line
-		if((cX < width) && (cY < height))
-		{
-			unsigned int* row = pixels + (cY * width);
-			row[cX] = cColor;
-		}
+			// draw a thick line from the previous to the current point
+			if ((prevPoint) && (i > 0))
+			{
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
+								   cPoint->getX(), cPoint->getY() - 1);
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
+								   cPoint->getX(), cPoint->getY());
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
+								   cPoint->getX(), cPoint->getY() + 1);
+			}
 
-		// Line + 1
-		if((cX < width) && (cY+1 < height))
-		{
-			unsigned int* row = pixels + ((cY+1) * width);
-			row[cX] = cColor;
+			prevPoint = cPoint;
 		}
 	}
-
-	SDL_UpdateTexture(parent->getBackground(), NULL, pixels, width * sizeof(*pixels));
 }
