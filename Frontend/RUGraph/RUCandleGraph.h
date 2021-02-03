@@ -60,6 +60,8 @@ public:
 	const static unsigned int P_YTD = 6;
 	const static unsigned int P_1Y = 7;
 	const static unsigned int P_5Y = 8;
+	const static unsigned int P_10Y = 9;
+	const static unsigned int P_20Y = 10;
 
 	const static unsigned int AGG_1m = 1;
 	const static unsigned int AGG_2m = 2;

@@ -154,15 +154,19 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 	int width = parent->getWidth();
 	int height = parent->getHeight();
 
-	unsigned int agg = ((RUCandleGraph*)parent)->getAggregate();
 	float xRange = (float)normalizedPoints.size();
 	float yRange = yMax - yMin;
 
 	// Scales coordinates based on graph size and data range.
+	unsigned int agg = ((RUCandleGraph*)parent)->getAggregate();
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
 
 	if(isinf(pointXGap))
+		return;
+
+	// Dont draw with bad data
+	if(! ((xRange == points.size()/agg) || (xRange == (points.size()/agg)+1)) )
 		return;
 
 	unsigned int cBGColor = parent->getBGColor().r;

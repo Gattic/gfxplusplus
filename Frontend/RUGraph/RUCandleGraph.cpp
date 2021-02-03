@@ -22,7 +22,7 @@
 RUCandleGraph::RUCandleGraph(int newWidth, int newHeight, int newQuadrants)
 	: RUGraph(newWidth, newHeight, newQuadrants)
 {
-	vscale = 0;
+	vscale = 0; // 0 is auto
 	period = P_1Y;
 	agg = AGG_1D;
 }
@@ -132,7 +132,7 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 
 void RUCandleGraph::clear(bool toggleDraw)
 {
-	vscale = 0;
+	vscale = 0; // 0 is auto
 	period = P_1Y;
 	agg = AGG_1D;
 	std::map<std::string, Graphable<Candle>*>::iterator it;
