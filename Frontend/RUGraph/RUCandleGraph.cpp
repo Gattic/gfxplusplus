@@ -22,6 +22,7 @@
 RUCandleGraph::RUCandleGraph(int newWidth, int newHeight, int newQuadrants)
 	: RUGraph(newWidth, newHeight, newQuadrants)
 {
+	vscale = 0;
 	period = P_1Y;
 	agg = AGG_1D;
 }
@@ -29,6 +30,11 @@ RUCandleGraph::RUCandleGraph(int newWidth, int newHeight, int newQuadrants)
 RUCandleGraph::~RUCandleGraph()
 {
 	clear();
+}
+
+unsigned int RUCandleGraph::getVScale()
+{
+	return vscale;
 }
 
 unsigned int RUCandleGraph::getPeriod()
@@ -39,6 +45,11 @@ unsigned int RUCandleGraph::getPeriod()
 unsigned int RUCandleGraph::getAggregate()
 {
 	return agg;
+}
+
+void RUCandleGraph::setVScale(unsigned int newVScale)
+{
+	vscale = newVScale;
 }
 
 void RUCandleGraph::setPeriod(unsigned int newPeriod)
@@ -61,8 +72,6 @@ void RUCandleGraph::add(gfxpp* cGfx, std::string label, const Candle* newPoint,
 	Candle* plotterPoint = new Candle(newPoint->getX(), newPoint->getOpen(), newPoint->getClose(),
 		newPoint->getHigh(), newPoint->getLow());
 
-	//if (candles.find(label) == candles.end())
-		//return;
 	if (candles.find(label) == candles.end())
 	{
 		std::vector<Candle*> newPointVec;
@@ -74,7 +83,9 @@ void RUCandleGraph::add(gfxpp* cGfx, std::string label, const Candle* newPoint,
 	Graphable<Candle>* cPlotter = candles[label];
 	cPlotter->add(cGfx, plotterPoint);
 
-	// trigger the draw update
+	// DON'T trigger the draw update
+	// We do it manually in plotter add
+	// This is an optimization for candles
 	// drawUpdate = true;
 }
 
@@ -121,6 +132,7 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 
 void RUCandleGraph::clear(bool toggleDraw)
 {
+	vscale = 0;
 	period = P_1Y;
 	agg = AGG_1D;
 	std::map<std::string, Graphable<Candle>*>::iterator it;

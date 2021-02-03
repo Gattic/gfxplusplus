@@ -40,8 +40,9 @@ class GList;
 class RUCandleGraph : public RUGraph
 {
 private:
-	int period;
-	int agg; //aggregate
+	unsigned int vscale;
+	unsigned int period;
+	unsigned int agg; //aggregate
 	std::map<std::string, Graphable<Candle>*> candles;
 
 protected:
@@ -76,11 +77,13 @@ public:
 	RUCandleGraph(int, int, int = QUADRANTS_ONE);
 	virtual ~RUCandleGraph();
 
+	unsigned int getVScale();
 	unsigned int getPeriod();
 	unsigned int getAggregate();
 
-	void setPeriod(unsigned int newPeriod);
-	void setAggregate(unsigned int newAggregate);
+	void setVScale(unsigned int);
+	void setPeriod(unsigned int);
+	void setAggregate(unsigned int);
 
 	virtual std::string getType() const;
 	virtual void add(gfxpp*, std::string, const Candle*,
