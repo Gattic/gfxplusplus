@@ -26,6 +26,7 @@
 
 gfxpp::gfxpp()
 {
+	systemCursor = NULL;
 	width = 800;
 	height = 600;
 	renderStatus = _2D;
@@ -36,6 +37,7 @@ gfxpp::gfxpp()
 gfxpp::gfxpp(std::string newTitle, int newRenderStatus, bool fullScreenMode, int newWidth,
 			 int newHeight)
 {
+	systemCursor = NULL;
 	renderStatus = newRenderStatus;
 	width = newWidth;
 	height = newHeight;
@@ -145,6 +147,10 @@ int gfxpp::initHelper(bool fullscreenMode, std::string title)
 	else if (renderStatus == _3D)
 		init3D();
 
+	// Set the SDL system cursor
+	systemCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+
+	// ALl good with initialization, return success
 	return 0;
 }
 

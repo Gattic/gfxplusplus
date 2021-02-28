@@ -46,6 +46,7 @@ void RUMouseMotion::setCursor(SDL_SystemCursor newCursor)
 {
 	cursor = newCursor;
 	customCursor = true;
+	cursorPtr = SDL_CreateSystemCursor(cursor);
 }
 
 void RUMouseMotion::setMouseMotionListener(GeneralListener f)
@@ -75,9 +76,8 @@ void RUMouseMotion::onMouseMotionHelper(gfxpp* cGfx, EventTracker* eventsStatus,
 	// Dont want to override subcomps cursor
 	if ((customCursor) && (!eventsStatus->hovered))
 	{
-		// Set the cursor
-		SDL_Cursor* renderCursor = SDL_CreateSystemCursor(cursor);
-		SDL_SetCursor(renderCursor);
+		// Set the custom cursor
+		SDL_SetCursor(cursorPtr);
 	}
 
 	// pass on the event

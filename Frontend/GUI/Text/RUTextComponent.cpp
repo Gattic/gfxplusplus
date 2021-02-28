@@ -31,6 +31,7 @@ RUTextComponent::RUTextComponent()
 	cursorStart = 0;
 	readOnly = true;
 	FONT_COLOR = 0;
+	xClick = 0;
 
 	// event listeners
 	KeyListener = 0;
@@ -46,6 +47,7 @@ RUTextComponent::~RUTextComponent()
 	passwordChar = '*';
 	passwordField = false;
 	readOnly = true;
+	xClick = 0;
 	FONT_COLOR = 0;
 
 	// event listeners

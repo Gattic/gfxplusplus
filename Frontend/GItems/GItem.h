@@ -59,6 +59,8 @@ protected:
 	SDL_Texture* background;
 	std::vector<GItem*> subitems;
 
+	EventTracker* eventsStatus;
+
 	// render
 	virtual void updateBackground(gfxpp*) = 0;
 

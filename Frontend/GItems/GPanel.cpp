@@ -137,13 +137,12 @@ void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPane
 		EventTracker* eventsStatus = cItem->processEvents(cGfx, this, event, mouseX, mouseY);
 		if (eventsStatus->hovered)
 			hovered = true;
-		delete eventsStatus;
 	}
 
 	if (!hovered)
 	{
 		// Set the default cursor
-		SDL_Cursor* renderCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+		SDL_Cursor* renderCursor = cGfx->getSystemCursor();
 		SDL_SetCursor(renderCursor);
 	}
 }

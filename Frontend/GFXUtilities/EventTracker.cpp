@@ -35,3 +35,13 @@ EventTracker::~EventTracker()
 	hovered = false;
 	wheeled = false;
 }
+
+void EventTracker::reset()
+{
+	downClicked = false;
+	upClicked = false;
+	keyPressed = false;
+	keyReleased = false;
+	hovered = false;
+	wheeled = false;
+}

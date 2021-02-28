@@ -28,6 +28,8 @@ GItem::GItem()
 	background = NULL;
 	zindex = -2;
 
+	eventsStatus = new EventTracker();
+
 	// Ready
 	visible = true;
 	drawUpdate = true;
@@ -40,6 +42,8 @@ GItem::GItem(int newX, int newY, int newWidth, int newHeight)
 	background = NULL;
 	zindex = -2;
 
+	eventsStatus = new EventTracker();
+
 	// Ready
 	visible = true;
 	drawUpdate = true;
@@ -47,7 +51,9 @@ GItem::GItem(int newX, int newY, int newWidth, int newHeight)
 
 GItem::~GItem()
 {
-	//
+	eventsStatus = NULL;
+
+	//Do more here?
 }
 
 int GItem::getID() const
@@ -220,7 +226,7 @@ void GItem::clearItems(unsigned int numToSave)
 EventTracker* GItem::processEvents(gfxpp* cGfx, GPanel* parentPanel, SDL_Event event, int mouseX,
 								   int mouseY)
 {
-	EventTracker* eventsStatus = new EventTracker();
+	eventsStatus->reset();
 
 	if (!cGfx)
 		return eventsStatus;
@@ -262,7 +268,7 @@ EventTracker* GItem::processEvents(gfxpp* cGfx, GPanel* parentPanel, SDL_Event e
 				if (customCursor)
 				{
 					// Set the cursor
-					SDL_Cursor* renderCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+					SDL_Cursor* renderCursor = cGfx->getSystemCursor();
 					SDL_SetCursor(renderCursor);
 				}
 
