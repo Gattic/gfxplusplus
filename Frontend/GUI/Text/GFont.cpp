@@ -16,7 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "GFont.h"
 #include "../../GItems/RUColors.h"
-#include "Backend/Database/GType.h"
+#include "Backend/Database/GString.h"
 
 GFont::GFont()
 {
@@ -93,7 +93,7 @@ void GFont::loadLetters()
 	for (unsigned char i = 1; i != 0; ++i)
 	{
 		SDL_Surface* textMessage =
-			TTF_RenderText_Solid(font, shmea::GType::charTOstring(i).c_str(), textColor);
+			TTF_RenderText_Solid(font, shmea::GString::charTOstring(i).c_str(), textColor);
 
 		if (!textMessage)
 		{
@@ -113,8 +113,8 @@ void GFont::loadLetters()
 		// Letter texture dimensions
 		int newWidth = 0;
 		int newHeight = 0;
-		std::string letterAsString = "";
-		letterAsString += shmea::GType::charTOstring(i);
+		shmea::GString letterAsString = "";
+		letterAsString += shmea::GString::charTOstring((char)i);
 		TTF_SizeText(getFont(), letterAsString.c_str(), &newWidth, &newHeight);
 
 		if (newHeight > maxHeight)
@@ -172,7 +172,7 @@ void GFont::setTextColor(SDL_Color newTextColor)
 
 bool GFont::validChar(char text)
 {
-	text = shmea::GType::toLower(text);
+	text = shmea::GString::toLower(text);
 	switch (text)
 	{
 	// letters

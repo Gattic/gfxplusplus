@@ -218,7 +218,7 @@ void RUTable::updateLabels()
 		std::vector<RULabel*> newRow;
 		for (unsigned int col = 0; col < numberOfCols(); ++col)
 		{
-			RULabel* newItem = new RULabel(getCell(row, col).getString());
+			RULabel* newItem = new RULabel(getCell(row, col).c_str());
 			newItem->setMarginX(col * cellWidth);
 			newItem->setMarginY(row * cellHeight);
 			newItem->setWidth(cellWidth);
@@ -273,7 +273,7 @@ void RUTable::refreshLabels()
 			textLabels[row][col]->setWidth(cellWidth);
 			textLabels[row][col]->setHeight(cellHeight);
 			// textLabels[row][col]->setFontSize(cellHeight / 2);
-			textLabels[row][col]->setText(getCell(row + cIndex, col).getString());
+			textLabels[row][col]->setText(getCell(row + cIndex, col).c_str());
 		}
 	}
 

@@ -74,6 +74,6 @@ public:
 		error = 0;
 	}
 };
-}; // namespace GNet
+};
 
 #endif
