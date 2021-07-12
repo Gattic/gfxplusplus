@@ -16,141 +16,76 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
 
+//TODO: Separate Scalar1D from Point2D and implement this add fncality
+
 template <>
-void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool fillOptimization)
+void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization)
 {
 	if (!cGfx)
+		return;
+
+	if (!parent)
+		return;
+
+	if (!cGfx->getRenderer())
 		return;
 
 	if (points.empty())
 		return;
 
-	y_max = points[0]->getY();
-	y_min = y_max;
-	x_max = points[0]->getX();
-	x_min = x_max;
-
-	for (unsigned int i = 1; i < points.size(); ++i)
+	redoRange = !additionOptimization;
+	if(additionOptimization)
 	{
-		Point2* pt = points[i];
-		float y_pt = pt->getY(), x_pt = pt->getX();
-		if (y_pt > y_max)
-			y_max = y_pt;
-
-		else if (y_pt < y_min)
-			y_min = y_pt;
-
-		if (x_pt < x_min)
-			x_min = x_pt;
-
-		else if (x_pt > x_max)
-			x_max = x_pt;
+		// Is the latest y not within the current range?
+		float cY = points[points.size()-1]->getY();
+		if(!((cY >= yMin) && (cY <= yMax)))
+			redoRange = true;
 	}
 
-	int calculatedWidth = x_max - x_min;
-	int calculatedHeight = y_max - y_min;
-
-	// If we need more room, extend by doubling
-	int newWidth = drawWidth;
-	while (newWidth < calculatedWidth)
+	redoRange = true;
+	if(redoRange)
 	{
-		if (newWidth == -1)
-			return;
+		float y_max = points[0]->getY();
+		float y_min = y_max;
 
-		// Add an upper limit here to work on certain size images only
-		// if (newWidth >= SOME_LARGE_NUMBER)
-		// return;
-
-		if (newWidth == 0)
-			newWidth = 16;
-		else
-			newWidth *= 2;
-	}
-
-	// If we need more room, extend by doubling
-	int newHeight = drawHeight;
-	while (newHeight < calculatedHeight)
-	{
-		if (newHeight == -1)
-			return;
-
-		if (newHeight == 0)
-			newHeight = 16;
-		else
-			newHeight *= 2;
-	}
-
-	/*printf("Calculated(%d,%d)\n", calculatedWidth, calculatedHeight);
-	printf("New(%d,%d)\n", newWidth, newHeight);
-	printf("Draw(%d,%d)\n", drawWidth, drawHeight);
-	printf("---------------------------------------------------------------\n");*/
-	drawWidth = newWidth;
-	drawHeight = newHeight;
-
-	// Do we need to recreate the texutre?
-	/*if ((newWidth >= drawWidth) || (newHeight >= drawHeight))
-	{
-		// Delete the old texture
-		if (rawGraph)
-			free(rawGraph);
-
-		// Set the new raw graph size
-		drawWidth = newWidth;
-		drawHeight = newHeight;
-
-		// Create a new texture
-		printf("New Texture(%d,%d)\n", drawWidth, drawHeight);
-		//rawGraph = SDL_CreateTexture(cGfx->getRenderer(),
-		//	SDL_PIXELFORMAT_RGBA8888,
-		//	SDL_TEXTUREACCESS_TARGET, drawWidth, drawHeight);
-	}*/
-
-
-
-
-
-	// Redo the texture
-	/*if (drawType == OPT_FULL)
-	{
-		// If there was a graph, then resize it
-		if (rawGraph)
+		for (unsigned int i = 1; i < points.size(); ++i)
 		{
-			//Render to different target?
+			Point2* pt = points[i];
+			float y_pt = pt->getY();
+
+			if (y_pt > y_max)
+				y_max = y_pt;
+
+			else if (y_pt < y_min)
+				y_min = y_pt;
 		}
-		else
-		{
-			// Create a new texture
-			rawGraph = SDL_CreateTexture(cGfx->getRenderer(),
-				SDL_PIXELFORMAT_RGBA8888,
-				SDL_TEXTUREACCESS_TARGET, x_max - x_min, y_max - y_min);
-		}
+
+		yMin = y_min;
+		yMax = y_max;
 	}
-	else if (drawType == OPT_FILL)
+
+	//==============================================Normalize the points==============================================
+
+	float xRange = (float)points.size();
+	float yRange = yMax - yMin;
+
+	float pointXGap = ((float)parent->getWidth()) / xRange;
+	float pointYGap = ((float)parent->getHeight()) / yRange;
+
+	unsigned int i = 0;
+	if(redoRange)
+		normalizedPoints.clear();
+	else
+		i = points.size()-1;
+
+	for (; i < points.size(); ++i)
 	{
-		// Create or resize the new texture
-		// Set Render target to desitination texture
-		// RenderCopy source texture
+		float newXValue = i * pointXGap;
+		float newYValue = (points[i]->getY() - yMin) * pointYGap;
+		normalizedPoints.push_back(new Point2(parent->getAxisOriginX() + newXValue,
+							parent->getAxisOriginY() + parent->getHeight() - newYValue));
 	}
-	else if (drawType == OPT_NOTHING)
-	{
-		// Do nothing, just refresh
-	}*/
 }
-
-
-// This function is recommended for optimizations.
-template <>
-void Graphable<Point2>::add(gfxpp* cGfx, const Point2* newPoint)
-{
-	if (!newPoint)
-		return;
-
-	//TODO: Separate Scalar1D from Point2D and implement this add fncality
-	//points.push_back(new T(points.size(), newPoint->getY()));
-	//drawType = OPT_FILL;
-	//computeAxisRanges(cGfx, true); // add point optimization
-}
-
 
 template <>
 void Graphable<Point2>::draw(gfxpp* cGfx)
@@ -158,39 +93,64 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
 						   getColor().a);
 
-	float xRange = (float)points.size(); // points per x axis
-	float yRange = y_max - y_min;
+	float xRange = (float)normalizedPoints.size(); // normalizedPoints per x axis
+	float yRange = yMax - yMin;
 
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
 
-	Point2* cPoint = NULL;
-	Point2* prevPoint = NULL;
-	for (unsigned int i = 0; i < points.size(); ++i)
+	if((redoRange) || (normalizedPoints.size() < 2))
 	{
-		float newXValue = i * pointXGap;
-		float newYValue = (points[i]->getY() - y_min) * pointYGap;
-		// add it to the background
-		cPoint = new Point2(parent->getAxisOriginX() + newXValue,
-							parent->getAxisOriginY() + parent->getHeight() - newYValue);
-
-		// draw a thick line from the previous to the current point
-		if ((prevPoint) && (i > 0))
+		Point2* prevPoint = NULL;
+		unsigned int i = 0;
+		for (; i < normalizedPoints.size(); ++i)
 		{
-			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
-							   cPoint->getX(), cPoint->getY() - 1);
-			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
-							   cPoint->getX(), cPoint->getY());
-			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
-							   cPoint->getX(), cPoint->getY() + 1);
+			// add it to the background
+			Point2* cPoint = normalizedPoints[i];
+
+			// draw a thick line from the previous to the current point
+			if ((prevPoint) && (i > 0))
+			{
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
+								   cPoint->getX(), cPoint->getY() - 1);
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
+								   cPoint->getX(), cPoint->getY());
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
+								   cPoint->getX(), cPoint->getY() + 1);
+			}
+
+			prevPoint = cPoint;
 		}
-
-		// save the previous point for later
-		if (prevPoint)
-			delete prevPoint;
-		prevPoint = cPoint;
 	}
+	else
+	{
+		//
+		SDL_Rect dRect;
+		dRect.x = 0;
+		dRect.y = 0;
+		dRect.w = parent->getWidth() - pointXGap;
+		dRect.h = parent->getHeight();
+		SDL_RenderCopy(cGfx->getRenderer(), parent->getBackground(), NULL, &dRect);
 
-	if (cPoint)
-		delete cPoint;
+		unsigned int i = normalizedPoints.size()-1;
+		Point2* prevPoint = normalizedPoints[i-1];
+		for (; i < normalizedPoints.size(); ++i)
+		{
+			// add it to the background
+			Point2* cPoint = normalizedPoints[i];
+
+			// draw a thick line from the previous to the current point
+			if ((prevPoint) && (i > 0))
+			{
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
+								   cPoint->getX(), cPoint->getY() - 1);
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
+								   cPoint->getX(), cPoint->getY());
+				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
+								   cPoint->getX(), cPoint->getY() + 1);
+			}
+
+			prevPoint = cPoint;
+		}
+	}
 }

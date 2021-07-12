@@ -19,14 +19,16 @@
 
 Candle::Candle()
 {
+	setX(0.0f);
 	setOpen(0.0f);
 	setClose(0.0f);
 	setHigh(0.0f);
 	setLow(0.0f);
 }
 
-Candle::Candle(float newOpen, float newClose, float newHigh, float newLow)
+Candle::Candle(float newX, float newOpen, float newClose, float newHigh, float newLow)
 {
+	setX(newX);
 	setOpen(newOpen);
 	setClose(newClose);
 	setHigh(newHigh);
@@ -35,6 +37,7 @@ Candle::Candle(float newOpen, float newClose, float newHigh, float newLow)
 
 Candle::Candle(const Candle& c2)
 {
+	setX(c2.x);
 	setOpen(c2.open);
 	setClose(c2.close);
 	setHigh(c2.high);
@@ -43,10 +46,16 @@ Candle::Candle(const Candle& c2)
 
 Candle::~Candle()
 {
+	setX(0.0f);
 	setOpen(0.0f);
 	setClose(0.0f);
 	setHigh(0.0f);
 	setLow(0.0f);
+}
+
+float Candle::getX() const
+{
+	return x;
 }
 
 float Candle::getOpen() const
@@ -69,12 +78,18 @@ float Candle::getLow() const
 	return low;
 }
 
-void Candle::set(float newOpen, float newClose, float newHigh, float newLow)
+void Candle::set(float newX, float newOpen, float newClose, float newHigh, float newLow)
 {
+	setX(newX);
 	setOpen(newOpen);
 	setClose(newClose);
 	setHigh(newHigh);
 	setLow(newLow);
+}
+
+void Candle::setX(float newX)
+{
+	x = newX;
 }
 
 void Candle::setOpen(float newOpen)

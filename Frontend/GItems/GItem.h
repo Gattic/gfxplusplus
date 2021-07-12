@@ -28,6 +28,7 @@
 #include "Mini/RUMouseUp.h"
 #include "Mini/RUMouseWheel.h"
 #include "RUItemArea.h"
+#include "GeneralListener.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <stdio.h>
@@ -51,18 +52,22 @@ class GItem : public RUBackgroundComponent,
 			  public RULoseFocus
 {
 protected:
+
 	int id;
-	int zindex;
+	unsigned int zindex;
 	std::string name;
 	SDL_Texture* background;
 	std::vector<GItem*> subitems;
+
+	EventTracker* eventsStatus;
 
 	// render
 	virtual void updateBackground(gfxpp*) = 0;
 
 public:
-	static const int Z_FRONT = -1;
-	static const int Z_BACK = -2;
+
+	static const unsigned int Z_FRONT = -1; // max unsigned int
+	static const unsigned int Z_BACK = -2; // max unsigned int -1
 
 	GItem();
 	GItem(int, int, int, int);
@@ -73,7 +78,7 @@ public:
 	std::string getName() const;
 	GItem* getItemByID(int);
 	GItem* getItemByName(const std::string&);
-	int getZIndex() const;
+	unsigned int getZIndex() const;
 	SDL_Texture* getBackground();
 	std::vector<GItem*> getItems() const;
 
@@ -82,10 +87,10 @@ public:
 	void setName(const std::string&);
 	void setWidth(int);
 	void setHeight(int);
-	void setZIndex(int);
+	void setZIndex(unsigned int);
 
 	// subcomps
-	virtual void addSubItem(GItem*, int = Z_FRONT);
+	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
 	void removeItem(gfxpp*, int);
 	void removeItem(gfxpp*, const std::string&);
 	void clearItems(unsigned int = 0);

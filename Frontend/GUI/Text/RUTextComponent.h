@@ -56,6 +56,8 @@ protected:
 	static const int CUROSR_LEFT = 0;
 	static const int CURSOR_RIGHT = 1;
 
+	int FONT_COLOR;
+
 	SlidingFocusWindow cursor;
 
 	std::string text;
@@ -82,7 +84,7 @@ protected:
 public:
 	// constructor
 	RUTextComponent();
-	~RUTextComponent();
+	virtual ~RUTextComponent();
 
 	// gets
 	std::string getText() const;
@@ -96,7 +98,7 @@ public:
 	void setPasswordChar(char);
 	void setPasswordField(bool);
 	void setReadOnly(bool);
-	void setFont(GFont*);
+	void setFontColor(int);
 
 	// render
 	void drawText(gfxpp*);

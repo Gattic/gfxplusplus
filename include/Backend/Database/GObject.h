@@ -14,40 +14,53 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUMOUSEUP
-#define _RUMOUSEUP
+#ifndef _GOBJECT
+#define _GOBJECT
 
-#include "../RUItemArea.h"
-#include "../GeneralListener.h"
-#include <SDL2/SDL.h>
+#include "GTable.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <string>
+#include <vector>
 
-class gfxpp;
-class GItem;
-class GPanel;
-class EventTracker;
+namespace shmea {
+class Serializable;
 
-class RUMouseUp : public virtual RUItemArea
+class GObject
 {
-protected:
-	// events
-	virtual void onMouseUp(gfxpp*, GPanel*, int, int);
+	friend Serializable;
 
-	// event listeners
-	GeneralListener MouseUpListener;
+private:
+	//
+	GTable members;
+	std::vector<GTable> memberTables;
 
 public:
-	// constructors & destructor
-	RUMouseUp();
-	virtual ~RUMouseUp();
+	GObject();
+	GObject(const GObject&);
+	~GObject();
 
-	// event functions
-	void setMouseUpListener(GeneralListener);
+	// sets
+	void copy(const GObject&);
+	void addTable(const GTable&);
+	void insertTable(unsigned int, const GTable&);
+	void setTable(unsigned int, const GTable&);
+	void setMembers(const GTable&);
+	void remove(unsigned int);
+	void clear();
 
-	// events
-	void onMouseUpHelper(gfxpp*, EventTracker*, GPanel*, int, int, bool = false);
+	// gets
+	GTable getTable(unsigned int) const;
+	const GTable& getMembers() const;
+	unsigned int size() const;
+	bool empty() const;
+
+	// operators
+	GTable operator[](unsigned int);
+	const GTable operator[](unsigned int) const;
+	void operator=(const GObject&);
+};
 };
 
 #endif

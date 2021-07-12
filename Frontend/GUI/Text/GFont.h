@@ -46,6 +46,13 @@ public:
 		width = newWidth;
 	}
 
+	GLetter(const GLetter& otherLetter)
+	{
+		letter = otherLetter.letter;
+		tex = otherLetter.tex;
+		width = otherLetter.width;
+	}
+
 	~GLetter()
 	{
 		// TODO: Destroy the texture here
@@ -86,6 +93,7 @@ public:
 	// constructor
 	GFont();
 	GFont(SDL_Renderer*, std::string = "");
+	GFont(const GFont&);
 	~GFont();
 
 	SDL_Color getTextColor() const;

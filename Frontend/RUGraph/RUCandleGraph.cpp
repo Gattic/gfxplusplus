@@ -22,32 +22,79 @@
 RUCandleGraph::RUCandleGraph(int newWidth, int newHeight, int newQuadrants)
 	: RUGraph(newWidth, newHeight, newQuadrants)
 {
-	//
+	vscale = 0; // 0 is auto
+	period = P_1Y;
+	agg = AGG_1D;
 }
 
 RUCandleGraph::~RUCandleGraph()
 {
-	//
+	clear();
+}
+
+unsigned int RUCandleGraph::getVScale()
+{
+	return vscale;
+}
+
+unsigned int RUCandleGraph::getPeriod()
+{
+	return period;
+}
+
+unsigned int RUCandleGraph::getAggregate()
+{
+	return agg;
+}
+
+void RUCandleGraph::setVScale(unsigned int newVScale)
+{
+	vscale = newVScale;
+}
+
+void RUCandleGraph::setPeriod(unsigned int newPeriod)
+{
+	period = newPeriod;
+}
+
+void RUCandleGraph::setAggregate(unsigned int newAggregate)
+{
+	agg = newAggregate;
 }
 
 //Dont worry about this fnc
-void RUCandleGraph::add(gfxpp* cGfx, const std::string& label, const Candle& newPoint)
+void RUCandleGraph::add(gfxpp* cGfx, std::string label, const Candle* newPoint,
+				  SDL_Color lineColor)
 {
-	Candle* plotterPoint = new Candle();//TODO PASS IN ALL 4 OCHL
-
-	if (candles.find(label) == candles.end())
+	if(!cGfx)
 		return;
 
-	Graphable<Candle>* cPlotter = candles[label];
-	// cPlotter->add(cGfx, newPoint);//Leave this please n ty
+	Candle* plotterPoint = new Candle(newPoint->getX(), newPoint->getOpen(), newPoint->getClose(),
+		newPoint->getHigh(), newPoint->getLow());
 
-	// trigger the draw update
-	drawUpdate = true;
+	if (candles.find(label) == candles.end())
+	{
+		std::vector<Candle*> newPointVec;
+		newPointVec.push_back(plotterPoint);
+		set(cGfx, label, newPointVec, lineColor);
+		return;
+	}
+
+	Graphable<Candle>* cPlotter = candles[label];
+	cPlotter->add(cGfx, plotterPoint);
+
+	// DON'T trigger the draw update
+	// We do it manually in plotter add
+	// This is an optimization for candles
+	// drawUpdate = true;
 }
 
 void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<Candle*>& graphPoints,
 				  SDL_Color lineColor)
 {
+	if(!cGfx)
+		return;
+
 	Graphable<Candle>* newPlotter;
 	if (candles.find(label) != candles.end())
 		newPlotter = candles[label];
@@ -67,6 +114,9 @@ void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector
 
 void RUCandleGraph::updateBackground(gfxpp* cGfx)
 {
+	if(!cGfx)
+		return;
+
 	RUGraph::updateBackground(cGfx);
 
 	// draw the candles
@@ -82,6 +132,9 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 
 void RUCandleGraph::clear(bool toggleDraw)
 {
+	vscale = 0; // 0 is auto
+	period = P_1Y;
+	agg = AGG_1D;
 	std::map<std::string, Graphable<Candle>*>::iterator it;
 
 	for (it = candles.begin(); it != candles.end(); ++it)

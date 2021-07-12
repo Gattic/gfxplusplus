@@ -23,16 +23,16 @@
 RUKeyUp::RUKeyUp()
 {
 	// event listeners
-	KeyUpListener = 0;
+	KeyUpListener = GeneralListener();
 }
 
 RUKeyUp::~RUKeyUp()
 {
 	// event listeners
-	KeyUpListener = 0;
+	KeyUpListener = GeneralListener();
 }
 
-void RUKeyUp::setKeyUpListener(void (GPanel::*f)(const std::string&))
+void RUKeyUp::setKeyUpListener(GeneralListener f)
 {
 	KeyUpListener = f;
 }
@@ -61,6 +61,9 @@ void RUKeyUp::onKeyUpHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPa
 
 	// pass on the event
 	onKeyUp(cGfx, cPanel, keyPressed, keyModPressed);
+
+	// Call the callback we saved
+	KeyUpListener.call(cItem->getName());
 }
 
 void RUKeyUp::onKeyUp(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode keyPressed, Uint16 keyModPressed)

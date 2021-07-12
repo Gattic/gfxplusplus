@@ -22,16 +22,16 @@
 RUMouseWheel::RUMouseWheel()
 {
 	// event listeners
-	MouseWheelListener = 0;
+	MouseWheelListener = GeneralListener();
 }
 
 RUMouseWheel::~RUMouseWheel()
 {
 	// event listeners
-	MouseWheelListener = 0;
+	MouseWheelListener = GeneralListener();
 }
 
-void RUMouseWheel::setMouseWheelListener(void (GPanel::*f)(int))
+void RUMouseWheel::setMouseWheelListener(GeneralListener f)
 {
 	MouseWheelListener = f;
 }
@@ -60,8 +60,8 @@ void RUMouseWheel::onMouseWheelHelper(gfxpp* cGfx, EventTracker* eventsStatus, G
 	// pass on the event
 	onMouseWheel(cGfx, cPanel, eventX - getX(), eventY - getY(), scrollType);
 
-	if (MouseWheelListener != 0)
-		(cPanel->*MouseWheelListener)(scrollType);
+	// Call the callback we saved
+	MouseWheelListener.call(scrollType);
 
 	eventsStatus->wheeled = true;
 }

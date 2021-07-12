@@ -35,8 +35,8 @@ class GLayout;
 // GPanel is highest-level abstraction for rendering.
 class GPanel : public GItem
 {
-
 protected:
+
 	// Lifetime (virtual) functions
 	virtual void onStart() = 0;
 	virtual void onShow(gfxpp*);
@@ -46,9 +46,10 @@ protected:
 	virtual void updateBackground(gfxpp*);
 
 public:
+
 	GPanel(const std::string&, int, int);
 
-	virtual void addSubItem(GItem*, int = Z_FRONT);
+	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
 	// events
@@ -58,22 +59,6 @@ public:
 	virtual void unhover(gfxpp*);
 	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
 	virtual void updateBackgroundHelper(gfxpp*);
-
-	virtual void GuiCommander1(const std::string&, int, int) = 0;
-	virtual void GuiCommander2(const std::string&, int, int) = 0;
-	virtual void GuiCommander3(const std::string&, int, int) = 0;
-	virtual void GuiCommander4(const std::string&, int, int) = 0;
-	virtual void GuiCommander5(const std::string&, int, int) = 0;
-	virtual void GuiCommander6(const std::string&, int, int) = 0;
-	virtual void GuiCommander7(const std::string&, int, int) = 0;
-	virtual void GuiCommander8(const std::string&, int, int) = 0;
-	virtual void GuiCommander9() = 0;
-	virtual void GuiCommander10(const std::string&, int, int) = 0;
-	virtual void GuiCommander11(char) = 0;
-	virtual void GuiCommander12(const std::string&, int, int) = 0;
-	virtual void GuiCommander13(const std::string&, int, int) = 0;
-	virtual void GuiCommander14(const std::string&, int, int) = 0;
-	virtual void GuiCommander15(int) = 0;
 
 	virtual std::string getType() const;
 

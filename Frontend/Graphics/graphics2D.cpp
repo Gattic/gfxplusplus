@@ -59,6 +59,11 @@ unsigned int gfxpp::RGBfromHue(double hue, int8_t* r, int8_t* g, int8_t* b)
 	return (*r) + ((*g) << 8) + ((*b) << 16);
 }
 
+SDL_Cursor* gfxpp::getSystemCursor()
+{
+	return systemCursor;
+}
+
 void gfxpp::addGradient(int x, int y, int size)
 {
 	// check the renderer

@@ -16,7 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUTextComponent.h"
 #include "../../Graphics/graphics.h"
-#include "Backend/Database/GType.h"
+#include "Backend/Database/GString.h"
 #include "GFont.h"
 
 RUTextComponent::RUTextComponent()
@@ -30,6 +30,8 @@ RUTextComponent::RUTextComponent()
 	passwordField = false;
 	cursorStart = 0;
 	readOnly = true;
+	FONT_COLOR = 0;
+	xClick = 0;
 
 	// event listeners
 	KeyListener = 0;
@@ -45,6 +47,8 @@ RUTextComponent::~RUTextComponent()
 	passwordChar = '*';
 	passwordField = false;
 	readOnly = true;
+	xClick = 0;
+	FONT_COLOR = 0;
 
 	// event listeners
 	KeyListener = 0;
@@ -102,6 +106,12 @@ void RUTextComponent::setPasswordField(bool newPasswordField)
 void RUTextComponent::setReadOnly(bool newReadOnly)
 {
 	readOnly = newReadOnly;
+}
+
+void RUTextComponent::setFontColor(int newFontColor)
+{
+	FONT_COLOR = newFontColor;
+	drawUpdate = true;
 }
 
 void RUTextComponent::calculateRenderInfo(GFont* cFont)
@@ -211,7 +221,17 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 	if (!cGfx)
 		return;
 
-	GFont* cFont = cGfx->cFont;
+	if (!cGfx->getRenderer())
+		return;
+
+	GFont* cFont = NULL;
+	int fontColor = FONT_COLOR;
+	std::map<int, GFont*>::iterator it = cGfx->graphicsFonts.find(fontColor);
+	if (it != cGfx->graphicsFonts.end())
+	{
+		cFont = it->second;
+	}
+
 	if (!cFont)
 		return;
 
@@ -255,7 +275,17 @@ void RUTextComponent::drawCursor(gfxpp* cGfx, float cursorYGap)
 	if (!cGfx)
 		return;
 
-	GFont* cFont = cGfx->cFont;
+	if (!cGfx->getRenderer())
+		return;
+
+	GFont* cFont = NULL;
+	int fontColor = FONT_COLOR;
+	std::map<int, GFont*>::iterator it = cGfx->graphicsFonts.find(fontColor);
+	if (it != cGfx->graphicsFonts.end())
+	{
+		cFont = it->second;
+	}
+
 	if (!cFont)
 		return;
 
@@ -315,11 +345,11 @@ bool RUTextComponent::onKeyHelper(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode event
 	// make the character caps
 	if ((eventKeyModPressed & KMOD_SHIFT) || (eventKeyModPressed & KMOD_LSHIFT) ||
 		(eventKeyModPressed & KMOD_RSHIFT))
-		eventChar = shmea::GType::toUpper(eventChar);
+		eventChar = shmea::GString::toUpper(eventChar);
 
 	// toggle the case because of caps lock
 	if (eventKeyModPressed & KMOD_CAPS)
-		eventChar = shmea::GType::toggleCase(eventChar);
+		eventChar = shmea::GString::toggleCase(eventChar);
 
 	// write to the text component
 	if (!readOnly)

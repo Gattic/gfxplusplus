@@ -26,6 +26,7 @@
 
 gfxpp::gfxpp()
 {
+	systemCursor = NULL;
 	width = 800;
 	height = 600;
 	renderStatus = _2D;
@@ -36,6 +37,7 @@ gfxpp::gfxpp()
 gfxpp::gfxpp(std::string newTitle, int newRenderStatus, bool fullScreenMode, int newWidth,
 			 int newHeight)
 {
+	systemCursor = NULL;
 	renderStatus = newRenderStatus;
 	width = newWidth;
 	height = newHeight;
@@ -106,6 +108,8 @@ int gfxpp::initHelper(bool fullscreenMode, std::string title)
 		return -1;
 	}
 
+	//SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+
 	// Create a new window
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	if (fullscreenMode)
@@ -143,13 +147,17 @@ int gfxpp::initHelper(bool fullscreenMode, std::string title)
 	else if (renderStatus == _3D)
 		init3D();
 
+	// Set the SDL system cursor
+	systemCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+
+	// ALl good with initialization, return success
 	return 0;
 }
 
 int gfxpp::init2D()
 {
 	// Create a new renderer; -1 loads the default video driver we need
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	if (!renderer)
 	{
 		printf("[GFX] Renderer error: %s\n", SDL_GetError());
@@ -168,6 +176,15 @@ int gfxpp::init2D()
 	}
 
 	cFont = new GFont(renderer);
+	graphicsFonts.insert(std::pair<int, GFont*>(0, cFont));
+
+	GFont* fontGreen = new GFont(renderer);
+	fontGreen->setTextColor(RUColors::TEXT_COLOR_GREEN);
+	graphicsFonts.insert(std::pair<int, GFont*>(1, fontGreen));
+
+	GFont* fontRed = new GFont(renderer);
+	fontRed->setTextColor(RUColors::TEXT_COLOR_RED);
+	graphicsFonts.insert(std::pair<int, GFont*>(2, fontRed));
 
 	// Load support for the PNG, TIF, and JPG image formats
 	int flags = IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_JPG;
@@ -199,10 +216,10 @@ void gfxpp::run()
 	{
 		// Set the FPS Component
 		fpsLabel = new RULabel();
-		fpsLabel->setWidth(200);
-		fpsLabel->setHeight(40);
-		fpsLabel->setX(width - fpsLabel->getWidth() - 6);
-		fpsLabel->setY(0);
+		fpsLabel->setWidth(150);
+		fpsLabel->setHeight(30);
+		fpsLabel->setX(10);
+		fpsLabel->setY(1045);
 		fpsLabel->setText("");
 		// fpsLabel->setFontSize(40);
 		// fpsLabel->toggleBG(false);
@@ -266,12 +283,12 @@ void gfxpp::display()
 				running = false;
 
 			SDL_Keycode keyPressed = 0x00;
-			Uint16 keyModPressed = 0x00;
+			//Uint16 keyModPressed = 0x00;
 			if ((event.type == SDL_KEYUP) || (event.type == SDL_KEYDOWN))
 			{
 				// set the key event vars
 				keyPressed = event.key.keysym.sym;
-				keyModPressed = event.key.keysym.mod;
+				//keyModPressed = event.key.keysym.mod;
 
 				// if((keyModPressed & KMOD_CTRL) || (keyModPressed & KMOD_LCTRL) || (keyModPressed
 				// & KMOD_RCTRL))
@@ -667,13 +684,22 @@ void gfxpp::clean2D()
 
 	if (renderer)
 	{
-		SDL_DestroyRenderer(renderer);
+		//SDL_DestroyRenderer(renderer); // TODO: CRASHES
 		renderer = NULL;
 	}
 
 	if (cFont)
 		delete cFont;
 	cFont = NULL;
+
+	// Iterate GFonts in graphicsFonts
+	/*std::map<int, GFont*>::iterator itr = graphicsFonts.begin();
+	for (; itr != graphicsFonts.end(); ++itr)
+	{
+		if (itr->second)
+			delete itr->second;
+		itr->second = NULL;
+	}*/
 }
 
 void gfxpp::clean3D()

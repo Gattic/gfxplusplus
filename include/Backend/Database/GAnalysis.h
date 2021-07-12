@@ -60,6 +60,6 @@ public:
 	void Apply(unsigned int);
 	GTable getResult();
 };
-}; // namespace shmea
+};
 
 #endif
