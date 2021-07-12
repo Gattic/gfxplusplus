@@ -98,6 +98,7 @@ private:
 
 	std::vector<GItem*> guiElements; // < RUComponent* || GLayout* >
 
+	SDL_Cursor* systemCursor;
 	GItem* focusedItem;
 	std::vector<Object*> objects;
 	unsigned int cObjIndex;
@@ -138,6 +139,7 @@ public:
 	std::map<int, GFont*> graphicsFonts;
 
 	GPanel* focusedPanel;
+	SDL_Cursor* getSystemCursor();
 	void addGradient(int, int, int);
 	void addItem(GItem*);
 	void removeItem(int); // id

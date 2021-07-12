@@ -34,6 +34,7 @@ class RUMouseMotion : public virtual RUItemArea
 protected:
 	bool unhovered;
 	SDL_SystemCursor cursor;
+	SDL_Cursor* cursorPtr;
 	bool customCursor;
 
 	// events
