@@ -18,6 +18,7 @@
 #define _GPANEL
 
 #include "GItem.h"
+#include "Backend/Database/GList.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <pthread.h>
@@ -27,6 +28,7 @@
 #include <string>
 #include <time.h>
 #include <vector>
+#include <queue>
 
 class gfxpp;
 class RUComponent;
@@ -36,6 +38,13 @@ class GLayout;
 class GPanel : public GItem
 {
 protected:
+
+	std::queue<shmea::GList> updateQueue;
+	pthread_mutex_t* qMutex;
+
+	void processQ();
+	void popQ();
+	virtual void updateFromQ(shmea::GList);
 
 	// Lifetime (virtual) functions
 	virtual void onStart() = 0;
@@ -48,7 +57,9 @@ protected:
 public:
 
 	GPanel(const std::string&, int, int);
+	virtual ~GPanel();
 
+	void addToQ(shmea::GList);
 	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 

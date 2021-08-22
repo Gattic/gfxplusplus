@@ -54,14 +54,13 @@ public:
 	const static unsigned int P_ALL = 0;
 	const static unsigned int P_1D = 1;
 	const static unsigned int P_5D = 2;
-	const static unsigned int P_1M = 3;
-	const static unsigned int P_3M = 4;
-	const static unsigned int P_6M = 5;
-	const static unsigned int P_YTD = 6;
+	const static unsigned int P_10D = 3;
+	const static unsigned int P_1M = 4;
+	const static unsigned int P_3M = 5;
+	const static unsigned int P_6M = 6;
 	const static unsigned int P_1Y = 7;
 	const static unsigned int P_5Y = 8;
 	const static unsigned int P_10Y = 9;
-	const static unsigned int P_20Y = 10;
 
 	const static unsigned int AGG_1m = 1;
 	const static unsigned int AGG_2m = 2;
