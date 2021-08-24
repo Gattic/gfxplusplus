@@ -34,6 +34,16 @@ GPanel::GPanel(const std::string& newName, int newWidth, int newHeight)
 	height = newHeight;
 	focus = false;
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+
+	qMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(qMutex, NULL);
+}
+
+GPanel::~GPanel()
+{
+	pthread_mutex_destroy(qMutex);
+	if (qMutex)
+		free(qMutex);
 }
 
 void GPanel::onShow(gfxpp* cGfx)
@@ -147,6 +157,39 @@ void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPane
 	}
 }
 
+void GPanel::processQ()
+{
+	//
+	while(updateQueue.size() > 0)
+	{
+		popQ();
+	}
+}
+
+void GPanel::addToQ(shmea::GList cList)
+{
+	pthread_mutex_lock(qMutex);
+	updateQueue.push(cList);
+	pthread_mutex_unlock(qMutex);
+}
+
+void GPanel::popQ()
+{
+	shmea::GList cList;
+	pthread_mutex_lock(qMutex);
+	cList = updateQueue.front();
+	updateQueue.pop();
+	pthread_mutex_unlock(qMutex);
+
+	if(cList.size() > 0)
+		updateFromQ(cList);
+}
+
+void GPanel::updateFromQ(shmea::GList cList)
+{
+	// Keep this empty in this class
+}
+
 void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 {
 	if (!focus)
@@ -164,6 +207,10 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 	if (!((width > 0) && (height > 0)))
 		return;
 
+	// Update the GUI based on a message queue
+	processQ();
+
+	// Do we want to redraw the panel
 	if (getDrawUpdateRequired())
 	{
 		drawUpdate = false;
