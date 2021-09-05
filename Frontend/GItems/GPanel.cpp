@@ -160,32 +160,41 @@ void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPane
 void GPanel::processQ()
 {
 	//
+	if(updateQueue.size() != updateQueueNames.size())
+	{
+		printf("[GPANEL] Update Queue misalign\n");
+		return;
+	}
+
 	while(updateQueue.size() > 0)
 	{
 		popQ();
 	}
 }
 
-void GPanel::addToQ(shmea::GList cList)
+void GPanel::addToQ(shmea::GString cName, const shmea::ServiceData* cData)
 {
 	pthread_mutex_lock(qMutex);
-	updateQueue.push(cList);
+	updateQueue.push(cData);
+	updateQueueNames.push(cName);
 	pthread_mutex_unlock(qMutex);
 }
 
 void GPanel::popQ()
 {
-	shmea::GList cList;
+	const shmea::ServiceData* cData;
+	shmea::GString cName = "";
 	pthread_mutex_lock(qMutex);
-	cList = updateQueue.front();
+	cData = updateQueue.front();
+	cName = updateQueueNames.front();
 	updateQueue.pop();
+	updateQueueNames.pop();
 	pthread_mutex_unlock(qMutex);
 
-	if(cList.size() > 0)
-		updateFromQ(cList);
+	updateFromQ(cName, cData);
 }
 
-void GPanel::updateFromQ(shmea::GList cList)
+void GPanel::updateFromQ(shmea::GString cName, const shmea::ServiceData* cData)
 {
 	// Keep this empty in this class
 }
