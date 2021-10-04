@@ -42,7 +42,8 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 			redoRange = true;
 	}
 
-	redoRange = true;
+	redoRange = true; // TODO: force this?
+	float vscale = ((RUCandleGraph*)parent)->getVScale();
 	if(redoRange)
 	{
 		float y_max = points[0]->getHigh();
@@ -62,7 +63,7 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 		}
 
 		yMin = y_min;
-		yMax = y_max;
+		yMax = y_max * vscale;
 	}
 
 	//==============================================Normalize the points==============================================
@@ -82,19 +83,31 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 		return;
 	}
 
+	// Size up the normalized points vec
+	while(normalizedPoints.size() < xRange)
+	{
+		Candle* newCandle = new Candle();
+		normalizedPoints.push_back(newCandle);
+	}
+
+	while(normalizedPoints.size() > xRange)
+	{
+		normalizedPoints.erase(normalizedPoints.begin()+normalizedPoints.size()-1);
+	}
+
+	//Get a head start?
 	unsigned int i = 0;
-	if(redoRange)
-		normalizedPoints.clear();
-	else
+	if(!redoRange)
 		i = points.size()-1;
 
-		// Aggregate helpers
+	// Aggregate helpers
 	unsigned int aggCounter = 0;
 	float aggOpenValue = 0.0f;
 	float aggCloseValue = 0.0f;
 	float aggHighValue = 0.0f;
 	float aggLowValue = 0.0f;
 
+	unsigned int normalCounter = 0;
 	for (; i < points.size(); ++i)
 	{
 
@@ -128,14 +141,14 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 		// Our aggregated candle
 		//float newXValue = ((i/agg) * pointXGap);
 		float newXValue = i * pointXGap + (pointXGap / 2);
-		Candle* newCandle = new Candle(parent->getAxisOriginX() + newXValue,
-							parent->getAxisOriginY() + parent->getHeight() - aggOpenValue,
-							parent->getAxisOriginY() + parent->getHeight() - aggCloseValue,
-							parent->getAxisOriginY() + parent->getHeight() - aggHighValue,
-							parent->getAxisOriginY() + parent->getHeight() - aggLowValue);
+		normalizedPoints[normalCounter]->setX(parent->getAxisOriginX() + newXValue);
+		normalizedPoints[normalCounter]->setOpen(parent->getAxisOriginY() + parent->getHeight() - aggOpenValue);
+		normalizedPoints[normalCounter]->setClose(parent->getAxisOriginY() + parent->getHeight() - aggCloseValue);
+		normalizedPoints[normalCounter]->setHigh(parent->getAxisOriginY() + parent->getHeight() - aggHighValue);
+		normalizedPoints[normalCounter]->setLow(parent->getAxisOriginY() + parent->getHeight() - aggLowValue);
 
 		// The draw container
-		normalizedPoints.push_back(newCandle);
+		++normalCounter;
 
 		// Reset the agg helpers
 		aggCounter = 0;

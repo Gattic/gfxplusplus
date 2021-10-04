@@ -43,8 +43,6 @@ private:
 	bool redoRange;
 	SDL_Color lineColor;
 
-	void computeAxisRanges(gfxpp*, bool = false);
-
 public:
 
 	const static int TEXTURE_MAX_DIM = 16384;
@@ -58,13 +56,15 @@ public:
 
 	// sets
 	void setColor(SDL_Color);
-	void add(gfxpp*, const T*);
+	void add(gfxpp*, const T*, bool = true);
 	void set(gfxpp*, const std::vector<T*>&);
 	virtual void clear();
 
 	// render
 	virtual void updateBackground(gfxpp*);
 	virtual void draw(gfxpp*);
+
+	void computeAxisRanges(gfxpp*, bool = false);
 };
 
 template <class T>
@@ -103,13 +103,14 @@ void Graphable<T>::set(gfxpp* cGfx, const std::vector<T*>& newPoints)
 
 // This function is recommended for TimeSeries optimizations.
 template <class T>
-void Graphable<T>::add(gfxpp* cGfx, const T* newPoint)
+void Graphable<T>::add(gfxpp* cGfx, const T* newPoint, bool recompute)
 {
 	if (!newPoint)
 		return;
 
 	points.push_back(new T(*newPoint));
-	computeAxisRanges(cGfx, true);
+	if(recompute)
+		computeAxisRanges(cGfx, true);
 }
 
 

@@ -22,7 +22,7 @@
 RUCandleGraph::RUCandleGraph(int newWidth, int newHeight, int newQuadrants)
 	: RUGraph(newWidth, newHeight, newQuadrants)
 {
-	vscale = 0; // 0 is auto
+	vscale = 1.2;
 	period = P_1Y;
 	agg = AGG_1D;
 }
@@ -32,7 +32,7 @@ RUCandleGraph::~RUCandleGraph()
 	clear();
 }
 
-unsigned int RUCandleGraph::getVScale()
+float RUCandleGraph::getVScale()
 {
 	return vscale;
 }
@@ -47,7 +47,7 @@ unsigned int RUCandleGraph::getAggregate()
 	return agg;
 }
 
-void RUCandleGraph::setVScale(unsigned int newVScale)
+void RUCandleGraph::setVScale(float newVScale)
 {
 	vscale = newVScale;
 }
@@ -63,8 +63,7 @@ void RUCandleGraph::setAggregate(unsigned int newAggregate)
 }
 
 //Dont worry about this fnc
-void RUCandleGraph::add(gfxpp* cGfx, std::string label, const Candle* newPoint,
-				  SDL_Color lineColor)
+void RUCandleGraph::add(gfxpp* cGfx, std::string label, const Candle* newPoint, SDL_Color lineColor)
 {
 	if(!cGfx)
 		return;
@@ -81,12 +80,9 @@ void RUCandleGraph::add(gfxpp* cGfx, std::string label, const Candle* newPoint,
 	}
 
 	Graphable<Candle>* cPlotter = candles[label];
-	cPlotter->add(cGfx, plotterPoint);
+	cPlotter->add(cGfx, plotterPoint, false);
 
-	// DON'T trigger the draw update
-	// We do it manually in plotter add
-	// This is an optimization for candles
-	// drawUpdate = true;
+	// DON'T trigger the draw update here
 }
 
 void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<Candle*>& graphPoints,
@@ -130,9 +126,24 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 	}
 }
 
+void RUCandleGraph::update(gfxpp* cGfx)
+{
+	if(!cGfx)
+		return;
+
+	// compute the candles
+	std::map<std::string, Graphable<Candle>*>::iterator it;
+	for (it = candles.begin(); it != candles.end(); ++it)
+	{
+		Graphable<Candle>* g = it->second;
+		if (g)
+			g->computeAxisRanges(cGfx);
+	}
+}
+
 void RUCandleGraph::clear(bool toggleDraw)
 {
-	vscale = 0; // 0 is auto
+	vscale = 1.2;
 	period = P_1Y;
 	agg = AGG_1D;
 	std::map<std::string, Graphable<Candle>*>::iterator it;

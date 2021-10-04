@@ -179,9 +179,6 @@ void GItem::addSubItem(GItem* newItem, unsigned int newZIndex)
 
 void GItem::removeItem(gfxpp* cGfx, int itemID)
 {
-	if (!itemID)
-		return;
-
 	for (unsigned int i = 0; i < subitems.size(); ++i)
 	{
 		if (subitems[i]->getID() == itemID)
