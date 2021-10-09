@@ -18,7 +18,6 @@
 #define _GPANEL
 
 #include "GItem.h"
-#include "Backend/Database/GString.h"
 #include "Backend/Database/ServiceData.h"
 #include <SDL2/SDL.h>
 #include <map>
@@ -41,12 +40,11 @@ class GPanel : public GItem
 protected:
 
 	std::queue<const shmea::ServiceData*> updateQueue;
-	std::queue<shmea::GString> updateQueueNames;
 	pthread_mutex_t* qMutex;
 
 	void processQ();
 	void popQ();
-	virtual void updateFromQ(shmea::GString, const shmea::ServiceData*);
+	virtual void updateFromQ(const shmea::ServiceData*);
 
 	// Lifetime (virtual) functions
 	virtual void onStart() = 0;
@@ -61,7 +59,7 @@ public:
 	GPanel(const std::string&, int, int);
 	virtual ~GPanel();
 
-	void addToQ(shmea::GString, const shmea::ServiceData*);
+	void addToQ(const shmea::ServiceData*);
 	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
