@@ -38,11 +38,12 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 	{
 		// Is the latest y not within the current range?
 		float cY = points[points.size()-1]->getY();
-		if(!((cY >= yMin) && (cY <= yMax)))
+		if(!((cY >= parent->getYMin()) && (cY <= parent->getYMax())))
 			redoRange = true;
 	}
 
 	redoRange = true;
+	float vscale = parent->getVScale();
 	if(redoRange)
 	{
 		float y_max = points[0]->getY();
@@ -60,31 +61,74 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 				y_min = y_pt;
 		}
 
-		yMin = y_min;
-		yMax = y_max;
+		parent->setYMin(y_min);
+		parent->setYMax(y_max * vscale);
 	}
 
 	//==============================================Normalize the points==============================================
 
-	float xRange = (float)points.size();
-	float yRange = yMax - yMin;
+	unsigned int agg = parent->getAggregate();
+	float xRange = (float)points.size() / (float)agg;
+	float yRange = parent->getYMax() - parent->getYMin();
+	if(points.size() % agg)
+		++xRange;
 
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
+	if(isinf(pointXGap))
+	{
+		normalizedPoints.clear();
+		return;
+	}
+
+	// Size up the normalized points vec
+	while(normalizedPoints.size() < xRange)
+	{
+		Point2* newPoint = new Point2();
+		normalizedPoints.push_back(newPoint);
+	}
+
+	while(normalizedPoints.size() > xRange)
+	{
+		normalizedPoints.erase(normalizedPoints.begin()+normalizedPoints.size()-1);
+	}
 
 	unsigned int i = 0;
-	if(redoRange)
-		normalizedPoints.clear();
-	else
+	if(!redoRange)
 		i = points.size()-1;
 
+	// Aggregate helpers
+	unsigned int aggCounter = 0;
+	float aggValue = 0.0f;
+
+	unsigned int normalCounter = 0;
 	for (; i < points.size(); ++i)
 	{
-		float newXValue = i * pointXGap;
-		float newYValue = (points[i]->getY() - yMin) * pointYGap;
-		normalizedPoints.push_back(new Point2(parent->getAxisOriginX() + newXValue,
-							parent->getAxisOriginY() + parent->getHeight() - newYValue));
+		float newYValue = (points[i]->getY() - parent->getYMin()) * pointYGap;
+
+		// Time to Aggreagate
+		++aggCounter;
+		aggValue=newYValue;
+
+		// Are we done aggregating data yet?
+		if((aggCounter < agg) && (i < points.size()-1))
+			continue;
+
+		// Our aggregated points
+		float newXValue = ((i/agg) * pointXGap);
+		//float newXValue = i * pointXGap;
+		normalizedPoints[normalCounter]->setX(parent->getAxisOriginX() + newXValue);
+		normalizedPoints[normalCounter]->setY(parent->getAxisOriginY() + parent->getHeight() - aggValue);
+
+		// The draw container
+		++normalCounter;
+
+		// Reset the agg helpers
+		aggCounter = 0;
+		aggValue = 0.0f;
 	}
+
+	parent->requireDrawUpdate();
 }
 
 template <>
@@ -94,11 +138,20 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 						   getColor().a);
 
 	float xRange = (float)normalizedPoints.size(); // normalizedPoints per x axis
-	float yRange = yMax - yMin;
+	float yRange = parent->getYMax() - parent->getYMin();
 
+	unsigned int agg = parent->getAggregate();
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
 
+	if(isinf(pointXGap))
+		return;
+
+	// Dont draw with bad data
+	if(! ((xRange == points.size()/agg) || (xRange == (points.size()/agg)+1)) )
+		return;
+
+	//printf("norm-size: %lu\n", normalizedPoints.size());
 	if((redoRange) || (normalizedPoints.size() < 2))
 	{
 		Point2* prevPoint = NULL;
@@ -111,6 +164,7 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 			// draw a thick line from the previous to the current point
 			if ((prevPoint) && (i > 0))
 			{
+				//printf("p(%f, %f); c(%f, %f)\n", prevPoint->getX(), prevPoint->getY(), cPoint->getX(), cPoint->getY());
 				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
 								   cPoint->getX(), cPoint->getY() - 1);
 				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),

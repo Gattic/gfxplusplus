@@ -15,7 +15,7 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
-#include "RUCandleGraph.h"
+#include "RUGraph.h"
 
 template <>
 void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization)
@@ -38,12 +38,12 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 		// Is the latest y not within the current range?
 		float cY1 = points[points.size()-1]->getHigh();
 		float cY2 = points[points.size()-1]->getLow();
-		if(!((cY2 >= yMin) && (cY1 <= yMax)))
+		if(!((cY2 >= parent->getYMin()) && (cY1 <= parent->getYMax())))
 			redoRange = true;
 	}
 
 	redoRange = true; // TODO: force this?
-	float vscale = ((RUCandleGraph*)parent)->getVScale();
+	float vscale = parent->getVScale();
 	if(redoRange)
 	{
 		float y_max = points[0]->getHigh();
@@ -62,15 +62,15 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 				y_min = y_low;
 		}
 
-		yMin = y_min;
-		yMax = y_max * vscale;
+		parent->setYMin(y_min);
+		parent->setYMax(y_max * vscale);
 	}
 
 	//==============================================Normalize the points==============================================
 
-	unsigned int agg = ((RUCandleGraph*)parent)->getAggregate();
+	unsigned int agg = parent->getAggregate();
 	float xRange = (float)points.size() / (float)agg;
-	float yRange = yMax - yMin;
+	float yRange = parent->getYMax() - parent->getYMin();
 	if(points.size() % agg)
 		++xRange;
 
@@ -110,13 +110,12 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 	unsigned int normalCounter = 0;
 	for (; i < points.size(); ++i)
 	{
-
 		// First point would be drawn at x = 0, so we need to add (pointXGap / 2)
 		// so that the bar can be drawn left and right.
-		float newOpenValue = (points[i]->getOpen() - yMin) * pointYGap;
-		float newCloseValue = (points[i]->getClose() - yMin) * pointYGap;
-		float newHighValue = (points[i]->getHigh() - yMin) * pointYGap;
-		float newLowValue = (points[i]->getLow() - yMin) * pointYGap;
+		float newOpenValue = (points[i]->getOpen() - parent->getYMin()) * pointYGap;
+		float newCloseValue = (points[i]->getClose() - parent->getYMin()) * pointYGap;
+		float newHighValue = (points[i]->getHigh() - parent->getYMin()) * pointYGap;
+		float newLowValue = (points[i]->getLow() - parent->getYMin()) * pointYGap;
 
 		// Time to Aggreagate
 		++aggCounter;
@@ -140,7 +139,8 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 
 		// Our aggregated candle
 		//float newXValue = ((i/agg) * pointXGap);
-		float newXValue = i * pointXGap + (pointXGap / 2);
+		//float newXValue = i * pointXGap + (pointXGap / 2);
+		float newXValue = ((i/agg) * pointXGap)+ (pointXGap / 2);
 		normalizedPoints[normalCounter]->setX(parent->getAxisOriginX() + newXValue);
 		normalizedPoints[normalCounter]->setOpen(parent->getAxisOriginY() + parent->getHeight() - aggOpenValue);
 		normalizedPoints[normalCounter]->setClose(parent->getAxisOriginY() + parent->getHeight() - aggCloseValue);
@@ -164,14 +164,11 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 template <>
 void Graphable<Candle>::draw(gfxpp* cGfx)
 {
-	int width = parent->getWidth();
-	int height = parent->getHeight();
-
 	float xRange = (float)normalizedPoints.size();
-	float yRange = yMax - yMin;
+	float yRange = parent->getYMax() - parent->getYMin();
 
 	// Scales coordinates based on graph size and data range.
-	unsigned int agg = ((RUCandleGraph*)parent)->getAggregate();
+	unsigned int agg = parent->getAggregate();
 	float pointXGap = ((float)parent->getWidth()) / xRange;
 	float pointYGap = ((float)parent->getHeight()) / yRange;
 
@@ -225,6 +222,7 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 
 		// Rendered down, not up, this block will probably not make sense
 		// If the close is higher than the open, make the real body green.
+		//printf("candle(%f, %f, %f, %f)\n", cCandle->getOpen(), cCandle->getHigh(), cCandle->getLow(), cCandle->getClose());
 		if (normalizedPoints[i]->getClose() > normalizedPoints[i]->getOpen())
 		{
 			SDL_SetRenderDrawColor(cGfx->getRenderer(), 255, 0, 0, 255);

@@ -37,8 +37,6 @@ private:
 	RUGraph* parent;
 	std::vector<T*> points;
 	std::vector<T*> normalizedPoints;
-	float yMin;
-	float yMax;
 
 	bool redoRange;
 	SDL_Color lineColor;
@@ -72,10 +70,6 @@ Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor)
 {
 	parent = newParent;
 	setColor(newColor);
-
-	yMin = 0.0f;
-	yMax = 0.0f;
-
 	redoRange = true;
 }
 
@@ -154,9 +148,6 @@ void Graphable<T>::clear()
 	normalizedPoints.clear();
 
 	parent = NULL;
-	yMin = 0.0f;
-	yMax = 0.0f;
-
 	redoRange = true;
 }
 

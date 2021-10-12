@@ -45,6 +45,12 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 	gridEnabled = false;
 	gridLineWidth = DEFAULT_GRIDLINE_WIDTH;
 
+	yMin = 0.0f;
+	yMax = 0.0f;
+	vscale = 1.2;
+	period = P_1Y;
+	agg = AGG_1D;
+
 	// checkbox label
 	titleLabel = new RULabel();
 	titleLabel->setWidth(350);
@@ -67,6 +73,12 @@ RUGraph::~RUGraph()
 	gridEnabled = false;
 	gridLineWidth = 0;
 	quadrants = QUADRANTS_ONE;
+
+	yMin = 0.0f;
+	yMax = 0.0f;
+	vscale = 1.2;
+	period = P_1Y;
+	agg = AGG_1D;
 }
 
 int RUGraph::getGraphSize() const
@@ -128,6 +140,31 @@ float RUGraph::getQuadrantOffsetY() const
 	return quadrantOffsetY;
 }
 
+float RUGraph::getYMin() const
+{
+	return yMin;
+}
+
+float RUGraph::getYMax() const
+{
+	return yMax;
+}
+
+float RUGraph::getVScale() const
+{
+	return vscale;
+}
+
+unsigned int RUGraph::getPeriod() const
+{
+	return period;
+}
+
+unsigned int RUGraph::getAggregate() const
+{
+	return agg;
+}
+
 void RUGraph::setGraphSize(int newGraphSize)
 {
 	graphSize = newGraphSize;
@@ -168,6 +205,31 @@ void RUGraph::setTitleLabel(std::string newLabel)
 
 	titleLabel->setText(newLabel);
 	titleLabel->setVisible(true);
+}
+
+void RUGraph::setYMin(float newYMin)
+{
+	yMin = newYMin;
+}
+
+void RUGraph::setYMax(float newYMax)
+{
+	yMax = newYMax;
+}
+
+void RUGraph::setVScale(float newVScale)
+{
+	vscale = newVScale;
+}
+
+void RUGraph::setPeriod(unsigned int newPeriod)
+{
+	period = newPeriod;
+}
+
+void RUGraph::setAggregate(unsigned int newAggregate)
+{
+	agg = newAggregate;
 }
 
 void RUGraph::updateBackground(gfxpp* cGfx)

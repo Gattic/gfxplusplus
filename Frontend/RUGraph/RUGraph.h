@@ -46,6 +46,12 @@ private:
 	int gridLineWidth;
 	int quadrants;
 
+	float yMin;
+	float yMax;
+	float vscale;
+	unsigned int period;
+	unsigned int agg; //aggregate
+
 protected:
 	RULabel* titleLabel;
 
@@ -53,8 +59,31 @@ protected:
 	virtual void updateBackground(gfxpp*);
 
 public:
-	static const unsigned int DEFAULT_NUM_ZONES = 10;
 
+	const static unsigned int P_ALL = 0;
+	const static unsigned int P_1D = 1;
+	const static unsigned int P_5D = 2;
+	const static unsigned int P_10D = 3;
+	const static unsigned int P_1M = 4;
+	const static unsigned int P_3M = 5;
+	const static unsigned int P_6M = 6;
+	const static unsigned int P_1Y = 7;
+	const static unsigned int P_5Y = 8;
+	const static unsigned int P_10Y = 9;
+
+	const static unsigned int AGG_1m = 1;
+	const static unsigned int AGG_2m = 2;
+	const static unsigned int AGG_3m = 3;
+	const static unsigned int AGG_5m = 5;
+	const static unsigned int AGG_15m = 15;
+	const static unsigned int AGG_30m = 30;
+	const static unsigned int AGG_1h = 60;
+	const static unsigned int AGG_4h = 240;
+	const static unsigned int AGG_1D = 390;
+	const static unsigned int AGG_1W = 1950;
+	const static unsigned int AGG_3W = 5850;
+
+	static const unsigned int DEFAULT_NUM_ZONES = 10;
 	static const unsigned int DEFAULT_GRAPH_SIZE = 1;
 	static const unsigned int DEFAULT_AXIS_WIDTH = 3;
 	static const unsigned int DEFAULT_GRIDLINE_WIDTH = 1;
@@ -76,6 +105,11 @@ public:
 	int getQuadrants() const;
 	float getQuadrantOffsetX() const;
 	float getQuadrantOffsetY() const;
+	float getYMin() const;
+	float getYMax() const;
+	float getVScale() const;
+	unsigned int getPeriod() const;
+	unsigned int getAggregate() const;
 
 	// sets
 	void setGraphSize(int);
@@ -84,6 +118,11 @@ public:
 	void setGridLineWidth(int);
 	void setQuadrants(int);
 	void setTitleLabel(std::string);
+	void setYMin(float);
+	void setYMax(float);
+	void setVScale(float);
+	void setPeriod(unsigned int);
+	void setAggregate(unsigned int);
 };
 
 #endif
