@@ -39,6 +39,9 @@ private:
 	std::vector<T*> normalizedPoints;
 
 	bool redoRange;
+	bool localMode;
+	float localMin;
+	float localMax;
 	SDL_Color lineColor;
 
 public:
@@ -50,9 +53,17 @@ public:
 	virtual ~Graphable();
 
 	// gets
+	float getMin() const;
+	float getMax() const;
+	bool getLocalMode() const;
+	float getLocalMin() const;
+	float getLocalMax() const;
 	SDL_Color getColor() const;
 
 	// sets
+	void setLocalMode(bool);
+	void setLocalMin(float);
+	void setLocalMax(float);
 	void setColor(SDL_Color);
 	void add(gfxpp*, const T*, bool = true);
 	void set(gfxpp*, const std::vector<T*>&);
@@ -70,6 +81,9 @@ Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor)
 {
 	parent = newParent;
 	setColor(newColor);
+	localMode = false;
+	localMin = 0.0f;
+	localMax = 0.0f;
 	redoRange = true;
 }
 
@@ -77,6 +91,48 @@ template <class T>
 Graphable<T>::~Graphable()
 {
 	clear();
+}
+
+template <class T>
+float Graphable<T>::getMin() const
+{
+	if(!parent)
+		return 0.0f;
+
+	if(localMode)
+		return localMin;
+
+	return parent->getYMin();
+}
+
+template <class T>
+float Graphable<T>::getMax() const
+{
+	if(!parent)
+		return 0.0f;
+
+	if(localMode)
+		return localMax;
+
+	return parent->getYMax();
+}
+
+template <class T>
+bool Graphable<T>::getLocalMode() const
+{
+	return localMode;
+}
+
+template <class T>
+float Graphable<T>::getLocalMin() const
+{
+	return localMin;
+}
+
+template <class T>
+float Graphable<T>::getLocalMax() const
+{
+	return localMax;
 }
 
 template <class T>
@@ -107,6 +163,23 @@ void Graphable<T>::add(gfxpp* cGfx, const T* newPoint, bool recompute)
 		computeAxisRanges(cGfx, true);
 }
 
+template <class T>
+void Graphable<T>::setLocalMode(bool newLocalMode)
+{
+	localMode = newLocalMode;
+}
+
+template <class T>
+void Graphable<T>::setLocalMin(float newYMin)
+{
+	localMin = newYMin;
+}
+
+template <class T>
+void Graphable<T>::setLocalMax(float newYMax)
+{
+	localMax = newYMax;
+}
 
 template <class T>
 void Graphable<T>::setColor(SDL_Color newColor)
@@ -148,6 +221,9 @@ void Graphable<T>::clear()
 	normalizedPoints.clear();
 
 	parent = NULL;
+	localMode = false;
+	localMin = 0.0f;
+	localMax = 0.0f;
 	redoRange = true;
 }
 

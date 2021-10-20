@@ -38,7 +38,7 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 		// Is the latest y not within the current range?
 		float cY1 = points[points.size()-1]->getHigh();
 		float cY2 = points[points.size()-1]->getLow();
-		if(!((cY2 >= parent->getYMin()) && (cY1 <= parent->getYMax())))
+		if(!((cY2 >= getMin()) && (cY1 <= getMax())))
 			redoRange = true;
 	}
 
@@ -48,6 +48,8 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 	{
 		float y_max = points[0]->getHigh();
 		float y_min = points[0]->getLow();
+		float local_y_max = y_max;
+		float local_y_min = y_min;
 
 		for (unsigned int i = 1; i < points.size(); ++i)
 		{
@@ -55,13 +57,19 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 			float y_high = c->getHigh();
 			float y_low = c->getLow();
 
+			if (y_high > local_y_max)
+				local_y_max = y_high;
+			else if (y_low < local_y_min)
+				local_y_min = y_low;
+
 			if (y_high > y_max)
 				y_max = y_high;
-
 			else if (y_low < y_min)
 				y_min = y_low;
 		}
 
+		setLocalMin(local_y_min);
+		setLocalMax(local_y_max * vscale);
 		parent->setYMin(y_min);
 		parent->setYMax(y_max * vscale);
 	}
@@ -70,7 +78,7 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 
 	unsigned int agg = parent->getAggregate();
 	float xRange = (float)points.size() / (float)agg;
-	float yRange = parent->getYMax() - parent->getYMin();
+	float yRange = getMax() - getMin();
 	if(points.size() % agg)
 		++xRange;
 
@@ -112,10 +120,10 @@ void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 	{
 		// First point would be drawn at x = 0, so we need to add (pointXGap / 2)
 		// so that the bar can be drawn left and right.
-		float newOpenValue = (points[i]->getOpen() - parent->getYMin()) * pointYGap;
-		float newCloseValue = (points[i]->getClose() - parent->getYMin()) * pointYGap;
-		float newHighValue = (points[i]->getHigh() - parent->getYMin()) * pointYGap;
-		float newLowValue = (points[i]->getLow() - parent->getYMin()) * pointYGap;
+		float newOpenValue = (points[i]->getOpen() - getMin()) * pointYGap;
+		float newCloseValue = (points[i]->getClose() - getMin()) * pointYGap;
+		float newHighValue = (points[i]->getHigh() - getMin()) * pointYGap;
+		float newLowValue = (points[i]->getLow() - getMin()) * pointYGap;
 
 		// Time to Aggreagate
 		++aggCounter;
@@ -165,7 +173,7 @@ template <>
 void Graphable<Candle>::draw(gfxpp* cGfx)
 {
 	float xRange = (float)normalizedPoints.size();
-	float yRange = parent->getYMax() - parent->getYMin();
+	float yRange = getMax() - getMin();
 
 	// Scales coordinates based on graph size and data range.
 	unsigned int agg = parent->getAggregate();

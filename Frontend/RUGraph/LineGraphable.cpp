@@ -38,7 +38,7 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 	{
 		// Is the latest y not within the current range?
 		float cY = points[points.size()-1]->getY();
-		if(!((cY >= parent->getYMin()) && (cY <= parent->getYMax())))
+		if(!((cY >= getMin()) && (cY <= getMax())))
 			redoRange = true;
 	}
 
@@ -48,15 +48,21 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 	{
 		float y_max = points[0]->getY();
 		float y_min = y_max;
+		float local_y_max = y_max;
+		float local_y_min = y_min;
 
 		for (unsigned int i = 1; i < points.size(); ++i)
 		{
 			Point2* pt = points[i];
 			float y_pt = pt->getY();
 
+			if (y_pt > local_y_max)
+				local_y_max = y_pt;
+			else if (y_pt < local_y_min)
+				local_y_min = y_pt;
+
 			if (y_pt > y_max)
 				y_max = y_pt;
-
 			else if (y_pt < y_min)
 				y_min = y_pt;
 		}
@@ -69,7 +75,7 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 
 	unsigned int agg = parent->getAggregate();
 	float xRange = (float)points.size() / (float)agg;
-	float yRange = parent->getYMax() - parent->getYMin();
+	float yRange = getMax() - getMin();
 	if(points.size() % agg)
 		++xRange;
 
@@ -104,7 +110,7 @@ void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization
 	unsigned int normalCounter = 0;
 	for (; i < points.size(); ++i)
 	{
-		float newYValue = (points[i]->getY() - parent->getYMin()) * pointYGap;
+		float newYValue = (points[i]->getY() - getMin()) * pointYGap;
 
 		// Time to Aggreagate
 		++aggCounter;
@@ -138,7 +144,7 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 						   getColor().a);
 
 	float xRange = (float)normalizedPoints.size(); // normalizedPoints per x axis
-	float yRange = parent->getYMax() - parent->getYMin();
+	float yRange = getMax() - getMin();
 
 	unsigned int agg = parent->getAggregate();
 	float pointXGap = ((float)parent->getWidth()) / xRange;
