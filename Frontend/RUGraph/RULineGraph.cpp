@@ -47,6 +47,7 @@ void RULineGraph::add(gfxpp* cGfx, std::string label, const Point2* newPoint, SD
 
 	Graphable<Point2>* cPlotter = lines[label];
 	cPlotter->add(cGfx, plotterPoint, recompute);
+	cPlotter->setColor(lineColor);
 
 	// DON'T trigger the draw update here
 }
