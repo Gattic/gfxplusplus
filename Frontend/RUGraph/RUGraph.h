@@ -46,6 +46,8 @@ private:
 	int gridLineWidth;
 	int quadrants;
 
+	float xMin;
+	float xMax;
 	float yMin;
 	float yMax;
 	float vscale;
@@ -108,6 +110,8 @@ public:
 	int getQuadrants() const;
 	float getQuadrantOffsetX() const;
 	float getQuadrantOffsetY() const;
+	float getXMin() const;
+	float getXMax() const;
 	float getYMin() const;
 	float getYMax() const;
 	float getVScale() const;
@@ -121,6 +125,8 @@ public:
 	void setGridLineWidth(int);
 	void setQuadrants(int);
 	void setTitleLabel(std::string);
+	void setXMin(float);
+	void setXMax(float);
 	void setYMin(float);
 	void setYMax(float);
 	void setVScale(float);

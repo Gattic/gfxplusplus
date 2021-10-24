@@ -32,7 +32,7 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 	{
 		// Is the latest y not within the current range?
 		float cY = points[points.size()-1]->getY();
-		if(!((cY >= getMin()) && (cY <= getMax())))
+		if(!((cY >= getYMin()) && (cY <= getYMax())))
 			redoRange = true;
 	}
 
@@ -40,6 +40,11 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 	float vscale = parent->getVScale();
 	if(redoRange)
 	{
+		float x_max = points[0]->getX();
+		float x_min = x_max;
+		float local_x_max = x_max;
+		float local_x_min = x_min;
+
 		float y_max = points[0]->getY();
 		float y_min = y_max;
 		float local_y_max = y_max;
@@ -48,7 +53,13 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 		for (unsigned int i = 1; i < points.size(); ++i)
 		{
 			Point2* pt = points[i];
+			float x_pt = pt->getX();
 			float y_pt = pt->getY();
+
+			if (x_pt > local_x_max)
+				local_x_max = x_pt;
+			else if (x_pt < local_x_min)
+				local_x_min = x_pt;
 
 			if (y_pt > local_y_max)
 				local_y_max = y_pt;
@@ -61,6 +72,10 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 				y_min = y_pt;
 		}
 
+		setLocalXMin(local_x_min);
+		setLocalXMax(local_x_max);
+		setLocalYMin(local_y_min);
+		setLocalYMax(local_y_max * vscale);
 		parent->setYMin(y_min);
 		parent->setYMax(y_max * vscale);
 	}
@@ -69,7 +84,7 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 
 	unsigned int agg = parent->getAggregate();
 	float xRange = (float)points.size() / (float)agg;
-	float yRange = getMax() - getMin();
+	float yRange = getYMax() - getYMin();
 	if(points.size() % agg)
 		++xRange;
 
@@ -104,7 +119,7 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 	unsigned int normalCounter = 0;
 	for (; i < points.size(); ++i)
 	{
-		float newYValue = (points[i]->getY() - getMin()) * pointYGap;
+		float newYValue = (points[i]->getY() - getYMin()) * pointYGap;
 
 		// Time to Aggreagate
 		++aggCounter;
@@ -138,7 +153,9 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 						   getColor().a);
 
 	float xRange = (float)normalizedPoints.size(); // normalizedPoints per x axis
-	float yRange = getMax() - getMin();
+	//float xRange = getXMax() - getXMin();
+	float yRange = getYMax() - getYMin();
+	//printf("Line[%s]: xRange: %f\n", parent->getName().c_str(),  xRange);
 
 	unsigned int agg = parent->getAggregate();
 	float pointXGap = ((float)parent->getWidth()) / xRange;

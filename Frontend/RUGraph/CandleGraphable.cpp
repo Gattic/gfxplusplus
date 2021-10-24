@@ -32,7 +32,7 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 		// Is the latest y not within the current range?
 		float cY1 = points[points.size()-1]->getHigh();
 		float cY2 = points[points.size()-1]->getLow();
-		if(!((cY2 >= getMin()) && (cY1 <= getMax())))
+		if(!((cY2 >= getYMin()) && (cY1 <= getYMax())))
 			redoRange = true;
 	}
 
@@ -40,6 +40,11 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 	float vscale = parent->getVScale();
 	if(redoRange)
 	{
+		float x_max = points[0]->getX();
+		float x_min = x_max;
+		float local_x_max = x_max;
+		float local_x_min = x_min;
+
 		float y_max = points[0]->getHigh();
 		float y_min = points[0]->getLow();
 		float local_y_max = y_max;
@@ -48,8 +53,15 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 		for (unsigned int i = 1; i < points.size(); ++i)
 		{
 			Candle* c = points[i];
+			float x_pt = c->getX();
 			float y_high = c->getHigh();
 			float y_low = c->getLow();
+
+			if (x_pt > local_x_max)
+				local_x_max = x_pt;
+			else if (x_pt < local_x_min)
+				local_x_min = x_pt;
+	//printf("Candle-PRE[%s]: %f:%f\n", parent->getName().c_str(), local_x_max, local_x_min);
 
 			if (y_high > local_y_max)
 				local_y_max = y_high;
@@ -62,17 +74,21 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 				y_min = y_low;
 		}
 
-		setLocalMin(local_y_min);
-		setLocalMax(local_y_max * vscale);
+		setLocalXMin(local_x_min);
+		setLocalXMax(local_x_max);
+		setLocalYMin(local_y_min);
+		setLocalYMax(local_y_max * vscale);
 		parent->setYMin(y_min);
 		parent->setYMax(y_max * vscale);
 	}
+
+	//printf("Candle-PRE[%s]: %f:%f\n", parent->getName().c_str(), getLocalXMax(), getLocalXMin());
 
 	//==============================================Normalize the points==============================================
 
 	unsigned int agg = parent->getAggregate();
 	float xRange = (float)points.size() / (float)agg;
-	float yRange = getMax() - getMin();
+	float yRange = getYMax() - getYMin();
 	if(points.size() % agg)
 		++xRange;
 
@@ -114,10 +130,10 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 	{
 		// First point would be drawn at x = 0, so we need to add (pointXGap / 2)
 		// so that the bar can be drawn left and right.
-		float newOpenValue = (points[i]->getOpen() - getMin()) * pointYGap;
-		float newCloseValue = (points[i]->getClose() - getMin()) * pointYGap;
-		float newHighValue = (points[i]->getHigh() - getMin()) * pointYGap;
-		float newLowValue = (points[i]->getLow() - getMin()) * pointYGap;
+		float newOpenValue = (points[i]->getOpen() - getYMin()) * pointYGap;
+		float newCloseValue = (points[i]->getClose() - getYMin()) * pointYGap;
+		float newHighValue = (points[i]->getHigh() - getYMin()) * pointYGap;
+		float newLowValue = (points[i]->getLow() - getYMin()) * pointYGap;
 
 		// Time to Aggreagate
 		++aggCounter;
@@ -167,7 +183,9 @@ template <>
 void Graphable<Candle>::draw(gfxpp* cGfx)
 {
 	float xRange = (float)normalizedPoints.size();
-	float yRange = getMax() - getMin();
+	//float xRange = getXMax() - getXMin();
+	float yRange = getYMax() - getYMin();
+	//printf("Candle[%s]: xRange: %f\n", parent->getName().c_str(),  xRange);
 
 	// Scales coordinates based on graph size and data range.
 	unsigned int agg = parent->getAggregate();

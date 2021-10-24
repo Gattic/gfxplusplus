@@ -47,6 +47,7 @@ void RUCandleGraph::add(const Candle* newPoint, SDL_Color lineColor)
 
 	Graphable<Candle>* cPlotter = candles[CANDLE_LABEL];
 	cPlotter->add(plotterPoint, false);
+	cPlotter->setColor(lineColor);
 
 	// DON'T trigger the draw update here
 }
@@ -83,6 +84,7 @@ void RUCandleGraph::addIndicator(std::string label, const Point2* newPoint, SDL_
 	}
 
 	Graphable<Point2>* cPlotter = indicators[label];
+	//cPlotter->setLocalXMode(true);
 	cPlotter->add(plotterPoint, false);
 
 	// DON'T trigger the draw update here
@@ -100,6 +102,7 @@ void RUCandleGraph::setIndicator(std::string label, const std::vector<Point2*>& 
 			indicators[label] = newPlotter;
 	}
 
+	//newPlotter->setLocalXMode(true);
 	newPlotter->set(graphPoints);
 
 	// trigger the draw update

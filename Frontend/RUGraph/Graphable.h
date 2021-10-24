@@ -39,9 +39,12 @@ private:
 	std::vector<T*> normalizedPoints;
 
 	bool redoRange;
-	bool localMode;
-	float localMin;
-	float localMax;
+	bool localXMode;
+	bool localYMode;
+	float localXMin;
+	float localXMax;
+	float localYMin;
+	float localYMax;
 	SDL_Color lineColor;
 
 public:
@@ -53,17 +56,25 @@ public:
 	virtual ~Graphable();
 
 	// gets
-	float getMin() const;
-	float getMax() const;
-	bool getLocalMode() const;
-	float getLocalMin() const;
-	float getLocalMax() const;
+	float getXMin() const;
+	float getXMax() const;
+	float getYMin() const;
+	float getYMax() const;
+	bool getLocalXMode() const;
+	float getLocalXMin() const;
+	float getLocalXMax() const;
+	bool getLocalYMode() const;
+	float getLocalYMin() const;
+	float getLocalYMax() const;
 	SDL_Color getColor() const;
 
 	// sets
-	void setLocalMode(bool);
-	void setLocalMin(float);
-	void setLocalMax(float);
+	void setLocalXMode(bool);
+	void setLocalXMin(float);
+	void setLocalXMax(float);
+	void setLocalYMode(bool);
+	void setLocalYMin(float);
+	void setLocalYMax(float);
 	void setColor(SDL_Color);
 	void add(const T*, bool = true);
 	void set(const std::vector<T*>&);
@@ -81,9 +92,12 @@ Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor)
 {
 	parent = newParent;
 	setColor(newColor);
-	localMode = false;
-	localMin = 0.0f;
-	localMax = 0.0f;
+	localXMode = false;
+	localYMode = false;
+	localXMin = 0.0f;
+	localXMax = 0.0f;
+	localYMin = 0.0f;
+	localYMax = 0.0f;
 	redoRange = true;
 }
 
@@ -94,45 +108,87 @@ Graphable<T>::~Graphable()
 }
 
 template <class T>
-float Graphable<T>::getMin() const
+float Graphable<T>::getXMin() const
 {
 	if(!parent)
 		return 0.0f;
 
-	if(localMode)
-		return localMin;
+	if(localXMode)
+		return localXMin;
+
+	return parent->getXMin();
+}
+
+template <class T>
+float Graphable<T>::getXMax() const
+{
+	if(!parent)
+		return 0.0f;
+
+	if(localXMode)
+		return localXMax;
+
+	return parent->getXMax();
+}
+
+template <class T>
+float Graphable<T>::getYMin() const
+{
+	if(!parent)
+		return 0.0f;
+
+	if(localYMode)
+		return localYMin;
 
 	return parent->getYMin();
 }
 
 template <class T>
-float Graphable<T>::getMax() const
+float Graphable<T>::getYMax() const
 {
 	if(!parent)
 		return 0.0f;
 
-	if(localMode)
-		return localMax;
+	if(localYMode)
+		return localYMax;
 
 	return parent->getYMax();
 }
 
 template <class T>
-bool Graphable<T>::getLocalMode() const
+bool Graphable<T>::getLocalXMode() const
 {
-	return localMode;
+	return localXMode;
 }
 
 template <class T>
-float Graphable<T>::getLocalMin() const
+float Graphable<T>::getLocalXMin() const
 {
-	return localMin;
+	return localXMin;
 }
 
 template <class T>
-float Graphable<T>::getLocalMax() const
+float Graphable<T>::getLocalXMax() const
 {
-	return localMax;
+	return localXMax;
+}
+
+template <class T>
+bool Graphable<T>::getLocalYMode() const
+{
+	return localYMode;
+}
+
+template <class T>
+float Graphable<T>::getLocalYMin() const
+{
+	return localYMin;
+}
+
+template <class T>
+float Graphable<T>::getLocalYMax() const
+{
+	return localYMax;
 }
 
 template <class T>
@@ -164,21 +220,39 @@ void Graphable<T>::add(const T* newPoint, bool recompute)
 }
 
 template <class T>
-void Graphable<T>::setLocalMode(bool newLocalMode)
+void Graphable<T>::setLocalXMode(bool newLocalXMode)
 {
-	localMode = newLocalMode;
+	localXMode = newLocalXMode;
 }
 
 template <class T>
-void Graphable<T>::setLocalMin(float newYMin)
+void Graphable<T>::setLocalXMin(float newXMin)
 {
-	localMin = newYMin;
+	localXMin = newXMin;
 }
 
 template <class T>
-void Graphable<T>::setLocalMax(float newYMax)
+void Graphable<T>::setLocalXMax(float newXMax)
 {
-	localMax = newYMax;
+	localXMax = newXMax;
+}
+
+template <class T>
+void Graphable<T>::setLocalYMode(bool newLocalYMode)
+{
+	localYMode = newLocalYMode;
+}
+
+template <class T>
+void Graphable<T>::setLocalYMin(float newYMin)
+{
+	localYMin = newYMin;
+}
+
+template <class T>
+void Graphable<T>::setLocalYMax(float newYMax)
+{
+	localYMax = newYMax;
 }
 
 template <class T>
@@ -221,9 +295,12 @@ void Graphable<T>::clear()
 	normalizedPoints.clear();
 
 	parent = NULL;
-	localMode = false;
-	localMin = 0.0f;
-	localMax = 0.0f;
+	localXMode = false;
+	localYMode = false;
+	localXMin = 0.0f;
+	localYMin = 0.0f;
+	localXMax = 0.0f;
+	localYMax = 0.0f;
 	redoRange = true;
 }
 

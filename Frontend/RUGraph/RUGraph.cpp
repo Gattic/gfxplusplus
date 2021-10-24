@@ -45,6 +45,8 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 	gridEnabled = false;
 	gridLineWidth = DEFAULT_GRIDLINE_WIDTH;
 
+	xMin = 0.0f;
+	xMax = 0.0f;
 	yMin = 0.0f;
 	yMax = 0.0f;
 	vscale = 1.2;
@@ -74,6 +76,8 @@ RUGraph::~RUGraph()
 	gridLineWidth = 0;
 	quadrants = QUADRANTS_ONE;
 
+	xMin = 0.0f;
+	xMax = 0.0f;
 	yMin = 0.0f;
 	yMax = 0.0f;
 	vscale = 1.2;
@@ -138,6 +142,16 @@ float RUGraph::getQuadrantOffsetY() const
 		quadrantOffsetY = ((float)getHeight()) / 2.0f;
 
 	return quadrantOffsetY;
+}
+
+float RUGraph::getXMin() const
+{
+	return xMin;
+}
+
+float RUGraph::getXMax() const
+{
+	return xMax;
 }
 
 float RUGraph::getYMin() const
@@ -205,6 +219,16 @@ void RUGraph::setTitleLabel(std::string newLabel)
 
 	titleLabel->setText(newLabel);
 	titleLabel->setVisible(true);
+}
+
+void RUGraph::setXMin(float newXMin)
+{
+	xMin = newXMin;
+}
+
+void RUGraph::setXMax(float newXMax)
+{
+	xMax = newXMax;
 }
 
 void RUGraph::setYMin(float newYMin)
