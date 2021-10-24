@@ -32,11 +32,8 @@ RUCandleGraph::~RUCandleGraph()
 	clear();
 }
 
-void RUCandleGraph::add(gfxpp* cGfx, const Candle* newPoint, SDL_Color lineColor)
+void RUCandleGraph::add(const Candle* newPoint, SDL_Color lineColor)
 {
-	if(!cGfx)
-		return;
-
 	Candle* plotterPoint = new Candle(newPoint->getX(), newPoint->getOpen(), newPoint->getClose(),
 		newPoint->getHigh(), newPoint->getLow());
 
@@ -44,22 +41,18 @@ void RUCandleGraph::add(gfxpp* cGfx, const Candle* newPoint, SDL_Color lineColor
 	{
 		std::vector<Candle*> newPointVec;
 		newPointVec.push_back(plotterPoint);
-		set(cGfx, newPointVec, lineColor);
+		set(newPointVec, lineColor);
 		return;
 	}
 
 	Graphable<Candle>* cPlotter = candles[CANDLE_LABEL];
-	cPlotter->add(cGfx, plotterPoint, false);
+	cPlotter->add(plotterPoint, false);
 
 	// DON'T trigger the draw update here
 }
 
-void RUCandleGraph::set(gfxpp* cGfx, const std::vector<Candle*>& graphPoints,
-				  SDL_Color lineColor)
+void RUCandleGraph::set(const std::vector<Candle*>& graphPoints, SDL_Color lineColor)
 {
-	if(!cGfx)
-		return;
-
 	Graphable<Candle>* newPlotter;
 	if (candles.find(CANDLE_LABEL) != candles.end())
 		newPlotter = candles[CANDLE_LABEL];
@@ -71,39 +64,32 @@ void RUCandleGraph::set(gfxpp* cGfx, const std::vector<Candle*>& graphPoints,
 			candles[CANDLE_LABEL] = newPlotter;
 	}
 
-	newPlotter->set(cGfx, graphPoints);
+	newPlotter->set(graphPoints);
 
 	// trigger the draw update
 	drawUpdate = true;
 }
 
-void RUCandleGraph::addIndicator(gfxpp* cGfx, std::string label, const Point2* newPoint, SDL_Color lineColor)
+void RUCandleGraph::addIndicator(std::string label, const Point2* newPoint, SDL_Color lineColor)
 {
-	if(!cGfx)
-		return;
-
 	Point2* plotterPoint = new Point2(newPoint->getX(), newPoint->getY());
 
 	if (indicators.find(label) == indicators.end())
 	{
 		std::vector<Point2*> newPointVec;
 		newPointVec.push_back(plotterPoint);
-		setIndicator(cGfx, label, newPointVec, lineColor);
+		setIndicator(label, newPointVec, lineColor);
 		return;
 	}
 
 	Graphable<Point2>* cPlotter = indicators[label];
-	cPlotter->add(cGfx, plotterPoint, false);
+	cPlotter->add(plotterPoint, false);
 
 	// DON'T trigger the draw update here
 }
 
-void RUCandleGraph::setIndicator(gfxpp* cGfx, std::string label, const std::vector<Point2*>& graphPoints,
-				  SDL_Color lineColor)
+void RUCandleGraph::setIndicator(std::string label, const std::vector<Point2*>& graphPoints, SDL_Color lineColor)
 {
-	if(!cGfx)
-		return;
-
 	Graphable<Point2>* newPlotter;
 	if (indicators.find(label) != indicators.end())
 		newPlotter = indicators[label];
@@ -114,7 +100,7 @@ void RUCandleGraph::setIndicator(gfxpp* cGfx, std::string label, const std::vect
 			indicators[label] = newPlotter;
 	}
 
-	newPlotter->set(cGfx, graphPoints);
+	newPlotter->set(graphPoints);
 
 	// trigger the draw update
 	drawUpdate = true;
@@ -146,18 +132,15 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 	}
 }
 
-void RUCandleGraph::update(gfxpp* cGfx)
+void RUCandleGraph::update()
 {
-	if(!cGfx)
-		return;
-
 	// compute the candles
 	std::map<std::string, Graphable<Candle>*>::iterator it;
 	for (it = candles.begin(); it != candles.end(); ++it)
 	{
 		Graphable<Candle>* g = it->second;
 		if (g)
-			g->computeAxisRanges(cGfx);
+			g->computeAxisRanges();
 	}
 
 	// compute the indicators
@@ -166,7 +149,7 @@ void RUCandleGraph::update(gfxpp* cGfx)
 	{
 		Graphable<Point2>* g = it2->second;
 		if (g)
-			g->computeAxisRanges(cGfx);
+			g->computeAxisRanges();
 	}
 }
 

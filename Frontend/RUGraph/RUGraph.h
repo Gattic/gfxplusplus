@@ -123,6 +123,8 @@ public:
 	void setVScale(float);
 	void setPeriod(unsigned int);
 	void setAggregate(unsigned int);
+
+	virtual void update() = 0;
 };
 
 #endif

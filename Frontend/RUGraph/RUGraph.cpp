@@ -230,6 +230,7 @@ void RUGraph::setPeriod(unsigned int newPeriod)
 void RUGraph::setAggregate(unsigned int newAggregate)
 {
 	agg = newAggregate;
+	update();
 }
 
 void RUGraph::updateBackground(gfxpp* cGfx)

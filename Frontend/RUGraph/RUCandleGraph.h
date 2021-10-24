@@ -59,18 +59,14 @@ public:
 	virtual std::string getType() const;
 
 	//
-	virtual void add(gfxpp*, const Candle*,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	virtual void set(gfxpp*, const std::vector<Candle*>&,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void add(const Candle*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void set(const std::vector<Candle*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
 	//
-	virtual void addIndicator(gfxpp*, std::string, const Point2*,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	virtual void setIndicator(gfxpp*, std::string, const std::vector<Point2*>&,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void addIndicator(std::string, const Point2*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void setIndicator(std::string, const std::vector<Point2*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
-	void update(gfxpp*);
+	virtual void update();
 	void clear(bool = false);
 };
 

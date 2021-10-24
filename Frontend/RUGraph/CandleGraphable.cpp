@@ -18,15 +18,9 @@
 #include "RUGraph.h"
 
 template <>
-void Graphable<Candle>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization)
+void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 {
-	if (!cGfx)
-		return;
-
 	if (!parent)
-		return;
-
-	if (!cGfx->getRenderer())
 		return;
 
 	if (points.empty())

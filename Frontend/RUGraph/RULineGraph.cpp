@@ -30,34 +30,27 @@ RULineGraph::~RULineGraph()
 	clear();
 }
 
-void RULineGraph::add(gfxpp* cGfx, std::string label, const Point2* newPoint, SDL_Color lineColor, bool recompute)
+void RULineGraph::add(std::string label, const Point2* newPoint, SDL_Color lineColor, bool recompute)
 {
-	if(!cGfx)
-		return;
-
 	Point2* plotterPoint = new Point2(newPoint->getX(), newPoint->getY());
 
 	if (lines.find(label) == lines.end())
 	{
 		std::vector<Point2*> newPointVec;
 		newPointVec.push_back(plotterPoint);
-		set(cGfx, label, newPointVec, lineColor);
+		set(label, newPointVec, lineColor);
 		return;
 	}
 
 	Graphable<Point2>* cPlotter = lines[label];
-	cPlotter->add(cGfx, plotterPoint, recompute);
+	cPlotter->add(plotterPoint, recompute);
 	cPlotter->setColor(lineColor);
 
 	// DON'T trigger the draw update here
 }
 
-void RULineGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<Point2*>& graphPoints,
-				  SDL_Color lineColor)
+void RULineGraph::set(const std::string& label, const std::vector<Point2*>& graphPoints, SDL_Color lineColor)
 {
-	if(!cGfx)
-		return;
-
 	Graphable<Point2>* newPlotter;
 	if (lines.find(label) != lines.end())
 	{
@@ -71,7 +64,7 @@ void RULineGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<P
 			lines[label] = newPlotter;
 	}
 
-	newPlotter->set(cGfx, graphPoints);
+	newPlotter->set(graphPoints);
 
 	// trigger the draw update
 	drawUpdate = true;
@@ -95,18 +88,15 @@ void RULineGraph::updateBackground(gfxpp* cGfx)
 	}
 }
 
-void RULineGraph::update(gfxpp* cGfx)
+void RULineGraph::update()
 {
-	if(!cGfx)
-		return;
-
 	// compute the lines
 	std::map<std::string, Graphable<Point2>*>::iterator it;
 	for (it = lines.begin(); it != lines.end(); ++it)
 	{
 		Graphable<Point2>* g = it->second;
 		if (g)
-			g->computeAxisRanges(cGfx);
+			g->computeAxisRanges();
 	}
 }
 

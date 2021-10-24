@@ -19,15 +19,9 @@
 //TODO: Separate Scalar1D from Point2D and implement this add fncality
 
 template <>
-void Graphable<Point2>::computeAxisRanges(gfxpp* cGfx, bool additionOptimization)
+void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 {
-	if (!cGfx)
-		return;
-
 	if (!parent)
-		return;
-
-	if (!cGfx->getRenderer())
 		return;
 
 	if (points.empty())

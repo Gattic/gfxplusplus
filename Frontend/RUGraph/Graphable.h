@@ -65,15 +65,15 @@ public:
 	void setLocalMin(float);
 	void setLocalMax(float);
 	void setColor(SDL_Color);
-	void add(gfxpp*, const T*, bool = true);
-	void set(gfxpp*, const std::vector<T*>&);
+	void add(const T*, bool = true);
+	void set(const std::vector<T*>&);
 	virtual void clear();
 
 	// render
 	virtual void updateBackground(gfxpp*);
 	virtual void draw(gfxpp*);
 
-	void computeAxisRanges(gfxpp*, bool = false);
+	void computeAxisRanges(bool = false);
 };
 
 template <class T>
@@ -142,25 +142,25 @@ SDL_Color Graphable<T>::getColor() const
 }
 
 template <class T>
-void Graphable<T>::set(gfxpp* cGfx, const std::vector<T*>& newPoints)
+void Graphable<T>::set(const std::vector<T*>& newPoints)
 {
 	if (newPoints.empty())
 		return;
 
 	points = newPoints;
-	computeAxisRanges(cGfx);//sets redoRange automatically
+	computeAxisRanges();//sets redoRange automatically
 }
 
 // This function is recommended for TimeSeries optimizations.
 template <class T>
-void Graphable<T>::add(gfxpp* cGfx, const T* newPoint, bool recompute)
+void Graphable<T>::add(const T* newPoint, bool recompute)
 {
 	if (!newPoint)
 		return;
 
 	points.push_back(new T(*newPoint));
 	if(recompute)
-		computeAxisRanges(cGfx, true);
+		computeAxisRanges(true);
 }
 
 template <class T>
