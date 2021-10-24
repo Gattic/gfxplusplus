@@ -233,6 +233,12 @@ void RUGraph::setAggregate(unsigned int newAggregate)
 	update();
 }
 
+void RUGraph::onMouseUp(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
+{
+	// printf("RUGraph: onMouseDown(%d, %d);\n", eventX, eventY);
+	update();
+}
+
 void RUGraph::updateBackground(gfxpp* cGfx)
 {
 	// draw the axes

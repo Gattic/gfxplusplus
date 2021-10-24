@@ -55,6 +55,9 @@ private:
 protected:
 	RULabel* titleLabel;
 
+	// events
+	virtual void onMouseUp(gfxpp*, GPanel*, int, int);
+
 	// render
 	virtual void updateBackground(gfxpp*);
 
