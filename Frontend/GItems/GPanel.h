@@ -73,7 +73,7 @@ public:
 
 	virtual std::string getType() const;
 
-	void MsgBox(std::string, std::string, int);
+	void MsgBox(std::string, std::string, int, GeneralListener = GeneralListener());
 };
 
 #endif
