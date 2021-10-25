@@ -94,10 +94,10 @@ Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor)
 	setColor(newColor);
 	localXMode = false;
 	localYMode = false;
-	localXMin = 0.0f;
-	localXMax = 0.0f;
-	localYMin = 0.0f;
-	localYMax = 0.0f;
+	localXMin = FLT_MAX;
+	localXMax = FLT_MIN;
+	localYMin = FLT_MAX;
+	localYMax = FLT_MIN;
 	redoRange = true;
 }
 
@@ -297,10 +297,10 @@ void Graphable<T>::clear()
 	parent = NULL;
 	localXMode = false;
 	localYMode = false;
-	localXMin = 0.0f;
-	localYMin = 0.0f;
-	localXMax = 0.0f;
-	localYMax = 0.0f;
+	localXMin = FLT_MAX;
+	localXMax = FLT_MIN;
+	localYMin = FLT_MAX;
+	localYMax = FLT_MIN;
 	redoRange = true;
 }
 

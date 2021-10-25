@@ -45,11 +45,11 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 	gridEnabled = false;
 	gridLineWidth = DEFAULT_GRIDLINE_WIDTH;
 
-	xMin = 0.0f;
-	xMax = 0.0f;
-	yMin = 0.0f;
-	yMax = 0.0f;
-	vscale = 1.2;
+	xMin = FLT_MAX;
+	xMax = FLT_MIN;
+	yMin = FLT_MAX;
+	yMax = FLT_MIN;
+	vscale = 1.0;
 	period = P_1Y;
 	agg = AGG_1D;
 
@@ -76,11 +76,11 @@ RUGraph::~RUGraph()
 	gridLineWidth = 0;
 	quadrants = QUADRANTS_ONE;
 
-	xMin = 0.0f;
-	xMax = 0.0f;
-	yMin = 0.0f;
-	yMax = 0.0f;
-	vscale = 1.2;
+	xMin = FLT_MAX;
+	xMax = FLT_MIN;
+	yMin = FLT_MAX;
+	yMax = FLT_MIN;
+	vscale = 1.0;
 	period = P_1Y;
 	agg = AGG_1D;
 }

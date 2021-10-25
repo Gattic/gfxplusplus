@@ -45,10 +45,10 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 		float local_x_max = x_max;
 		float local_x_min = x_min;
 
-		float y_max = points[0]->getY();
-		float y_min = y_max;
-		float local_y_max = y_max;
-		float local_y_min = y_min;
+		float y_max = parent->getYMax();
+		float y_min = parent->getYMin();
+		float local_y_max = points[0]->getY();
+		float local_y_min = local_y_max;
 
 		for (unsigned int i = 1; i < points.size(); ++i)
 		{
@@ -76,8 +76,11 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 		setLocalXMax(local_x_max);
 		setLocalYMin(local_y_min);
 		setLocalYMax(local_y_max * vscale);
-		parent->setYMin(y_min);
-		parent->setYMax(y_max * vscale);
+
+		if(y_min < parent->getYMin())
+			parent->setYMin(y_min);
+		if(y_max > parent->getYMax())
+			parent->setYMax(y_max * vscale);
 	}
 
 	//==============================================Normalize the points==============================================
@@ -89,6 +92,7 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 		++xRange;
 
 	float pointXGap = ((float)parent->getWidth()) / xRange;
+	//printf("Line[%s]: xRange;pointXGap: %f; %f\n", parent->getName().c_str(),  xRange, pointXGap);
 	float pointYGap = ((float)parent->getHeight()) / yRange;
 	if(isinf(pointXGap))
 	{
@@ -130,7 +134,7 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 			continue;
 
 		// Our aggregated points
-		float newXValue = ((i/agg) * pointXGap);
+		float newXValue = (normalCounter * pointXGap);
 		//float newXValue = i * pointXGap;
 		normalizedPoints[normalCounter]->setX(parent->getAxisOriginX() + newXValue);
 		normalizedPoints[normalCounter]->setY(parent->getAxisOriginY() + parent->getHeight() - aggValue);
@@ -181,7 +185,14 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 			// draw a thick line from the previous to the current point
 			if ((prevPoint) && (i > 0))
 			{
-				//printf("p(%f, %f); c(%f, %f)\n", prevPoint->getX(), prevPoint->getY(), cPoint->getX(), cPoint->getY());
+				/*if(parent->getName() == "RoRGraph")
+				{
+					printf("Dim[%s]: %d:%d\n", parent->getName().c_str(), parent->getWidth(), parent->getWidth());
+					printf("Range[%s]: %f:%f\n", parent->getName().c_str(), getYMin(), getYMax());
+					printf("LocalRange[%s]: %f:%f\n", parent->getName().c_str(), getLocalYMin(), getLocalYMax());
+					printf("p[%s][%u]:  (%f, %f); c(%f, %f)\n", parent->getName().c_str(), i, prevPoint->getX(), prevPoint->getY(), cPoint->getX(), cPoint->getY());
+					printf("-----\n");
+				}*/
 				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
 								   cPoint->getX(), cPoint->getY() - 1);
 				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
