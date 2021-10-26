@@ -108,6 +108,11 @@ void RULineGraph::clear(bool toggleDraw)
 		delete it->second;
 	lines.clear();
 
+	xMin = FLT_MAX;
+	xMax = FLT_MIN;
+	yMin = FLT_MAX;
+	yMax = FLT_MIN;
+
 	if (toggleDraw)
 		drawUpdate = true;
 }

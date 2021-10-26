@@ -46,16 +46,17 @@ private:
 	int gridLineWidth;
 	int quadrants;
 
+	float vscale;
+	unsigned int period;
+	unsigned int sourceAgg; //aggregate level of the source data
+	unsigned int agg; //aggregatelevel of our data
+
+protected:
+	RULabel* titleLabel;
 	float xMin;
 	float xMax;
 	float yMin;
 	float yMax;
-	float vscale;
-	unsigned int period;
-	unsigned int agg; //aggregate
-
-protected:
-	RULabel* titleLabel;
 
 	// events
 	virtual void onMouseUp(gfxpp*, GPanel*, int, int);
@@ -116,6 +117,7 @@ public:
 	float getYMax() const;
 	float getVScale() const;
 	unsigned int getPeriod() const;
+	unsigned int getSourceAggregate() const;
 	unsigned int getAggregate() const;
 
 	// sets
@@ -131,6 +133,7 @@ public:
 	void setYMax(float);
 	void setVScale(float);
 	void setPeriod(unsigned int);
+	void setSourceAggregate(unsigned int);
 	void setAggregate(unsigned int);
 
 	virtual void update() = 0;

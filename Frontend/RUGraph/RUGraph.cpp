@@ -51,7 +51,8 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 	yMax = FLT_MIN;
 	vscale = 1.0;
 	period = P_1Y;
-	agg = AGG_1D;
+	agg = AGG_1m;
+	sourceAgg = AGG_1m;
 
 	// checkbox label
 	titleLabel = new RULabel();
@@ -82,7 +83,8 @@ RUGraph::~RUGraph()
 	yMax = FLT_MIN;
 	vscale = 1.0;
 	period = P_1Y;
-	agg = AGG_1D;
+	agg = AGG_1m;
+	sourceAgg = AGG_1m;
 }
 
 int RUGraph::getGraphSize() const
@@ -174,6 +176,11 @@ unsigned int RUGraph::getPeriod() const
 	return period;
 }
 
+unsigned int RUGraph::getSourceAggregate() const
+{
+	return sourceAgg;
+}
+
 unsigned int RUGraph::getAggregate() const
 {
 	return agg;
@@ -249,6 +256,11 @@ void RUGraph::setVScale(float newVScale)
 void RUGraph::setPeriod(unsigned int newPeriod)
 {
 	period = newPeriod;
+}
+
+void RUGraph::setSourceAggregate(unsigned int newSrcAggregate)
+{
+	sourceAgg = newSrcAggregate;
 }
 
 void RUGraph::setAggregate(unsigned int newAggregate)
