@@ -71,6 +71,11 @@ void RUCandleGraph::set(const std::vector<Candle*>& graphPoints, SDL_Color lineC
 	drawUpdate = true;
 }
 
+void RUCandleGraph::setIndicatorPeriods(const std::vector<unsigned int>& newIndPers)
+{
+	indicatorPeriods = newIndPers;
+}
+
 void RUCandleGraph::addIndicator(std::string label, const Point2* newPoint, SDL_Color lineColor)
 {
 	Point2* plotterPoint = new Point2(newPoint->getX(), newPoint->getY());
@@ -167,6 +172,7 @@ void RUCandleGraph::clear(bool toggleDraw)
 	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
 		delete it2->second;
 	indicators.clear();
+	indicatorPeriods.clear();
 
 	xMin = FLT_MAX;
 	xMax = FLT_MIN;

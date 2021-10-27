@@ -43,6 +43,7 @@ private:
 
 	std::map<std::string, Graphable<Candle>*> candles;
 	std::map<std::string, Graphable<Point2>*> indicators;
+	std::vector<unsigned int> indicatorPeriods;
 
 protected:
 	// render
@@ -63,6 +64,7 @@ public:
 	virtual void set(const std::vector<Candle*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
 	//
+	void setIndicatorPeriods(const std::vector<unsigned int>&);
 	virtual void addIndicator(std::string, const Point2*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 	virtual void setIndicator(std::string, const std::vector<Point2*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
