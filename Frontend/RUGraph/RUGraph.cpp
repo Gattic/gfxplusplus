@@ -269,14 +269,33 @@ void RUGraph::setAggregate(unsigned int newAggregate)
 	update();
 }
 
-void RUGraph::onMouseUp(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
+
+void RUGraph::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUGraph: onMouseDown(%d, %d);\n", eventX, eventY);
+	update();
+}
+void RUGraph::onMouseUp(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
+{
+	// printf("RUGraph: onMouseUp(%d, %d);\n", eventX, eventY);
 	update();
 }
 
 void RUGraph::updateBackground(gfxpp* cGfx)
 {
+	// set the background color
+	SDL_SetRenderDrawColor(cGfx->getRenderer(), getBGColor().r, getBGColor().g,
+						   getBGColor().b, 0xFF);
+
+	// set the background rect
+	SDL_Rect fullRect;
+	fullRect.x = 0;
+	fullRect.y = 0;
+	fullRect.w = width;
+	fullRect.h = height;
+
+	SDL_RenderFillRect(cGfx->getRenderer(), &fullRect);
+
 	// draw the axes
 	if (axisWidth > 0)
 	{

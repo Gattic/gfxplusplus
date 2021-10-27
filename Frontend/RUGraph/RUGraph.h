@@ -60,6 +60,7 @@ protected:
 
 	// events
 	virtual void onMouseUp(gfxpp*, GPanel*, int, int);
+	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 
 	// render
 	virtual void updateBackground(gfxpp*);
