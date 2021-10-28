@@ -239,10 +239,10 @@ void RUScrollbar::calculateBarPos()
 		return;
 
 	// draw the bar in the right spot
-	int blockSpace = getHeight() - (arrowSpace * 2);
-	int blockSize = blockSpace / maxValue;
+	float blockSpace = getHeight() - (arrowSpace * 2);
+	float blockSize = blockSpace / maxValue;
 	int blockOffset = arrowSpace + (blockSize * value);
-	int newHeight = blockSize * optionsShown;
+	int newHeight = blockSize * (((float)optionsShown)/((float)maxValue));
 
 	scrollBar->setMarginY(blockOffset);
 	scrollBar->setHeight(newHeight);
