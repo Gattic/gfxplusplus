@@ -17,7 +17,6 @@
 #ifndef _RUCIRCLE
 #define _RUCIRCLE
 
-#include "Graphable.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <map>
@@ -28,20 +27,22 @@
 #include <vector>
 
 class gfxpp;
-class RUGraph;
 class Point2;
 
-class Circle : public Graphable
+class Circle
 {
-private:
-	std::map<int, std::map<int, int> > heatmap;
-	std::vector<const Point2*> foci;
+protected:
+
 	double radius;
 	int maxHit;
 
 public:
+
+	std::map<int, std::map<int, int> > heatmap;
+	std::vector<const Point2*> foci;
+
 	// constructors & destructor
-	Circle(RUGraph*, SDL_Color);
+	Circle();
 	~Circle();
 
 	void addFocalPoint(const Point2*);
@@ -50,9 +51,7 @@ public:
 
 	const Point2* getFocalPoint(unsigned int) const;
 	double getRadius() const;
-
-	virtual void draw(gfxpp*);
-	virtual std::string getType() const;
+	int getMaxHit() const;
 };
 
 #endif

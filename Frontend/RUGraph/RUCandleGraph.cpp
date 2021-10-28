@@ -114,6 +114,44 @@ void RUCandleGraph::setIndicator(std::string label, const std::vector<Point2*>& 
 	drawUpdate = true;
 }
 
+void RUCandleGraph::addTrade(std::string label, const ActionBubble* newPoint, SDL_Color lineColor)
+{
+	ActionBubble* plotterPoint = new ActionBubble(*newPoint);
+
+	if (trades.find(label) == trades.end())
+	{
+		std::vector<ActionBubble*> newPointVec;
+		newPointVec.push_back(plotterPoint);
+		setTrade(label, newPointVec, lineColor);
+		return;
+	}
+
+	Graphable<ActionBubble>* cPlotter = trades[label];
+	//cPlotter->setLocalXMode(true);
+	cPlotter->add(plotterPoint, false);
+
+	// DON'T trigger the draw update here
+}
+
+void RUCandleGraph::setTrade(std::string label, const std::vector<ActionBubble*>& graphPoints, SDL_Color lineColor)
+{
+	Graphable<ActionBubble>* newPlotter;
+	if (trades.find(label) != trades.end())
+		newPlotter = trades[label];
+	else
+	{
+		newPlotter = new Graphable<ActionBubble>(this, lineColor);
+		if (newPlotter)
+			trades[label] = newPlotter;
+	}
+
+	//newPlotter->setLocalXMode(true);
+	newPlotter->set(graphPoints);
+
+	// trigger the draw update
+	drawUpdate = true;
+}
+
 void RUCandleGraph::updateBackground(gfxpp* cGfx)
 {
 	if(!cGfx)
@@ -138,6 +176,15 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 		if (g)
 			g->updateBackground(cGfx);
 	}
+
+	// draw the trades
+	std::map<std::string, Graphable<ActionBubble>*>::iterator it3;
+	for (it3 = trades.begin(); it3 != trades.end(); ++it3)
+	{
+		Graphable<ActionBubble>* g = it3->second;
+		if (g)
+			g->updateBackground(cGfx);
+	}
 }
 
 void RUCandleGraph::update()
@@ -159,6 +206,15 @@ void RUCandleGraph::update()
 		if (g)
 			g->computeAxisRanges();
 	}
+
+	// compute the trades
+	std::map<std::string, Graphable<ActionBubble>*>::iterator it3;
+	for (it3 = trades.begin(); it3 != trades.end(); ++it3)
+	{
+		Graphable<ActionBubble>* g = it3->second;
+		if (g)
+			g->computeAxisRanges();
+	}
 }
 
 void RUCandleGraph::clear(bool toggleDraw)
@@ -173,6 +229,11 @@ void RUCandleGraph::clear(bool toggleDraw)
 		delete it2->second;
 	indicators.clear();
 	indicatorPeriods.clear();
+
+	std::map<std::string, Graphable<ActionBubble>*>::iterator it3;
+	for (it3 = trades.begin(); it3 != trades.end(); ++it3)
+		delete it3->second;
+	trades.clear();
 
 	xMin = FLT_MAX;
 	xMax = FLT_MIN;

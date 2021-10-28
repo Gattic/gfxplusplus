@@ -9,6 +9,10 @@ set(GU_src_files
 	scalar1.h
 	Candle.cpp
 	Candle.h
+	ActionBubble.cpp
+	ActionBubble.h
+	Circle.cpp
+	Circle.h
 	EventTracker.cpp
 	EventTracker.h
 )

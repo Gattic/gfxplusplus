@@ -20,6 +20,7 @@
 #include "RUGraph.h"
 #include "../GItems/RUColors.h"
 #include "../GFXUtilities/Candle.h"
+#include "../GFXUtilities/ActionBubble.h"
 #include "Graphable.h"
 #include <SDL2/SDL.h>
 #include <map>
@@ -43,6 +44,7 @@ private:
 
 	std::map<std::string, Graphable<Candle>*> candles;
 	std::map<std::string, Graphable<Point2>*> indicators;
+	std::map<std::string, Graphable<ActionBubble>*> trades;
 	std::vector<unsigned int> indicatorPeriods;
 
 protected:
@@ -67,6 +69,10 @@ public:
 	void setIndicatorPeriods(const std::vector<unsigned int>&);
 	virtual void addIndicator(std::string, const Point2*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 	virtual void setIndicator(std::string, const std::vector<Point2*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
+	//
+	virtual void addTrade(std::string, const ActionBubble*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void setTrade(std::string, const std::vector<ActionBubble*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
 	virtual void update();
 	void clear(bool = false);
