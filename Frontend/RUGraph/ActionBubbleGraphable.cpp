@@ -23,11 +23,7 @@ void Graphable<ActionBubble>::computeAxisRanges(bool additionOptimization)
 	if (!parent)
 		return;
 
-	for (unsigned int i = 1; i < points.size(); ++i)
-	{
-		ActionBubble* pt = points[i];
-		pt->createHeatmap();
-	}
+	//TODO: Normalize like LineGraphable
 
 	parent->requireDrawUpdate();
 }
@@ -35,43 +31,34 @@ void Graphable<ActionBubble>::computeAxisRanges(bool additionOptimization)
 template <>
 void Graphable<ActionBubble>::draw(gfxpp* cGfx)
 {
+	//TODO: Use the action type to change the color for each point in the first loop
+	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
+
 	for (unsigned int i = 1; i < points.size(); ++i)
 	{
-		ActionBubble* pt = points[i];
+		const ActionBubble* cBubble = points[i];
+		if (!cBubble)
+			continue;
 
-		if (pt->getRadius() <= 0)
-			return;
+		const Point2* cFocalPoint = cBubble->getFocalPoint();
+		if (!cFocalPoint)
+			continue;
+
+		double radius = cBubble->getRadius();
+		if (radius <= 0)
+			continue;
 	
-		if (pt->foci.size() == 0)
-			return;
-	
-		SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
-							   getColor().a);
-	
-		std::map<int, std::map<int, int> >::const_iterator itr = pt->heatmap.begin();
-		for (; itr != pt->heatmap.end(); ++itr)
+		for (int i = -radius; i < radius; ++i)
 		{
-			int xIndex = itr->first;
-			std::map<int, int>::const_iterator itr2 = pt->heatmap[xIndex].begin();
-			for (; itr2 != pt->heatmap[xIndex].end(); ++itr2)
+			int xIndex = cFocalPoint->getX() + i;
+
+			std::map<int, int> newMap;
+			for (int j = -radius; j < radius; ++j)
 			{
-				int yIndex = itr2->first;
-				int cHeat = itr2->second;
-				// printf("pt->heatmap[%d][%d]: %d\n", xIndex, yIndex, cHeat);
-	
-				// calculate the hue
-				double hue = ((double)cHeat) / ((double)pt->getMaxHit());
-				hue = 1.0f - hue;
-	
-				// get the color
-				int8_t redMask = 0;
-				int8_t greenMask = 0;
-				int8_t blueMask = 0;
-				unsigned int colorMask = gfxpp::RGBfromHue(hue, &redMask, &greenMask, &blueMask);
+				int yIndex = cFocalPoint->getY() + j;
+
 	
 				// set the color and draw the point
-				SDL_SetRenderDrawColor(cGfx->getRenderer(), redMask, greenMask, blueMask,
-									   SDL_ALPHA_OPAQUE);
 				SDL_RenderDrawPoint(cGfx->getRenderer(), parent->getX() + xIndex,
 									parent->getY() + yIndex);
 			}

@@ -33,25 +33,35 @@ class ActionBubble
 {
 protected:
 
+	float cost;
+	int quantity;
 	double radius;
-	int maxHit;
+	Point2* focalPoint;
+	int actionType;
 
 public:
 
-	std::map<int, std::map<int, int> > heatmap;
-	std::vector<const Point2*> foci;
+	const static double AB_DEFAULT_RADIUS = 20.0f;
+
+	const static int ACTION_BUY = 0;
+	const static int ACTION_SELL = 1;
 
 	// constructors & destructor
 	ActionBubble();
+	ActionBubble(int, float, int, int);
 	~ActionBubble();
 
-	void addFocalPoint(const Point2*);
+	void setFocalPoint(const Point2*);
 	void setRadius(double);
-	void createHeatmap();
+	void setCost(float);
+	void setQuantity(int);
+	void setActionType(int);
 
-	const Point2* getFocalPoint(unsigned int) const;
+	const Point2* getFocalPoint() const;
 	double getRadius() const;
-	int getMaxHit() const;
+	float getCost() const;
+	int getQuantity() const;
+	int getActionType() const;
 };
 
 #endif

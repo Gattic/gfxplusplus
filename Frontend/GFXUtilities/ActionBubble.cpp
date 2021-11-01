@@ -20,84 +20,62 @@
 
 ActionBubble::ActionBubble()
 {
-	radius = 0.0f;
-	maxHit = 0;
+	radius = AB_DEFAULT_RADIUS;
+	focalPoint = NULL;
+	cost = 0.0f;
+	quantity = 0;
+	actionType = -1;
+}
+
+ActionBubble::ActionBubble(int graphXVal, float newCost, int newQuantity, int newActionType)
+{
+	radius = AB_DEFAULT_RADIUS;
+	cost = newCost;
+	quantity = newQuantity;
+	actionType = newActionType;
+	focalPoint = new Point2(graphXVal, newCost);
 }
 
 ActionBubble::~ActionBubble()
 {
-	radius = 0.0f;
-	maxHit = 0;
+	radius = AB_DEFAULT_RADIUS;
+	focalPoint = NULL;
+	cost = 0.0f;
+	quantity = 0;
+	actionType = -1;
 }
 
-void ActionBubble::addFocalPoint(const Point2* newFocalPoint)
+void ActionBubble::setFocalPoint(const Point2* newFocalPoint)
 {
 	if (!newFocalPoint)
 		return;
 
-	const Point2* newFocalPointCopy =
-		new Point2(floor(newFocalPoint->getX()), floor(newFocalPoint->getY()));
-	foci.push_back(newFocalPointCopy);
-	createHeatmap();
+	focalPoint = new Point2(floor(newFocalPoint->getX()), floor(newFocalPoint->getY()));
 }
 
 void ActionBubble::setRadius(double newRadius)
 {
 	radius = newRadius;
-	createHeatmap();
 }
 
-void ActionBubble::createHeatmap()
+void ActionBubble::setCost(float newCost)
 {
-	heatmap.clear();
-
-	// ActionBubble
-	if (foci.size() == 1)
-	{
-		for (unsigned int focalIndex = 0; focalIndex < foci.size(); ++focalIndex)
-		{
-			const Point2* cFocalPoint = foci[focalIndex];
-			for (int i = -radius; i < radius; ++i)
-			{
-				int xIndex = cFocalPoint->getX() + i;
-
-				std::map<int, int> newMap;
-				for (int j = -radius; j < radius; ++j)
-				{
-					int yIndex = cFocalPoint->getY() + j;
-
-					// calculate the distance
-					double distance = sqrt(pow(((double)i), 2.0f) + pow(((double)j), 2.0f));
-					double hue =
-						distance / sqrt(pow(((double)radius), 2.0f) + pow(((double)radius), 2.0f));
-					if (distance > radius)
-						continue;
-
-					// printf("i(%d,%d:%ld)\n", focalIndex, xIndex, heatmap.size());
-					if (heatmap.find(xIndex) == heatmap.end())
-						heatmap.insert(std::pair<int, std::map<int, int> >(xIndex, newMap));
-
-					// printf("j(%d:%d:%ld)\n", focalIndex, yIndex, heatmap[xIndex].size());
-					if (heatmap[xIndex].find(yIndex) == heatmap[xIndex].end())
-						heatmap[xIndex].insert(std::pair<int, int>(yIndex, 0));
-
-					// tick
-					++heatmap[xIndex][yIndex];
-
-					if (heatmap[xIndex][yIndex] > maxHit)
-						maxHit = heatmap[xIndex][yIndex];
-				}
-			}
-		}
-	}
+	cost = newCost;
 }
 
-const Point2* ActionBubble::getFocalPoint(unsigned int index) const
+void ActionBubble::setQuantity(int newQuantity)
 {
-	if (index >= foci.size())
-		return NULL;
+	quantity = newQuantity;
+}
 
-	return foci[index];
+void ActionBubble::setActionType(int newActionType)
+{
+	actionType = newActionType;
+}
+
+const Point2* ActionBubble::getFocalPoint() const
+{
+	return focalPoint;
 }
 
 double ActionBubble::getRadius() const
@@ -105,7 +83,17 @@ double ActionBubble::getRadius() const
 	return radius;
 }
 
-int ActionBubble::getMaxHit() const
+float ActionBubble::getCost() const
 {
-	return maxHit;
+	return cost;
+}
+
+int ActionBubble::getQuantity() const
+{
+	return quantity;
+}
+
+int ActionBubble::getActionType() const
+{
+	return actionType;
 }
