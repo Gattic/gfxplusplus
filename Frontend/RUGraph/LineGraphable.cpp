@@ -66,6 +66,11 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 			else if (y_pt < local_y_min)
 				local_y_min = y_pt;
 
+			if (x_pt > x_max)
+				x_max = x_pt;
+			else if (x_pt < x_min)
+				x_min = x_pt;
+
 			if (y_pt > y_max)
 				y_max = y_pt;
 			else if (y_pt < y_min)
@@ -76,6 +81,11 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 		setLocalXMax(local_x_max);
 		setLocalYMin(local_y_min);
 		setLocalYMax(local_y_max * vscale);
+
+		if(x_min < parent->getXMin())
+			parent->setXMin(x_min);
+		if(x_max > parent->getXMax())
+			parent->setXMax(x_max * vscale);
 
 		if(y_min < parent->getYMin())
 			parent->setYMin(y_min);

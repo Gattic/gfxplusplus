@@ -61,12 +61,16 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 				local_x_max = x_pt;
 			else if (x_pt < local_x_min)
 				local_x_min = x_pt;
-	//printf("Candle-PRE[%s]: %f:%f\n", parent->getName().c_str(), local_x_max, local_x_min);
 
 			if (y_high > local_y_max)
 				local_y_max = y_high;
 			else if (y_low < local_y_min)
 				local_y_min = y_low;
+
+			if (x_pt > x_max)
+				x_max = x_pt;
+			else if (x_pt < x_min)
+				x_min = x_pt;
 
 			if (y_high > y_max)
 				y_max = y_high;
@@ -78,6 +82,11 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 		setLocalXMax(local_x_max);
 		setLocalYMin(local_y_min);
 		setLocalYMax(local_y_max * vscale);
+
+		if(x_min < parent->getXMin())
+			parent->setXMin(x_min);
+		if(x_max > parent->getXMax())
+			parent->setXMax(x_max * vscale);
 
 		if(y_min < parent->getYMin())
 			parent->setYMin(y_min);
