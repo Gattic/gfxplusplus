@@ -67,6 +67,8 @@ public:
 	float getLocalYMin() const;
 	float getLocalYMax() const;
 	SDL_Color getColor() const;
+	unsigned int size() const;
+	unsigned int normalizedSize() const;
 
 	// sets
 	void setLocalXMode(bool);
@@ -195,6 +197,18 @@ template <class T>
 SDL_Color Graphable<T>::getColor() const
 {
 	return lineColor;
+}
+
+template <class T>
+unsigned int Graphable<T>::size() const
+{
+	return points.size();
+}
+
+template <class T>
+unsigned int Graphable<T>::normalizedSize() const
+{
+	return normalizedPoints.size();
 }
 
 template <class T>

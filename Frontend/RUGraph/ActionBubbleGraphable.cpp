@@ -15,6 +15,7 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
+#include "RUCandleGraph.h"
 #include "../GFXUtilities/ActionBubble.h"
 
 template <>
@@ -25,6 +26,16 @@ void Graphable<ActionBubble>::computeAxisRanges(bool additionOptimization)
 
 	if (points.empty())
 		return;
+
+	if(parent->getType() != "RUCandleGraph")
+		return;
+
+	RUCandleGraph* candleParent = (RUCandleGraph*)parent;
+	Graphable<Candle>* candlePlotter = candleParent->getCandleGraphable();
+	if(!candlePlotter)
+		return;
+
+	float candleWidth = ((float)candleParent->getWidth()) / candleParent->getCandleGraphableNormalizedSize();
 
 	redoRange = !additionOptimization;
 	if(additionOptimization)
@@ -120,11 +131,17 @@ void Graphable<ActionBubble>::computeAxisRanges(bool additionOptimization)
 		float newXValue = ((points[i]->getFocalPoint()->getX() - getXMin()) / getXMax()) * parent->getWidth();
 		float newYValue = (points[i]->getFocalPoint()->getY() - getYMin()) * pointYGap;
 
-		normalizedPoints[i]->setRadius(points[i]->getRadius());
+		normalizedPoints[i]->setRadius(candleWidth / 2.0f);
 		normalizedPoints[i]->setCost(points[i]->getCost());
 		normalizedPoints[i]->setQuantity(points[i]->getQuantity());
 		normalizedPoints[i]->setActionType(points[i]->getActionType());
-		normalizedPoints[i]->setFocalPoint(new Point2(parent->getAxisOriginX() + newXValue, parent->getAxisOriginY() + parent->getHeight() - newYValue));
+
+		if(normalizedPoints[i]->getActionType() == ActionBubble::ACTION_BUY)
+			normalizedPoints[i]->setFocalPoint(new Point2(parent->getAxisOriginX() + newXValue, parent->getAxisOriginY() + parent->getHeight() - newYValue - (candleWidth*3.0f)));
+		else if(normalizedPoints[i]->getActionType() == ActionBubble::ACTION_SELL)
+			normalizedPoints[i]->setFocalPoint(new Point2(parent->getAxisOriginX() + newXValue, parent->getAxisOriginY() + parent->getHeight() - newYValue + (candleWidth*3.0f)));
+		else
+			normalizedPoints[i]->setFocalPoint(new Point2(parent->getAxisOriginX() + newXValue, parent->getAxisOriginY() + parent->getHeight() - newYValue));
 	}
 
 	parent->requireDrawUpdate();
@@ -133,14 +150,21 @@ void Graphable<ActionBubble>::computeAxisRanges(bool additionOptimization)
 template <>
 void Graphable<ActionBubble>::draw(gfxpp* cGfx)
 {
-	//TODO: Use the action type to change the color for each point in the first loop
-	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
-
 	for (unsigned int i = 0; i < normalizedPoints.size(); ++i)
 	{
 		const ActionBubble* cBubble = normalizedPoints[i];
 		if (!cBubble)
 			continue;
+
+		if(cBubble->getActionType() == ActionBubble::ACTION_BUY)
+			SDL_SetRenderDrawColor(cGfx->getRenderer(), RUColors::COLOR_WHITE.r, RUColors::COLOR_WHITE.g, RUColors::COLOR_WHITE.b, RUColors::COLOR_WHITE.a);
+		else if(cBubble->getActionType() == ActionBubble::ACTION_SELL)
+			SDL_SetRenderDrawColor(cGfx->getRenderer(), RUColors::COLOR_BLACK.r, RUColors::COLOR_BLACK.g, RUColors::COLOR_BLACK.b, RUColors::COLOR_BLACK.a);
+		else
+		{
+			SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
+			continue;
+		}
 
 		const Point2* cFocalPoint = cBubble->getFocalPoint();
 		if (!cFocalPoint)
@@ -157,6 +181,10 @@ void Graphable<ActionBubble>::draw(gfxpp* cGfx)
 			std::map<int, int> newMap;
 			for (int j = -radius; j < radius; ++j)
 			{
+				double distance = sqrt(pow(((double)i), 2.0f) + pow(((double)j), 2.0f));
+				if (distance > radius)
+					continue;
+
 				int yIndex = cFocalPoint->getY() + j;
 	
 				// set the color and draw the point

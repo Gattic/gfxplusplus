@@ -152,6 +152,32 @@ void RUCandleGraph::setTrade(std::string label, const std::vector<ActionBubble*>
 	drawUpdate = true;
 }
 
+Graphable<Candle>* RUCandleGraph::getCandleGraphable()
+{
+	if (candles.find(CANDLE_LABEL) == candles.end())
+		return NULL;
+
+	return candles[CANDLE_LABEL];
+}
+
+unsigned int RUCandleGraph::getCandleGraphableSize() const
+{
+	std::map<std::string, Graphable<Candle>*>::const_iterator itr = candles.find(CANDLE_LABEL);
+	if (itr == candles.end())
+		return 0;
+
+	return itr->second->size();
+}
+
+unsigned int RUCandleGraph::getCandleGraphableNormalizedSize() const
+{
+	std::map<std::string, Graphable<Candle>*>::const_iterator itr = candles.find(CANDLE_LABEL);
+	if (itr == candles.end())
+		return 0;
+
+	return itr->second->normalizedSize();
+}
+
 void RUCandleGraph::updateBackground(gfxpp* cGfx)
 {
 	if(!cGfx)

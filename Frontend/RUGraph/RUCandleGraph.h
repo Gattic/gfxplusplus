@@ -74,6 +74,10 @@ public:
 	virtual void addTrade(std::string, const ActionBubble*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 	virtual void setTrade(std::string, const std::vector<ActionBubble*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
+	Graphable<Candle>* getCandleGraphable();
+	unsigned int getCandleGraphableSize() const;
+	unsigned int getCandleGraphableNormalizedSize() const;
+
 	virtual void update();
 	void clear(bool = false);
 };
