@@ -193,6 +193,8 @@ void RUListbox::addOption(std::string newItemText)
 	scrollbar->setMaxValue(items.size());
 	if (items.size() > optionsShown)
 		scrollbar->setVisible(true);
+	else
+		scrollbar->setVisible(false);
 
 	// single select
 	if ((!multiSelectEnabled) && (itemsSelected.size() == 1))

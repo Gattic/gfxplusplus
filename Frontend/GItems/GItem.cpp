@@ -53,6 +53,9 @@ GItem::~GItem()
 {
 	eventsStatus = NULL;
 
+	if(background)
+		SDL_DestroyTexture(background);
+	background = NULL;
 	//Do more here?
 }
 
