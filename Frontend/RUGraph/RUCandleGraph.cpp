@@ -92,6 +92,34 @@ void RUCandleGraph::addIndicator(std::string label, const Point2* newPoint, SDL_
 	//cPlotter->setLocalXMode(true);
 	cPlotter->add(plotterPoint, false);
 
+	// Set the indicator color
+	unsigned int indCounter = 0;
+	std::map<std::string, Graphable<Point2>*>::iterator it2;
+	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
+	{
+		// calculate the hue
+		double hue = ((double)indCounter) / ((double)indicators.size());
+		hue = 1.0f - hue;
+
+		// get the color
+		int8_t redMask = 0xBF;
+		int8_t greenMask = 0xBF;
+		int8_t blueMask = 0xFF * hue;
+
+		// set the color and draw the point
+		SDL_Color cColor;
+		cColor.r = redMask,
+		cColor.g = greenMask;
+		cColor.b = blueMask;
+		cColor.a = SDL_ALPHA_OPAQUE;
+		Graphable<Point2>* g = it2->second;
+		if (g)
+		{
+			g->setColor(cColor);
+			++indCounter;
+		}
+	}
+
 	// DON'T trigger the draw update here
 }
 
@@ -109,6 +137,34 @@ void RUCandleGraph::setIndicator(std::string label, const std::vector<Point2*>& 
 
 	//newPlotter->setLocalXMode(true);
 	newPlotter->set(graphPoints);
+
+	// Set the indicator color
+	unsigned int indCounter = 0;
+	std::map<std::string, Graphable<Point2>*>::iterator it2;
+	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
+	{
+		// calculate the hue
+		double hue = ((double)indCounter) / ((double)indicators.size());
+		hue = 1.0f - hue;
+
+		// get the color
+		int8_t redMask = 0xBF;
+		int8_t greenMask = 0xBF;
+		int8_t blueMask = 0xFF * hue;
+
+		// set the color and draw the point
+		SDL_Color cColor;
+		cColor.r = redMask,
+		cColor.g = greenMask;
+		cColor.b = blueMask;
+		cColor.a = SDL_ALPHA_OPAQUE;
+		Graphable<Point2>* g = it2->second;
+		if (g)
+		{
+			g->setColor(cColor);
+			++indCounter;
+		}
+	}
 
 	// trigger the draw update
 	drawUpdate = true;
