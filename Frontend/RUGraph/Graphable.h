@@ -36,7 +36,6 @@ class Graphable
 private:
 	RUGraph* parent;
 	std::vector<T*> points;
-	std::vector<T*> normalizedPoints;
 
 	bool redoRange;
 	bool localXMode;
@@ -48,6 +47,8 @@ private:
 	SDL_Color lineColor;
 
 public:
+
+	std::vector<T*> normalizedPoints;
 
 	const static int TEXTURE_MAX_DIM = 16384;
 

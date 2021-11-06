@@ -21,138 +21,25 @@
 template <>
 void Graphable<ActionBubble>::computeAxisRanges(bool additionOptimization)
 {
-	if (!parent)
-		return;
-
-	if (points.empty())
-		return;
-
-	if(parent->getType() != "RUCandleGraph")
-		return;
-
-	RUCandleGraph* candleParent = (RUCandleGraph*)parent;
-	Graphable<Candle>* candlePlotter = candleParent->getCandleGraphable();
-	if(!candlePlotter)
-		return;
-
-	float candleWidth = ((float)candleParent->getWidth()) / candleParent->getCandleGraphableNormalizedSize();
-
-	redoRange = !additionOptimization;
-	if(additionOptimization)
-	{
-		// Is the latest y not within the current range?
-		float cY = points[points.size()-1]->getFocalPoint()->getY();
-		if(!((cY >= getYMin()) && (cY <= getYMax())))
-			redoRange = true;
-	}
-
-	redoRange = true;
-	float vscale = parent->getVScale();
-	if(redoRange)
-	{
-		float x_max = points[0]->getFocalPoint()->getX();
-		float x_min = x_max;
-		float local_x_max = x_max;
-		float local_x_min = x_min;
-
-		float y_max = parent->getYMax();
-		float y_min = parent->getYMin();
-		float local_y_max = points[0]->getFocalPoint()->getY();
-		float local_y_min = local_y_max;
-
-		for (unsigned int i = 1; i < points.size(); ++i)
-		{
-			const Point2* pt = points[i]->getFocalPoint();
-			float x_pt = pt->getX();
-			float y_pt = pt->getY();
-
-			if (x_pt > local_x_max)
-				local_x_max = x_pt;
-			else if (x_pt < local_x_min)
-				local_x_min = x_pt;
-
-			if (y_pt > local_y_max)
-				local_y_max = y_pt;
-			else if (y_pt < local_y_min)
-				local_y_min = y_pt;
-
-			if (x_pt > x_max)
-				x_max = x_pt;
-			else if (x_pt < x_min)
-				x_min = x_pt;
-
-			if (y_pt > y_max)
-				y_max = y_pt;
-			else if (y_pt < y_min)
-				y_min = y_pt;
-		}
-
-		setLocalXMin(local_x_min);
-		setLocalXMax(local_x_max);
-		setLocalYMin(local_y_min);
-		setLocalYMax(local_y_max * vscale);
-
-		if(x_min < parent->getXMin())
-			parent->setXMin(x_min);
-		if(x_max > parent->getXMax())
-			parent->setXMax(x_max * vscale);
-
-		if(y_min < parent->getYMin())
-			parent->setYMin(y_min);
-		if(y_max > parent->getYMax())
-			parent->setYMax(y_max * vscale);
-	}
-
-	//==============================================Normalize the points==============================================
-
-	float yRange = getYMax() - getYMin();
-
-	float pointYGap = ((float)parent->getHeight()) / yRange;
-
-	// Size up the normalized points vec
-	while(normalizedPoints.size() < points.size())
-	{
-		ActionBubble* newPoint = new ActionBubble();
-		normalizedPoints.push_back(newPoint);
-	}
-
-	while(normalizedPoints.size() > points.size())
-	{
-		normalizedPoints.erase(normalizedPoints.begin()+normalizedPoints.size()-1);
-	}
-
-	unsigned int i = 0;
-	if(!redoRange)
-		i = points.size()-1;
-
-	// Raw cost and fp->Y are the same
-	for (; i < points.size(); ++i)
-	{
-		float newXValue = ((points[i]->getFocalPoint()->getX() - getXMin()) / getXMax()) * parent->getWidth();
-		float newYValue = (points[i]->getFocalPoint()->getY() - getYMin()) * pointYGap;
-
-		normalizedPoints[i]->setRadius(candleWidth / 2.0f);
-		normalizedPoints[i]->setCost(points[i]->getCost());
-		normalizedPoints[i]->setQuantity(points[i]->getQuantity());
-		normalizedPoints[i]->setActionType(points[i]->getActionType());
-
-		if(normalizedPoints[i]->getActionType() == ActionBubble::ACTION_BUY)
-			normalizedPoints[i]->setFocalPoint(new Point2(parent->getAxisOriginX() + newXValue, parent->getAxisOriginY() + parent->getHeight() - newYValue - (candleWidth*3.0f)));
-		else if(normalizedPoints[i]->getActionType() == ActionBubble::ACTION_SELL)
-			normalizedPoints[i]->setFocalPoint(new Point2(parent->getAxisOriginX() + newXValue, parent->getAxisOriginY() + parent->getHeight() - newYValue + (candleWidth*3.0f)));
-		else
-			normalizedPoints[i]->setFocalPoint(new Point2(parent->getAxisOriginX() + newXValue, parent->getAxisOriginY() + parent->getHeight() - newYValue));
-	}
-
+	// We use the candle calculations
 	parent->requireDrawUpdate();
 }
 
 template <>
 void Graphable<ActionBubble>::draw(gfxpp* cGfx)
 {
-	for (unsigned int i = 0; i < normalizedPoints.size(); ++i)
+	RUCandleGraph* candleParent = (RUCandleGraph*)parent;
+	Graphable<Candle>* candlePlotter = candleParent->getCandleGraphable();
+	if(!candlePlotter)
+		return;
+
+	float candleWidth = ((float)candleParent->getWidth()) / candleParent->getCandleGraphableNormalizedSize();
+	float yRange = getYMax() - getYMin();
+	float pointYGap = ((float)parent->getHeight()) / yRange;
+
+	for (unsigned int i = 0; i < points.size(); ++i)
 	{
-		const ActionBubble* cBubble = normalizedPoints[i];
+		const ActionBubble* cBubble = points[i];
 		if (!cBubble)
 			continue;
 
@@ -170,26 +57,35 @@ void Graphable<ActionBubble>::draw(gfxpp* cGfx)
 		if (!cFocalPoint)
 			continue;
 
-		double radius = cBubble->getRadius();
+		double radius = candleWidth / 2.0f;
 		if (radius <= 0)
 			continue;
 	
-		for (int i = -radius; i < radius; ++i)
+		for (int drawX = -radius; drawX < radius; ++drawX)
 		{
-			int xIndex = cFocalPoint->getX() + i;
+			unsigned int xIndex = cFocalPoint->getX();
+			if(xIndex >= candlePlotter->normalizedPoints.size())
+				continue;
+
+			int xVal = candlePlotter->normalizedPoints[xIndex]->getX() + drawX; // from candle X
 
 			std::map<int, int> newMap;
-			for (int j = -radius; j < radius; ++j)
+			for (int drawY = -radius; drawY < radius; ++drawY)
 			{
-				double distance = sqrt(pow(((double)i), 2.0f) + pow(((double)j), 2.0f));
+				double distance = sqrt(pow(((double)drawX), 2.0f) + pow(((double)drawY), 2.0f));
 				if (distance > radius)
 					continue;
 
-				int yIndex = cFocalPoint->getY() + j;
+				float yVal = (cFocalPoint->getY() - getYMin()) * pointYGap;
+				if(cBubble->getActionType() == ActionBubble::ACTION_BUY)
+					yVal = parent->getHeight() - yVal - (candleWidth*3.0f);
+				else if(cBubble->getActionType() == ActionBubble::ACTION_SELL)
+					yVal = parent->getHeight() - yVal + (candleWidth*3.0f);
+				yVal += drawY;
 	
 				// set the color and draw the point
-				SDL_RenderDrawPoint(cGfx->getRenderer(), parent->getX() + xIndex,
-									parent->getY() + yIndex);
+				SDL_RenderDrawPoint(cGfx->getRenderer(), parent->getX() + xVal,
+									parent->getY() + yVal);
 			}
 		}
 	}
