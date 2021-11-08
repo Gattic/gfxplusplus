@@ -67,7 +67,7 @@ void Graphable<ActionBubble>::draw(gfxpp* cGfx)
 			if(xIndex >= candlePlotter->normalizedPoints.size())
 				continue;
 
-			int xVal = candlePlotter->normalizedPoints[xIndex]->getX() + drawX; // from candle X
+			int xVal = candlePlotter->normalizedPoints[xIndex]->getX() + drawX - radius; // from candle X
 
 			std::map<int, int> newMap;
 			for (int drawY = -radius; drawY < radius; ++drawY)
