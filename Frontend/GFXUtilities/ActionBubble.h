@@ -14,10 +14,9 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUCIRCLE
-#define _RUCIRCLE
+#ifndef _RUACTIONBUBBLE
+#define _RUACTIONBUBBLE
 
-#include "Graphable.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <map>
@@ -28,31 +27,41 @@
 #include <vector>
 
 class gfxpp;
-class RUGraph;
 class Point2;
 
-class Circle : public Graphable
+class ActionBubble
 {
-private:
-	std::map<int, std::map<int, int> > heatmap;
-	std::vector<const Point2*> foci;
+protected:
+
+	float cost;
+	int quantity;
 	double radius;
-	int maxHit;
+	Point2* focalPoint;
+	int actionType;
 
 public:
+
+	const static double AB_DEFAULT_RADIUS = 20.0f;
+
+	const static int ACTION_BUY = 0;
+	const static int ACTION_SELL = 1;
+
 	// constructors & destructor
-	Circle(RUGraph*, SDL_Color);
-	~Circle();
+	ActionBubble();
+	ActionBubble(int, float, int, int);
+	~ActionBubble();
 
-	void addFocalPoint(const Point2*);
+	void setFocalPoint(const Point2*);
 	void setRadius(double);
-	void createHeatmap();
+	void setCost(float);
+	void setQuantity(int);
+	void setActionType(int);
 
-	const Point2* getFocalPoint(unsigned int) const;
+	const Point2* getFocalPoint() const;
 	double getRadius() const;
-
-	virtual void draw(gfxpp*);
-	virtual std::string getType() const;
+	float getCost() const;
+	int getQuantity() const;
+	int getActionType() const;
 };
 
 #endif

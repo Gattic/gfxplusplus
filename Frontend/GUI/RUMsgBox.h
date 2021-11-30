@@ -61,6 +61,9 @@ protected:
 	RUButton* inputButtonSubmit;
 	std::string inputSubmitText;
 
+	// event listeners
+	GeneralListener MouseDownListener;
+
 	// events
 	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 
@@ -70,7 +73,7 @@ public:
 	static const int INPUTBOX = 2;
 
 	// constructors & destructor
-	RUMsgBox(GPanel*, std::string, std::string, int);
+	RUMsgBox(GPanel*, std::string, std::string, int, GeneralListener = GeneralListener());
 	~RUMsgBox();
 
 	// events

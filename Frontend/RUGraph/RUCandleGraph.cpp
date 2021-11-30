@@ -19,12 +19,12 @@
 #include "../GFXUtilities/Candle.h"
 #include "Graphable.h"
 
+const std::string RUCandleGraph::CANDLE_LABEL = "candles";
+
 RUCandleGraph::RUCandleGraph(int newWidth, int newHeight, int newQuadrants)
 	: RUGraph(newWidth, newHeight, newQuadrants)
 {
-	vscale = 0; // 0 is auto
-	period = P_1Y;
-	agg = AGG_1D;
+	//
 }
 
 RUCandleGraph::~RUCandleGraph()
@@ -32,84 +32,206 @@ RUCandleGraph::~RUCandleGraph()
 	clear();
 }
 
-unsigned int RUCandleGraph::getVScale()
+void RUCandleGraph::add(const Candle* newPoint, SDL_Color lineColor)
 {
-	return vscale;
-}
-
-unsigned int RUCandleGraph::getPeriod()
-{
-	return period;
-}
-
-unsigned int RUCandleGraph::getAggregate()
-{
-	return agg;
-}
-
-void RUCandleGraph::setVScale(unsigned int newVScale)
-{
-	vscale = newVScale;
-}
-
-void RUCandleGraph::setPeriod(unsigned int newPeriod)
-{
-	period = newPeriod;
-}
-
-void RUCandleGraph::setAggregate(unsigned int newAggregate)
-{
-	agg = newAggregate;
-}
-
-//Dont worry about this fnc
-void RUCandleGraph::add(gfxpp* cGfx, std::string label, const Candle* newPoint,
-				  SDL_Color lineColor)
-{
-	if(!cGfx)
-		return;
-
 	Candle* plotterPoint = new Candle(newPoint->getX(), newPoint->getOpen(), newPoint->getClose(),
 		newPoint->getHigh(), newPoint->getLow());
 
-	if (candles.find(label) == candles.end())
+	if (candles.find(CANDLE_LABEL) == candles.end())
 	{
 		std::vector<Candle*> newPointVec;
 		newPointVec.push_back(plotterPoint);
-		set(cGfx, label, newPointVec, lineColor);
+		set(newPointVec, lineColor);
 		return;
 	}
 
-	Graphable<Candle>* cPlotter = candles[label];
-	cPlotter->add(cGfx, plotterPoint);
+	Graphable<Candle>* cPlotter = candles[CANDLE_LABEL];
+	cPlotter->add(plotterPoint, false);
+	cPlotter->setColor(lineColor);
 
-	// DON'T trigger the draw update
-	// We do it manually in plotter add
-	// This is an optimization for candles
-	// drawUpdate = true;
+	// DON'T trigger the draw update here
 }
 
-void RUCandleGraph::set(gfxpp* cGfx, const std::string& label, const std::vector<Candle*>& graphPoints,
-				  SDL_Color lineColor)
+void RUCandleGraph::set(const std::vector<Candle*>& graphPoints, SDL_Color lineColor)
 {
-	if(!cGfx)
-		return;
-
 	Graphable<Candle>* newPlotter;
-	if (candles.find(label) != candles.end())
-		newPlotter = candles[label];
+	if (candles.find(CANDLE_LABEL) != candles.end())
+		newPlotter = candles[CANDLE_LABEL];
 	else
 	{
 		newPlotter = new Graphable<Candle>(this, lineColor);
 
 		if (newPlotter)
-			candles[label] = newPlotter;
+			candles[CANDLE_LABEL] = newPlotter;
 	}
 
-	newPlotter->set(cGfx, graphPoints);
+	newPlotter->set(graphPoints);
 
 	// trigger the draw update
 	drawUpdate = true;
+}
+
+void RUCandleGraph::setIndicatorPeriods(const std::vector<unsigned int>& newIndPers)
+{
+	indicatorPeriods = newIndPers;
+}
+
+void RUCandleGraph::addIndicator(std::string label, const Point2* newPoint, SDL_Color lineColor)
+{
+	Point2* plotterPoint = new Point2(newPoint->getX(), newPoint->getY());
+
+	if (indicators.find(label) == indicators.end())
+	{
+		std::vector<Point2*> newPointVec;
+		newPointVec.push_back(plotterPoint);
+		setIndicator(label, newPointVec, lineColor);
+		return;
+	}
+
+	Graphable<Point2>* cPlotter = indicators[label];
+	//cPlotter->setLocalXMode(true);
+	cPlotter->add(plotterPoint, false);
+
+	// Set the indicator color
+	unsigned int indCounter = 0;
+	std::map<std::string, Graphable<Point2>*>::iterator it2;
+	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
+	{
+		// calculate the hue
+		double hue = ((double)indCounter) / ((double)indicators.size());
+		hue = 1.0f - hue;
+
+		// get the color
+		int8_t redMask = 0xBF;
+		int8_t greenMask = 0xBF;
+		int8_t blueMask = 0xFF * hue;
+
+		// set the color and draw the point
+		SDL_Color cColor;
+		cColor.r = redMask,
+		cColor.g = greenMask;
+		cColor.b = blueMask;
+		cColor.a = SDL_ALPHA_OPAQUE;
+		Graphable<Point2>* g = it2->second;
+		if (g)
+		{
+			g->setColor(cColor);
+			++indCounter;
+		}
+	}
+
+	// DON'T trigger the draw update here
+}
+
+void RUCandleGraph::setIndicator(std::string label, const std::vector<Point2*>& graphPoints, SDL_Color lineColor)
+{
+	Graphable<Point2>* newPlotter;
+	if (indicators.find(label) != indicators.end())
+		newPlotter = indicators[label];
+	else
+	{
+		newPlotter = new Graphable<Point2>(this, lineColor);
+		if (newPlotter)
+			indicators[label] = newPlotter;
+	}
+
+	//newPlotter->setLocalXMode(true);
+	newPlotter->set(graphPoints);
+
+	// Set the indicator color
+	unsigned int indCounter = 0;
+	std::map<std::string, Graphable<Point2>*>::iterator it2;
+	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
+	{
+		// calculate the hue
+		double hue = ((double)indCounter) / ((double)indicators.size());
+		hue = 1.0f - hue;
+
+		// get the color
+		int8_t redMask = 0xBF;
+		int8_t greenMask = 0xBF;
+		int8_t blueMask = 0xFF * hue;
+
+		// set the color and draw the point
+		SDL_Color cColor;
+		cColor.r = redMask,
+		cColor.g = greenMask;
+		cColor.b = blueMask;
+		cColor.a = SDL_ALPHA_OPAQUE;
+		Graphable<Point2>* g = it2->second;
+		if (g)
+		{
+			g->setColor(cColor);
+			++indCounter;
+		}
+	}
+
+	// trigger the draw update
+	drawUpdate = true;
+}
+
+void RUCandleGraph::addTrade(std::string label, const ActionBubble* newPoint, SDL_Color lineColor)
+{
+	ActionBubble* plotterPoint = new ActionBubble(*newPoint);
+
+	if (trades.find(label) == trades.end())
+	{
+		std::vector<ActionBubble*> newPointVec;
+		newPointVec.push_back(plotterPoint);
+		setTrade(label, newPointVec, lineColor);
+		return;
+	}
+
+	Graphable<ActionBubble>* cPlotter = trades[label];
+	//cPlotter->setLocalXMode(true);
+	cPlotter->add(plotterPoint, false);
+
+	// DON'T trigger the draw update here
+}
+
+void RUCandleGraph::setTrade(std::string label, const std::vector<ActionBubble*>& graphPoints, SDL_Color lineColor)
+{
+	Graphable<ActionBubble>* newPlotter;
+	if (trades.find(label) != trades.end())
+		newPlotter = trades[label];
+	else
+	{
+		newPlotter = new Graphable<ActionBubble>(this, lineColor);
+		if (newPlotter)
+			trades[label] = newPlotter;
+	}
+
+	//newPlotter->setLocalXMode(true);
+	newPlotter->set(graphPoints);
+
+	// trigger the draw update
+	drawUpdate = true;
+}
+
+Graphable<Candle>* RUCandleGraph::getCandleGraphable()
+{
+	if (candles.find(CANDLE_LABEL) == candles.end())
+		return NULL;
+
+	return candles[CANDLE_LABEL];
+}
+
+unsigned int RUCandleGraph::getCandleGraphableSize() const
+{
+	std::map<std::string, Graphable<Candle>*>::const_iterator itr = candles.find(CANDLE_LABEL);
+	if (itr == candles.end())
+		return 0;
+
+	return itr->second->size();
+}
+
+unsigned int RUCandleGraph::getCandleGraphableNormalizedSize() const
+{
+	std::map<std::string, Graphable<Candle>*>::const_iterator itr = candles.find(CANDLE_LABEL);
+	if (itr == candles.end())
+		return 0;
+
+	return itr->second->normalizedSize();
 }
 
 void RUCandleGraph::updateBackground(gfxpp* cGfx)
@@ -121,25 +243,84 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 
 	// draw the candles
 	std::map<std::string, Graphable<Candle>*>::iterator it;
-
 	for (it = candles.begin(); it != candles.end(); ++it)
 	{
 		Graphable<Candle>* g = it->second;
 		if (g)
 			g->updateBackground(cGfx);
 	}
+
+	// draw the indicators
+	std::map<std::string, Graphable<Point2>*>::iterator it2;
+	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
+	{
+		Graphable<Point2>* g = it2->second;
+		if (g)
+			g->updateBackground(cGfx);
+	}
+
+	// draw the trades
+	std::map<std::string, Graphable<ActionBubble>*>::iterator it3;
+	for (it3 = trades.begin(); it3 != trades.end(); ++it3)
+	{
+		Graphable<ActionBubble>* g = it3->second;
+		if (g)
+			g->updateBackground(cGfx);
+	}
+}
+
+void RUCandleGraph::update()
+{
+	// compute the candles
+	std::map<std::string, Graphable<Candle>*>::iterator it;
+	for (it = candles.begin(); it != candles.end(); ++it)
+	{
+		Graphable<Candle>* g = it->second;
+		if (g)
+			g->computeAxisRanges();
+	}
+
+	// compute the indicators
+	std::map<std::string, Graphable<Point2>*>::iterator it2;
+	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
+	{
+		Graphable<Point2>* g = it2->second;
+		if (g)
+			g->computeAxisRanges();
+	}
+
+	// compute the trades
+	std::map<std::string, Graphable<ActionBubble>*>::iterator it3;
+	for (it3 = trades.begin(); it3 != trades.end(); ++it3)
+	{
+		Graphable<ActionBubble>* g = it3->second;
+		if (g)
+			g->computeAxisRanges();
+	}
 }
 
 void RUCandleGraph::clear(bool toggleDraw)
 {
-	vscale = 0; // 0 is auto
-	period = P_1Y;
-	agg = AGG_1D;
 	std::map<std::string, Graphable<Candle>*>::iterator it;
-
 	for (it = candles.begin(); it != candles.end(); ++it)
 		delete it->second;
 	candles.clear();
+
+	std::map<std::string, Graphable<Point2>*>::iterator it2;
+	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
+		delete it2->second;
+	indicators.clear();
+	indicatorPeriods.clear();
+
+	std::map<std::string, Graphable<ActionBubble>*>::iterator it3;
+	for (it3 = trades.begin(); it3 != trades.end(); ++it3)
+		delete it3->second;
+	trades.clear();
+
+	xMin = FLT_MAX;
+	xMax = FLT_MIN;
+	yMin = FLT_MAX;
+	yMax = FLT_MIN;
 
 	if (toggleDraw)
 		drawUpdate = true;

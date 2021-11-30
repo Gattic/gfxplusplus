@@ -26,12 +26,13 @@ std::string RUMsgBox::YES_BUTTON = "YES_Button";
 std::string RUMsgBox::NO_BUTTON = "NO_Button";
 std::string RUMsgBox::SUBMIT_BUTTON = "SUBMIT_Button";
 
-RUMsgBox::RUMsgBox(GPanel* gPanel, std::string newTitle, std::string newMessage, int newType)
+RUMsgBox::RUMsgBox(GPanel* gPanel, std::string newTitle, std::string newMessage, int newType, GeneralListener f)
 {
 	panel = gPanel;
 	title = newTitle;
 	message = newMessage;
 	type = newType;
+	MouseDownListener = f;
 	confirmButtonClicked = -1;
 
 	setWidth(DEFAULT_WIDTH);
@@ -189,6 +190,9 @@ void RUMsgBox::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 				if (itr->second->getName() == OK_BUTTON)
 				{
 					msgButtonOKClicked(cGfx);
+
+					// Call the callback we saved
+					MouseDownListener.call(getName(), eventX, eventY);
 				}
 				break;
 
@@ -197,6 +201,9 @@ void RUMsgBox::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 				if (itr->second->getName() == YES_BUTTON)
 				{
 					confirmButtonYESClicked(cGfx);
+
+					// Call the callback we saved
+					MouseDownListener.call(getName(), eventX, eventY);
 				}
 				else if (itr->second->getName() == NO_BUTTON)
 				{
@@ -209,6 +216,9 @@ void RUMsgBox::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 				if (itr->second->getName() == SUBMIT_BUTTON)
 				{
 					inputButtonSUBMITClicked(cGfx);
+
+					// Call the callback we saved
+					MouseDownListener.call(getName(), eventX, eventY);
 				}
 				break;
 			}

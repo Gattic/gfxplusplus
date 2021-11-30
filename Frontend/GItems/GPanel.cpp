@@ -160,41 +160,31 @@ void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPane
 void GPanel::processQ()
 {
 	//
-	if(updateQueue.size() != updateQueueNames.size())
-	{
-		printf("[GPANEL] Update Queue misalign\n");
-		return;
-	}
-
 	while(updateQueue.size() > 0)
 	{
 		popQ();
 	}
 }
 
-void GPanel::addToQ(shmea::GString cName, const shmea::ServiceData* cData)
+void GPanel::addToQ(const shmea::ServiceData* cData)
 {
 	pthread_mutex_lock(qMutex);
 	updateQueue.push(cData);
-	updateQueueNames.push(cName);
 	pthread_mutex_unlock(qMutex);
 }
 
 void GPanel::popQ()
 {
 	const shmea::ServiceData* cData;
-	shmea::GString cName = "";
 	pthread_mutex_lock(qMutex);
 	cData = updateQueue.front();
-	cName = updateQueueNames.front();
 	updateQueue.pop();
-	updateQueueNames.pop();
 	pthread_mutex_unlock(qMutex);
 
-	updateFromQ(cName, cData);
+	updateFromQ(cData);
 }
 
-void GPanel::updateFromQ(shmea::GString cName, const shmea::ServiceData* cData)
+void GPanel::updateFromQ(const shmea::ServiceData* cData)
 {
 	// Keep this empty in this class
 }
@@ -305,10 +295,10 @@ std::string GPanel::getType() const
 	return "GPanel";
 }
 
-void GPanel::MsgBox(std::string title, std::string msg, int type)
+void GPanel::MsgBox(std::string title, std::string msg, int type, GeneralListener f)
 {
 	// Type = Message Box, ConfirmBox, or InputBox
-	RUMsgBox* newMsgBox = new RUMsgBox(this, title, msg, type);
+	RUMsgBox* newMsgBox = new RUMsgBox(this, title, msg, type, f);
 
 	newMsgBox->setX((getWidth() / 2.0f) - (newMsgBox->getWidth() / 2.0f));
 	newMsgBox->setY((getHeight() / 2.0f) - (newMsgBox->getHeight() / 2.0f));

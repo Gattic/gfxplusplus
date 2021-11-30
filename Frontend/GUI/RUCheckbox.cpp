@@ -36,6 +36,7 @@ RUCheckbox::RUCheckbox(std::string message)
 	// checkbox label
 	checkboxLabel = new RULabel();
 	checkboxLabel->setText(message);
+	checkboxLabel->setMouseDownListener(GeneralListener(this, &RUCheckbox::toggleCheck));
 	addSubItem(checkboxLabel);
 }
 
@@ -78,7 +79,7 @@ void RUCheckbox::toggleCheck()
 		checkboxLocation = "resources/gui/Checkbox/unchecked.bmp";
 	checkbox->setBGImageFromLocation(checkboxLocation);
 
-	drawUpdate = true;
+	checkbox->requireDrawUpdate();
 }
 
 void RUCheckbox::setWidth(int newWidth)

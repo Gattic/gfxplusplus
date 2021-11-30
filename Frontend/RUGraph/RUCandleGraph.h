@@ -20,6 +20,7 @@
 #include "RUGraph.h"
 #include "../GItems/RUColors.h"
 #include "../GFXUtilities/Candle.h"
+#include "../GFXUtilities/ActionBubble.h"
 #include "Graphable.h"
 #include <SDL2/SDL.h>
 #include <map>
@@ -40,10 +41,11 @@ class GList;
 class RUCandleGraph : public RUGraph
 {
 private:
-	unsigned int vscale;
-	unsigned int period;
-	unsigned int agg; //aggregate
+
 	std::map<std::string, Graphable<Candle>*> candles;
+	std::map<std::string, Graphable<Point2>*> indicators;
+	std::map<std::string, Graphable<ActionBubble>*> trades;
+	std::vector<unsigned int> indicatorPeriods;
 
 protected:
 	// render
@@ -51,47 +53,32 @@ protected:
 
 public:
 
-	const static unsigned int P_ALL = 0;
-	const static unsigned int P_1D = 1;
-	const static unsigned int P_5D = 2;
-	const static unsigned int P_10D = 3;
-	const static unsigned int P_1M = 4;
-	const static unsigned int P_3M = 5;
-	const static unsigned int P_6M = 6;
-	const static unsigned int P_1Y = 7;
-	const static unsigned int P_5Y = 8;
-	const static unsigned int P_10Y = 9;
-
-	const static unsigned int AGG_1m = 1;
-	const static unsigned int AGG_2m = 2;
-	const static unsigned int AGG_3m = 3;
-	const static unsigned int AGG_5m = 5;
-	const static unsigned int AGG_15m = 15;
-	const static unsigned int AGG_30m = 30;
-	const static unsigned int AGG_1h = 60;
-	const static unsigned int AGG_4h = 240;
-	const static unsigned int AGG_1D = 390;
-	const static unsigned int AGG_1W = 1950;
-	const static unsigned int AGG_3W = 5850;
+	const static std::string CANDLE_LABEL;
 
 	// constructors & destructor
 	RUCandleGraph(int, int, int = QUADRANTS_ONE);
 	virtual ~RUCandleGraph();
 
-	unsigned int getVScale();
-	unsigned int getPeriod();
-	unsigned int getAggregate();
-
-	void setVScale(unsigned int);
-	void setPeriod(unsigned int);
-	void setAggregate(unsigned int);
-
 	virtual std::string getType() const;
-	virtual void add(gfxpp*, std::string, const Candle*,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	virtual void set(gfxpp*, const std::string&, const std::vector<Candle*>&,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
+	//
+	virtual void add(const Candle*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void set(const std::vector<Candle*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
+	//
+	void setIndicatorPeriods(const std::vector<unsigned int>&);
+	virtual void addIndicator(std::string, const Point2*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void setIndicator(std::string, const std::vector<Point2*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
+	//
+	virtual void addTrade(std::string, const ActionBubble*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void setTrade(std::string, const std::vector<ActionBubble*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
+	Graphable<Candle>* getCandleGraphable();
+	unsigned int getCandleGraphableSize() const;
+	unsigned int getCandleGraphableNormalizedSize() const;
+
+	virtual void update();
 	void clear(bool = false);
 };
 

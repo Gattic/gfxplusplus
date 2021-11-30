@@ -37,6 +37,7 @@ private:
 public:
 	GLetter()
 	{
+		tex = NULL;
 	}
 
 	GLetter(char newLetter, SDL_Texture* newTex, int newWidth)
@@ -56,6 +57,9 @@ public:
 	~GLetter()
 	{
 		// TODO: Destroy the texture here
+		if(tex)
+			SDL_DestroyTexture(tex);
+		tex = NULL;
 	}
 
 	char getLetter() const

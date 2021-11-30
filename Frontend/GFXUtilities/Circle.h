@@ -14,66 +14,44 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GPANEL
-#define _GPANEL
+#ifndef _RUCIRCLE
+#define _RUCIRCLE
 
-#include "GItem.h"
-#include "Backend/Database/ServiceData.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 #include <map>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <string>
-#include <time.h>
 #include <vector>
-#include <queue>
 
 class gfxpp;
-class RUComponent;
-class GLayout;
+class Point2;
 
-// GPanel is highest-level abstraction for rendering.
-class GPanel : public GItem
+class Circle
 {
 protected:
 
-	std::queue<const shmea::ServiceData*> updateQueue;
-	pthread_mutex_t* qMutex;
-
-	void processQ();
-	void popQ();
-	virtual void updateFromQ(const shmea::ServiceData*);
-
-	// Lifetime (virtual) functions
-	virtual void onStart() = 0;
-	virtual void onShow(gfxpp*);
-	virtual void onHide(gfxpp*);
-
-	// render
-	virtual void updateBackground(gfxpp*);
+	double radius;
+	int maxHit;
 
 public:
 
-	GPanel(const std::string&, int, int);
-	virtual ~GPanel();
+	std::map<int, std::map<int, int> > heatmap;
+	std::vector<const Point2*> foci;
 
-	void addToQ(const shmea::ServiceData*);
-	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
-	virtual void calculateSubItemPositions(std::pair<int, int>);
+	// constructors & destructor
+	Circle();
+	~Circle();
 
-	// events
-	void show(gfxpp*);
-	void hide(gfxpp*);
-	virtual void hover(gfxpp*);
-	virtual void unhover(gfxpp*);
-	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
-	virtual void updateBackgroundHelper(gfxpp*);
+	void addFocalPoint(const Point2*);
+	void setRadius(double);
+	void createHeatmap();
 
-	virtual std::string getType() const;
-
-	void MsgBox(std::string, std::string, int, GeneralListener = GeneralListener());
+	const Point2* getFocalPoint(unsigned int) const;
+	double getRadius() const;
+	int getMaxHit() const;
 };
 
 #endif

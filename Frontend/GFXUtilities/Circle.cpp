@@ -15,11 +15,10 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Circle.h"
-#include "../GFXUtilities/point2.h"
-#include "../Graphics/graphics.h"
-#include "RUGraph.h"
+#include "point2.h"
+//#include "../Graphics/graphics.h"
 
-Circle::Circle(RUGraph* newParent, SDL_Color newColor) : Graphable(newParent, newColor)
+Circle::Circle()
 {
 	radius = 0.0f;
 	maxHit = 0;
@@ -170,48 +169,7 @@ double Circle::getRadius() const
 	return radius;
 }
 
-void Circle::draw(gfxpp* cGfx)
+int Circle::getMaxHit() const
 {
-	if (radius <= 0)
-		return;
-
-	if (foci.size() == 0)
-		return;
-
-	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
-						   getColor().a);
-
-	std::map<int, std::map<int, int> >::const_iterator itr = heatmap.begin();
-	for (; itr != heatmap.end(); ++itr)
-	{
-		int xIndex = itr->first;
-		std::map<int, int>::const_iterator itr2 = heatmap[xIndex].begin();
-		for (; itr2 != heatmap[xIndex].end(); ++itr2)
-		{
-			int yIndex = itr2->first;
-			int cHeat = itr2->second;
-			// printf("heatmap[%d][%d]: %d\n", xIndex, yIndex, cHeat);
-
-			// calculate the hue
-			double hue = ((double)cHeat) / ((double)maxHit);
-			hue = 1.0f - hue;
-
-			// get the color
-			int8_t redMask = 0;
-			int8_t greenMask = 0;
-			int8_t blueMask = 0;
-			unsigned int colorMask = gfxpp::RGBfromHue(hue, &redMask, &greenMask, &blueMask);
-
-			// set the color and draw the point
-			SDL_SetRenderDrawColor(cGfx->getRenderer(), redMask, greenMask, blueMask,
-								   SDL_ALPHA_OPAQUE);
-			SDL_RenderDrawPoint(cGfx->getRenderer(), parent->getX() + xIndex,
-								parent->getY() + yIndex);
-		}
-	}
-}
-
-std::string Circle::getType() const
-{
-	return "Circle";
+	return maxHit;
 }
