@@ -19,7 +19,7 @@
 #include "../Graphics/graphics.h"
 #include "Backend/Database/image.h"
 
-RUImageComponent::RUImageComponent(const std::string& newBGImageLocation)
+RUImageComponent::RUImageComponent(const shmea::GString& newBGImageLocation)
 {
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 	setBGImageFromLocation(newBGImageLocation);
@@ -41,7 +41,7 @@ void RUImageComponent::updateBackground(gfxpp* cGfx)
 	//
 }
 
-std::string RUImageComponent::getType() const
+shmea::GString RUImageComponent::getType() const
 {
 	return "RUImageComponent";
 }

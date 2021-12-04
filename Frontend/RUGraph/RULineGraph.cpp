@@ -30,7 +30,7 @@ RULineGraph::~RULineGraph()
 	clear();
 }
 
-void RULineGraph::add(std::string label, const Point2* newPoint, SDL_Color lineColor, bool recompute)
+void RULineGraph::add(shmea::GString label, const Point2* newPoint, SDL_Color lineColor, bool recompute)
 {
 	Point2* plotterPoint = new Point2(newPoint->getX(), newPoint->getY());
 
@@ -49,7 +49,7 @@ void RULineGraph::add(std::string label, const Point2* newPoint, SDL_Color lineC
 	// DON'T trigger the draw update here
 }
 
-void RULineGraph::set(const std::string& label, const std::vector<Point2*>& graphPoints, SDL_Color lineColor)
+void RULineGraph::set(const shmea::GString& label, const std::vector<Point2*>& graphPoints, SDL_Color lineColor)
 {
 	Graphable<Point2>* newPlotter;
 	if (lines.find(label) != lines.end())
@@ -78,7 +78,7 @@ void RULineGraph::updateBackground(gfxpp* cGfx)
 	RUGraph::updateBackground(cGfx);
 
 	// draw the lines
-	std::map<std::string, Graphable<Point2>*>::iterator it;
+	std::map<shmea::GString, Graphable<Point2>*>::iterator it;
 
 	for (it = lines.begin(); it != lines.end(); ++it)
 	{
@@ -91,7 +91,7 @@ void RULineGraph::updateBackground(gfxpp* cGfx)
 void RULineGraph::update()
 {
 	// compute the lines
-	std::map<std::string, Graphable<Point2>*>::iterator it;
+	std::map<shmea::GString, Graphable<Point2>*>::iterator it;
 	for (it = lines.begin(); it != lines.end(); ++it)
 	{
 		Graphable<Point2>* g = it->second;
@@ -102,7 +102,7 @@ void RULineGraph::update()
 
 void RULineGraph::clear(bool toggleDraw)
 {
-	std::map<std::string, Graphable<Point2>*>::iterator it;
+	std::map<shmea::GString, Graphable<Point2>*>::iterator it;
 
 	for (it = lines.begin(); it != lines.end(); ++it)
 		delete it->second;
@@ -117,7 +117,7 @@ void RULineGraph::clear(bool toggleDraw)
 		drawUpdate = true;
 }
 
-std::string RULineGraph::getType() const
+shmea::GString RULineGraph::getType() const
 {
 	return "RULineGraph";
 }

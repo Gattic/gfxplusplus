@@ -19,6 +19,7 @@
 
 #include "GItem.h"
 #include "Backend/Database/ServiceData.h"
+#include "Backend/Database/GString.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <pthread.h>
@@ -56,7 +57,7 @@ protected:
 
 public:
 
-	GPanel(const std::string&, int, int);
+	GPanel(const shmea::GString&, int, int);
 	virtual ~GPanel();
 
 	void addToQ(const shmea::ServiceData*);
@@ -71,9 +72,9 @@ public:
 	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
 	virtual void updateBackgroundHelper(gfxpp*);
 
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 
-	void MsgBox(std::string, std::string, int, GeneralListener = GeneralListener());
+	void MsgBox(shmea::GString, shmea::GString, int, GeneralListener = GeneralListener());
 };
 
 #endif

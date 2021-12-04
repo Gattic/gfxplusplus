@@ -35,7 +35,7 @@ GFont::GFont()
 	loadLetters();
 }
 
-GFont::GFont(SDL_Renderer* newRenderer, std::string newFontPath)
+GFont::GFont(SDL_Renderer* newRenderer, shmea::GString newFontPath)
 {
 	cRenderer = newRenderer;
 	fontPath = newFontPath;
@@ -161,7 +161,7 @@ int GFont::getFontSize() const
 	return fontSize;
 }
 
-std::string GFont::getFontPath() const
+shmea::GString GFont::getFontPath() const
 {
 	return fontPath;
 }

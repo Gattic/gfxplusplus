@@ -27,7 +27,7 @@
 #include "RUColors.h"
 #include "RUComponent.h"
 
-GPanel::GPanel(const std::string& newName, int newWidth, int newHeight)
+GPanel::GPanel(const shmea::GString& newName, int newWidth, int newHeight)
 {
 	name = newName;
 	width = newWidth;
@@ -82,7 +82,7 @@ void GPanel::addSubItem(GItem* newItem, unsigned int newZIndex)
 	if (!newItem)
 		return;
 
-	std::string itemName = newItem->getName();
+	shmea::GString itemName = newItem->getName();
 	if (getItemByName(itemName))
 	{
 		printf("GUI item name '%s' already exists. Skipping.\n", itemName.c_str());
@@ -290,12 +290,12 @@ void GPanel::updateBackground(gfxpp* cGfx)
 	//
 }
 
-std::string GPanel::getType() const
+shmea::GString GPanel::getType() const
 {
 	return "GPanel";
 }
 
-void GPanel::MsgBox(std::string title, std::string msg, int type, GeneralListener f)
+void GPanel::MsgBox(shmea::GString title, shmea::GString msg, int type, GeneralListener f)
 {
 	// Type = Message Box, ConfirmBox, or InputBox
 	RUMsgBox* newMsgBox = new RUMsgBox(this, title, msg, type, f);

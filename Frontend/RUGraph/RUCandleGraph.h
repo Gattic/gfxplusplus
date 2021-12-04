@@ -42,9 +42,9 @@ class RUCandleGraph : public RUGraph
 {
 private:
 
-	std::map<std::string, Graphable<Candle>*> candles;
-	std::map<std::string, Graphable<Point2>*> indicators;
-	std::map<std::string, Graphable<ActionBubble>*> trades;
+	std::map<shmea::GString, Graphable<Candle>*> candles;
+	std::map<shmea::GString, Graphable<Point2>*> indicators;
+	std::map<shmea::GString, Graphable<ActionBubble>*> trades;
 	std::vector<unsigned int> indicatorPeriods;
 
 protected:
@@ -53,13 +53,13 @@ protected:
 
 public:
 
-	const static std::string CANDLE_LABEL;
+	const static shmea::GString CANDLE_LABEL;
 
 	// constructors & destructor
 	RUCandleGraph(int, int, int = QUADRANTS_ONE);
 	virtual ~RUCandleGraph();
 
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 
 	//
 	virtual void add(const Candle*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
@@ -67,12 +67,12 @@ public:
 
 	//
 	void setIndicatorPeriods(const std::vector<unsigned int>&);
-	virtual void addIndicator(std::string, const Point2*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	virtual void setIndicator(std::string, const std::vector<Point2*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void addIndicator(shmea::GString, const Point2*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void setIndicator(shmea::GString, const std::vector<Point2*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
 	//
-	virtual void addTrade(std::string, const ActionBubble*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	virtual void setTrade(std::string, const std::vector<ActionBubble*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void addTrade(shmea::GString, const ActionBubble*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void setTrade(shmea::GString, const std::vector<ActionBubble*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
 	Graphable<Candle>* getCandleGraphable();
 	unsigned int getCandleGraphableSize() const;

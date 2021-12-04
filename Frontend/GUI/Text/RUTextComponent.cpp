@@ -54,7 +54,7 @@ RUTextComponent::~RUTextComponent()
 	KeyListener = 0;
 }
 
-std::string RUTextComponent::getText() const
+shmea::GString RUTextComponent::getText() const
 {
 	return text;
 }
@@ -76,11 +76,11 @@ bool RUTextComponent::getReadOnly() const
 
 void RUTextComponent::setText(const char* newCStrText)
 {
-	std::string newText(newCStrText);
+	shmea::GString newText(newCStrText);
 	setText(newText);
 }
 
-void RUTextComponent::setText(std::string newText)
+void RUTextComponent::setText(shmea::GString newText)
 {
 	if (text == newText)
 		return;

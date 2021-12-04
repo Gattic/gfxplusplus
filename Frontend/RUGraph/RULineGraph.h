@@ -40,7 +40,7 @@ class GList;
 class RULineGraph : public RUGraph
 {
 private:
-	std::map<std::string, Graphable<Point2>*> lines;
+	std::map<shmea::GString, Graphable<Point2>*> lines;
 
 protected:
 	// render
@@ -52,9 +52,9 @@ public:
 	RULineGraph(int, int, int = QUADRANTS_ONE);
 	virtual ~RULineGraph();
 
-	virtual std::string getType() const;
-	virtual void add(std::string, const Point2*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, bool = true);
-	virtual void set(const std::string&, const std::vector<Point2*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual shmea::GString getType() const;
+	virtual void add(shmea::GString, const Point2*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, bool = true);
+	virtual void set(const shmea::GString&, const std::vector<Point2*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
 	virtual void update();
 	void clear(bool = false);

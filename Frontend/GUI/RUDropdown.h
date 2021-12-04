@@ -35,7 +35,7 @@ protected:
 	bool open;
 	unsigned int prevSelectedIndex;
 	unsigned int selectedIndex;
-	std::string arrowLocation;
+	shmea::GString arrowLocation;
 
 	RULabel* selectedLabel;
 	RUListbox* lbItems;
@@ -57,7 +57,7 @@ public:
 	bool isOpen() const;
 	unsigned int getOptionsShown() const;
 	unsigned int getSelectedIndex();
-	std::string getSelectedText() const;
+	shmea::GString getSelectedText() const;
 
 	// sets
 	void toggleOpen();
@@ -65,7 +65,7 @@ public:
 	void setHeight(int);
 	void setOptionsShown(unsigned int);
 	void setSelectedIndex(unsigned int);
-	void addOption(std::string);
+	void addOption(shmea::GString);
 	void clearOptions();
 	unsigned int size() const;
 
@@ -74,7 +74,7 @@ public:
 
 	// render
 	virtual void updateBackground(gfxpp*);
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 };
 
 #endif

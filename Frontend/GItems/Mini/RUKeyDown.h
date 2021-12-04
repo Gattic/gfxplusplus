@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string>
 
-typedef void (*KeyDownEvent)(const std::string&);
+typedef void (*KeyDownEvent)(const shmea::GString&);
 
 class gfxpp;
 class GItem;

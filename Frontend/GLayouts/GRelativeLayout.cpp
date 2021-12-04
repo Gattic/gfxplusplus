@@ -20,7 +20,7 @@
 #include "../GItems/Mini/RUBackgroundComponent.h"
 #include "../GItems/Mini/RUBorderComponent.h"
 
-GRelativeLayout::GRelativeLayout(std::string layoutName)
+GRelativeLayout::GRelativeLayout(shmea::GString layoutName)
 {
 	name = layoutName;
 	layoutType = 0; // 0 = Relative; 1 = Linear
@@ -48,7 +48,7 @@ void GRelativeLayout::updateBackgroundHelper(gfxpp* cGfx)
 	//
 }
 
-std::string GRelativeLayout::getType() const
+shmea::GString GRelativeLayout::getType() const
 {
 	return "GRelativeLayout";
 }

@@ -21,12 +21,12 @@
 #include "Text/RULabel.h"
 #include "Text/RUTextbox.h"
 
-std::string RUMsgBox::OK_BUTTON = "OK_Button";
-std::string RUMsgBox::YES_BUTTON = "YES_Button";
-std::string RUMsgBox::NO_BUTTON = "NO_Button";
-std::string RUMsgBox::SUBMIT_BUTTON = "SUBMIT_Button";
+shmea::GString RUMsgBox::OK_BUTTON = "OK_Button";
+shmea::GString RUMsgBox::YES_BUTTON = "YES_Button";
+shmea::GString RUMsgBox::NO_BUTTON = "NO_Button";
+shmea::GString RUMsgBox::SUBMIT_BUTTON = "SUBMIT_Button";
 
-RUMsgBox::RUMsgBox(GPanel* gPanel, std::string newTitle, std::string newMessage, int newType, GeneralListener f)
+RUMsgBox::RUMsgBox(GPanel* gPanel, shmea::GString newTitle, shmea::GString newMessage, int newType, GeneralListener f)
 {
 	panel = gPanel;
 	title = newTitle;
@@ -176,8 +176,8 @@ void RUMsgBox::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 	std::map<int, GItem*>::iterator itr = clickedSubItems.begin();
 	for (; itr != clickedSubItems.end(); ++itr)
 	{
-		std::string compType = itr->second->getType();
-		std::string compName = itr->second->getName();
+		shmea::GString compType = itr->second->getType();
+		shmea::GString compName = itr->second->getName();
 		// printf("Subcomponent '%s' of type '%s' was clicked.\n", compName.c_str(),
 		// compType.c_str());
 
@@ -274,7 +274,7 @@ void RUMsgBox::inputButtonSUBMITClicked(gfxpp* cGfx)
 	// printf("\nSUBMITTED: %s\n", inputSubmitText.c_str());
 }
 
-std::string RUMsgBox::getType() const
+shmea::GString RUMsgBox::getType() const
 {
 	return "RUMsgBox";
 }

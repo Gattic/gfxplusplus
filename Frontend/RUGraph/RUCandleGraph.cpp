@@ -19,7 +19,7 @@
 #include "../GFXUtilities/Candle.h"
 #include "Graphable.h"
 
-const std::string RUCandleGraph::CANDLE_LABEL = "candles";
+const shmea::GString RUCandleGraph::CANDLE_LABEL = "candles";
 
 RUCandleGraph::RUCandleGraph(int newWidth, int newHeight, int newQuadrants)
 	: RUGraph(newWidth, newHeight, newQuadrants)
@@ -76,7 +76,7 @@ void RUCandleGraph::setIndicatorPeriods(const std::vector<unsigned int>& newIndP
 	indicatorPeriods = newIndPers;
 }
 
-void RUCandleGraph::addIndicator(std::string label, const Point2* newPoint, SDL_Color lineColor)
+void RUCandleGraph::addIndicator(shmea::GString label, const Point2* newPoint, SDL_Color lineColor)
 {
 	Point2* plotterPoint = new Point2(newPoint->getX(), newPoint->getY());
 
@@ -94,7 +94,7 @@ void RUCandleGraph::addIndicator(std::string label, const Point2* newPoint, SDL_
 
 	// Set the indicator color
 	unsigned int indCounter = 0;
-	std::map<std::string, Graphable<Point2>*>::iterator it2;
+	std::map<shmea::GString, Graphable<Point2>*>::iterator it2;
 	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
 	{
 		// calculate the hue
@@ -123,7 +123,7 @@ void RUCandleGraph::addIndicator(std::string label, const Point2* newPoint, SDL_
 	// DON'T trigger the draw update here
 }
 
-void RUCandleGraph::setIndicator(std::string label, const std::vector<Point2*>& graphPoints, SDL_Color lineColor)
+void RUCandleGraph::setIndicator(shmea::GString label, const std::vector<Point2*>& graphPoints, SDL_Color lineColor)
 {
 	Graphable<Point2>* newPlotter;
 	if (indicators.find(label) != indicators.end())
@@ -140,7 +140,7 @@ void RUCandleGraph::setIndicator(std::string label, const std::vector<Point2*>& 
 
 	// Set the indicator color
 	unsigned int indCounter = 0;
-	std::map<std::string, Graphable<Point2>*>::iterator it2;
+	std::map<shmea::GString, Graphable<Point2>*>::iterator it2;
 	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
 	{
 		// calculate the hue
@@ -170,7 +170,7 @@ void RUCandleGraph::setIndicator(std::string label, const std::vector<Point2*>& 
 	drawUpdate = true;
 }
 
-void RUCandleGraph::addTrade(std::string label, const ActionBubble* newPoint, SDL_Color lineColor)
+void RUCandleGraph::addTrade(shmea::GString label, const ActionBubble* newPoint, SDL_Color lineColor)
 {
 	ActionBubble* plotterPoint = new ActionBubble(*newPoint);
 
@@ -189,7 +189,7 @@ void RUCandleGraph::addTrade(std::string label, const ActionBubble* newPoint, SD
 	// DON'T trigger the draw update here
 }
 
-void RUCandleGraph::setTrade(std::string label, const std::vector<ActionBubble*>& graphPoints, SDL_Color lineColor)
+void RUCandleGraph::setTrade(shmea::GString label, const std::vector<ActionBubble*>& graphPoints, SDL_Color lineColor)
 {
 	Graphable<ActionBubble>* newPlotter;
 	if (trades.find(label) != trades.end())
@@ -218,7 +218,7 @@ Graphable<Candle>* RUCandleGraph::getCandleGraphable()
 
 unsigned int RUCandleGraph::getCandleGraphableSize() const
 {
-	std::map<std::string, Graphable<Candle>*>::const_iterator itr = candles.find(CANDLE_LABEL);
+	std::map<shmea::GString, Graphable<Candle>*>::const_iterator itr = candles.find(CANDLE_LABEL);
 	if (itr == candles.end())
 		return 0;
 
@@ -227,7 +227,7 @@ unsigned int RUCandleGraph::getCandleGraphableSize() const
 
 unsigned int RUCandleGraph::getCandleGraphableNormalizedSize() const
 {
-	std::map<std::string, Graphable<Candle>*>::const_iterator itr = candles.find(CANDLE_LABEL);
+	std::map<shmea::GString, Graphable<Candle>*>::const_iterator itr = candles.find(CANDLE_LABEL);
 	if (itr == candles.end())
 		return 0;
 
@@ -242,7 +242,7 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 	RUGraph::updateBackground(cGfx);
 
 	// draw the candles
-	std::map<std::string, Graphable<Candle>*>::iterator it;
+	std::map<shmea::GString, Graphable<Candle>*>::iterator it;
 	for (it = candles.begin(); it != candles.end(); ++it)
 	{
 		Graphable<Candle>* g = it->second;
@@ -251,7 +251,7 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 	}
 
 	// draw the indicators
-	std::map<std::string, Graphable<Point2>*>::iterator it2;
+	std::map<shmea::GString, Graphable<Point2>*>::iterator it2;
 	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
 	{
 		Graphable<Point2>* g = it2->second;
@@ -260,7 +260,7 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 	}
 
 	// draw the trades
-	std::map<std::string, Graphable<ActionBubble>*>::iterator it3;
+	std::map<shmea::GString, Graphable<ActionBubble>*>::iterator it3;
 	for (it3 = trades.begin(); it3 != trades.end(); ++it3)
 	{
 		Graphable<ActionBubble>* g = it3->second;
@@ -272,7 +272,7 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 void RUCandleGraph::update()
 {
 	// compute the candles
-	std::map<std::string, Graphable<Candle>*>::iterator it;
+	std::map<shmea::GString, Graphable<Candle>*>::iterator it;
 	for (it = candles.begin(); it != candles.end(); ++it)
 	{
 		Graphable<Candle>* g = it->second;
@@ -281,7 +281,7 @@ void RUCandleGraph::update()
 	}
 
 	// compute the indicators
-	std::map<std::string, Graphable<Point2>*>::iterator it2;
+	std::map<shmea::GString, Graphable<Point2>*>::iterator it2;
 	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
 	{
 		Graphable<Point2>* g = it2->second;
@@ -290,7 +290,7 @@ void RUCandleGraph::update()
 	}
 
 	// compute the trades
-	std::map<std::string, Graphable<ActionBubble>*>::iterator it3;
+	std::map<shmea::GString, Graphable<ActionBubble>*>::iterator it3;
 	for (it3 = trades.begin(); it3 != trades.end(); ++it3)
 	{
 		Graphable<ActionBubble>* g = it3->second;
@@ -301,18 +301,18 @@ void RUCandleGraph::update()
 
 void RUCandleGraph::clear(bool toggleDraw)
 {
-	std::map<std::string, Graphable<Candle>*>::iterator it;
+	std::map<shmea::GString, Graphable<Candle>*>::iterator it;
 	for (it = candles.begin(); it != candles.end(); ++it)
 		delete it->second;
 	candles.clear();
 
-	std::map<std::string, Graphable<Point2>*>::iterator it2;
+	std::map<shmea::GString, Graphable<Point2>*>::iterator it2;
 	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
 		delete it2->second;
 	indicators.clear();
 	indicatorPeriods.clear();
 
-	std::map<std::string, Graphable<ActionBubble>*>::iterator it3;
+	std::map<shmea::GString, Graphable<ActionBubble>*>::iterator it3;
 	for (it3 = trades.begin(); it3 != trades.end(); ++it3)
 		delete it3->second;
 	trades.clear();
@@ -326,7 +326,7 @@ void RUCandleGraph::clear(bool toggleDraw)
 		drawUpdate = true;
 }
 
-std::string RUCandleGraph::getType() const
+shmea::GString RUCandleGraph::getType() const
 {
 	return "RUCandleGraph";
 }

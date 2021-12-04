@@ -216,9 +216,9 @@ void RUGraph::setQuadrants(int newQuadrants)
 	drawUpdate = true;
 }
 
-void RUGraph::setTitleLabel(std::string newLabel)
+void RUGraph::setTitleLabel(shmea::GString newLabel)
 {
-	if (newLabel == "" || newLabel.empty())
+	if (newLabel.length() == 0)
 	{
 		titleLabel->setVisible(false);
 		return;

@@ -95,7 +95,7 @@ unsigned int RUDropdown::getSelectedIndex()
  * @brief get selected text
  * @details gets the text content of the selected label
  */
-std::string RUDropdown::getSelectedText() const
+shmea::GString RUDropdown::getSelectedText() const
 {
 	return selectedLabel->getText();
 }
@@ -183,7 +183,7 @@ void RUDropdown::setSelectedIndex(unsigned int newIndex)
 	drawUpdate = true;
 }
 
-void RUDropdown::addOption(std::string newItemText)
+void RUDropdown::addOption(shmea::GString newItemText)
 {
 	// add the label
 	lbItems->addOption(newItemText);
@@ -287,7 +287,7 @@ void RUDropdown::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int event
 	drawUpdate = true;
 }
 
-std::string RUDropdown::getType() const
+shmea::GString RUDropdown::getType() const
 {
 	return "RUDropdown";
 }

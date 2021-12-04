@@ -323,7 +323,7 @@ void RUTable::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY, 
 	}
 }
 
-std::string RUTable::getType() const
+shmea::GString RUTable::getType() const
 {
 	return "RUTable";
 }

@@ -153,7 +153,7 @@ void RUListbox::setOptionsShown(unsigned int newOptionsShown)
 	drawUpdate = true;
 }
 
-void RUListbox::addOption(std::string newItemText)
+void RUListbox::addOption(shmea::GString newItemText)
 {
 	int newLabelWidth = getWidth();
 	if (items.size() + 1 > optionsShown)
@@ -435,7 +435,7 @@ void RUListbox::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY
 	}
 }
 
-std::string RUListbox::getType() const
+shmea::GString RUListbox::getType() const
 {
 	return "RUListbox";
 }

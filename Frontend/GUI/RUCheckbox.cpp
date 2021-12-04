@@ -20,7 +20,7 @@
 #include "RUImageComponent.h"
 #include "Text/RULabel.h"
 
-RUCheckbox::RUCheckbox(std::string message)
+RUCheckbox::RUCheckbox(shmea::GString message)
 {
 	checked = false;
 
@@ -65,7 +65,7 @@ bool RUCheckbox::isChecked() const
  * @brief get selected text
  * @details gets the text content of the selected label
  */
-std::string RUCheckbox::getLabel() const
+shmea::GString RUCheckbox::getLabel() const
 {
 	return checkboxLabel->getText();
 }
@@ -150,7 +150,7 @@ void RUCheckbox::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int event
 	drawUpdate = true;
 }
 
-std::string RUCheckbox::getType() const
+shmea::GString RUCheckbox::getType() const
 {
 	return "RUCheckbox";
 }

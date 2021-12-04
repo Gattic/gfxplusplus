@@ -127,7 +127,7 @@ public:
 	void setGridEnabled(bool);
 	void setGridLineWidth(int);
 	void setQuadrants(int);
-	void setTitleLabel(std::string);
+	void setTitleLabel(shmea::GString);
 	void setXMin(float);
 	void setXMax(float);
 	void setYMin(float);

@@ -27,7 +27,7 @@ RUButton::RUButton()
 	setCursor(SDL_SYSTEM_CURSOR_HAND);
 }
 
-RUButton::RUButton(std::string buttonColor_)
+RUButton::RUButton(shmea::GString buttonColor_)
 {
 	buttonColor = buttonColor_;
 
@@ -120,7 +120,7 @@ void RUButton::unhover(gfxpp* cGfx)
 	drawUpdate = true;
 }
 
-std::string RUButton::getType() const
+shmea::GString RUButton::getType() const
 {
 	return "RUButton";
 }

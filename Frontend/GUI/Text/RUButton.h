@@ -27,19 +27,19 @@ class gfxpp;
 class RUButton : public RUTextComponent
 {
 protected:
-	std::string buttonColor;
+	shmea::GString buttonColor;
 
 public:
 	// constructors & destructor
 	RUButton();
-	RUButton(std::string);
+	RUButton(shmea::GString);
 	~RUButton();
 
 	// render
 	void updateBackground(gfxpp*);
 	virtual void hover(gfxpp*);
 	virtual void unhover(gfxpp*);
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 };
 
 #endif

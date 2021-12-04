@@ -18,6 +18,7 @@
 #ifndef _RUGENERALLISTENER
 #define _RUGENERALLISTENER
 
+#include "Backend/Database/GString.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,8 +45,8 @@ class GeneralListener
 		virtual void call()=0;
 		virtual void call(int scrollType)=0;
 		virtual void call(int x, int y)=0;
-		virtual void call(const std::string& str, int x, int y)=0;
-		virtual void call(const std::string& str)=0;
+		virtual void call(const shmea::GString& str, int x, int y)=0;
+		virtual void call(const shmea::GString& str)=0;
 	};
 
 	template< typename T>
@@ -57,8 +58,8 @@ class GeneralListener
 		void (T::*listener0)() = NULL;
 		void (T::*listener1)(int) = NULL;
 		void (T::*listener2)(int, int) = NULL;
-		void (T::*listener3)(const std::string&, int, int) = NULL;
-		void (T::*listener4)(const std::string&) = NULL;
+		void (T::*listener3)(const shmea::GString&, int, int) = NULL;
+		void (T::*listener4)(const shmea::GString&) = NULL;
 
 	public:
 		ListenerModel(T* t, void (T::*newListener)()) : cbPanel(t), listener0(newListener)
@@ -76,12 +77,12 @@ class GeneralListener
 			//
 		}
 
-		ListenerModel(T* t, void (T::*newListener)(const std::string&, int, int)) : cbPanel(t), listener3(newListener)
+		ListenerModel(T* t, void (T::*newListener)(const shmea::GString&, int, int)) : cbPanel(t), listener3(newListener)
 		{
 			//
 		}
 
-		ListenerModel(T* t, void (T::*newListener)(const std::string&)) : cbPanel(t), listener4(newListener)
+		ListenerModel(T* t, void (T::*newListener)(const shmea::GString&)) : cbPanel(t), listener4(newListener)
 		{
 			//
 		}
@@ -110,7 +111,7 @@ class GeneralListener
 			(cbPanel->*listener2)(x, y);
 		}
 
-		void call(const std::string& str, int x, int y)
+		void call(const shmea::GString& str, int x, int y)
 		{
 			if(!listener3)
 				return;
@@ -118,7 +119,7 @@ class GeneralListener
 			(cbPanel->*listener3)(str, x, y);
 		}
 
-		void call(const std::string& str)
+		void call(const shmea::GString& str)
 		{
 			if(!listener4)
 				return;
@@ -160,13 +161,13 @@ public:
 	}
 
 	template< typename T>
-	GeneralListener(T* callbackPanel, void (T::*newListener)(const std::string&, int, int))
+	GeneralListener(T* callbackPanel, void (T::*newListener)(const shmea::GString&, int, int))
 	{
 		object = new ListenerModel<T>(callbackPanel, newListener);
 	}
 
 	template< typename T>
-	GeneralListener(T* callbackPanel, void (T::*newListener)(const std::string&))
+	GeneralListener(T* callbackPanel, void (T::*newListener)(const shmea::GString&))
 	{
 		object = new ListenerModel<T>(callbackPanel, newListener);
 	}
@@ -189,13 +190,13 @@ public:
 			object->call(x, y);
 	}
 
-	void call(const std::string& str, int x, int y)
+	void call(const shmea::GString& str, int x, int y)
 	{
 		if(object)
 			object->call(str, x, y);
 	}
 
-	void call(const std::string& str)
+	void call(const shmea::GString& str)
 	{
 		if(object)
 			object->call(str);

@@ -98,9 +98,9 @@ void gfxpp::addItem(GItem* newItem)
 	if (!newItem)
 		return;
 
-	const std::string options = "0123456789";
+	const shmea::GString options = "0123456789";
 	const int keyLength = 6;
-	std::string newItemID = "";
+	shmea::GString newItemID = "";
 	int itemID = 0;
 
 	do

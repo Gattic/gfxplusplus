@@ -112,7 +112,7 @@ void RUTabContainer::setOptionsShown(unsigned int newOptionsShown)
 	drawUpdate = true;
 }
 
-void RUTabContainer::addTab(std::string newItemText)
+void RUTabContainer::addTab(shmea::GString newItemText)
 {
 	if (!optionsShown)
 		return;
@@ -168,7 +168,7 @@ void RUTabContainer::addTab(std::string newItemText)
 	drawUpdate = true;
 }
 
-void RUTabContainer::addItemToTab(std::string tabText, GItem* tabItem)
+void RUTabContainer::addItemToTab(shmea::GString tabText, GItem* tabItem)
 {
 
 	for (unsigned int i = 0; i < items.size(); ++i)
@@ -236,7 +236,7 @@ void RUTabContainer::setSelectedTab(unsigned int newIndex)
 }
 
 // string = tab name
-void RUTabContainer::setSelectedTab(std::string tabName)
+void RUTabContainer::setSelectedTab(shmea::GString tabName)
 {
 	bool tabFound = false;
 	if (size() > 0)
@@ -363,7 +363,7 @@ void RUTabContainer::unhover()
 	}
 }
 
-std::string RUTabContainer::getType() const
+shmea::GString RUTabContainer::getType() const
 {
 	return "RUTabContainer";
 }

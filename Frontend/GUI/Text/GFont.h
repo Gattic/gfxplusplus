@@ -17,6 +17,7 @@
 #ifndef _GFONT
 #define _GFONT
 
+#include "Backend/Database/GString.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_ttf.h>
@@ -83,7 +84,7 @@ class GFont
 private:
 	static const int DEFAULT_FONT_SIZE = 30; // font resolution?
 
-	std::string fontPath;
+	shmea::GString fontPath;
 	TTF_Font* font;
 	int fontSize;
 	SDL_Color textColor;
@@ -96,13 +97,13 @@ private:
 public:
 	// constructor
 	GFont();
-	GFont(SDL_Renderer*, std::string = "");
+	GFont(SDL_Renderer*, shmea::GString = "");
 	GFont(const GFont&);
 	~GFont();
 
 	SDL_Color getTextColor() const;
 	int getFontSize() const;
-	std::string getFontPath() const;
+	shmea::GString getFontPath() const;
 	TTF_Font* getFont() const;
 	GLetter* getLetter(char) const;
 	int getMaxHeight() const;
