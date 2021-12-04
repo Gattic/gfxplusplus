@@ -42,7 +42,7 @@ protected:
 	RUImageComponent* arrow;
 
 	// events
-	void (GPanel::*OptionChangedListener)(int);
+	GeneralListener OptionChangedListener;
 	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 	virtual void onMouseWheel(gfxpp*, GPanel*, int, int, int);
 
@@ -70,7 +70,7 @@ public:
 	unsigned int size() const;
 
 	// events
-	void setOptionChangedListener(void (GPanel::*)(int));
+	void setOptionChangedListener(GeneralListener);
 
 	// render
 	virtual void updateBackground(gfxpp*);

@@ -26,7 +26,7 @@ RUDropdown::RUDropdown()
 {
 	toggleBorder(true);
 	open = false;
-	OptionChangedListener = 0;
+	OptionChangedListener = GeneralListener();
 
 	// selected label
 	selectedIndex = -1;
@@ -219,7 +219,7 @@ void RUDropdown::updateBackground(gfxpp* cGfx)
 	//
 }
 
-void RUDropdown::setOptionChangedListener(void (GPanel::*f)(int))
+void RUDropdown::setOptionChangedListener(GeneralListener f)
 {
 	OptionChangedListener = f;
 }
@@ -251,8 +251,7 @@ void RUDropdown::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY
 	// On Option changed event
 	if (getSelectedIndex() != prevSelectedIndex)
 	{
-		if (OptionChangedListener != 0)
-			(cPanel->*OptionChangedListener)(getSelectedIndex());
+		OptionChangedListener.call(getSelectedIndex());
 	}
 	prevSelectedIndex = getSelectedIndex();
 
