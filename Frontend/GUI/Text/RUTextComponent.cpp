@@ -80,12 +80,28 @@ void RUTextComponent::setText(const char* newCStrText)
 	setText(newText);
 }
 
-void RUTextComponent::setText(shmea::GString newText)
+void RUTextComponent::setText(shmea::GType newItem)
 {
-	if (text == newText)
+	if (text == newItem)
 		return;
 
-	text = newText;
+	if (newItem.getType() == shmea::GType::STRING_TYPE)
+		text = newItem;
+	else if (newItem.getType() == shmea::GType::CHAR_TYPE)
+		text = shmea::GString::charTOstring(newItem.getChar());
+	else if (newItem.getType() == shmea::GType::SHORT_TYPE)
+		text = shmea::GString::shortTOstring(newItem.getShort());
+	else if (newItem.getType() == shmea::GType::INT_TYPE)
+		text = shmea::GString::intTOstring(newItem.getInt());
+	else if (newItem.getType() == shmea::GType::LONG_TYPE)
+		text = shmea::GString::longTOstring(newItem.getLong());
+	else if (newItem.getType() == shmea::GType::FLOAT_TYPE)
+		text = shmea::GString::floatTOstring(newItem.getFloat());
+	else if (newItem.getType() == shmea::GType::DOUBLE_TYPE)
+		text = shmea::GString::doubleTOstring(newItem.getDouble());
+	else if (newItem.getType() == shmea::GType::BOOLEAN_TYPE)
+		text = newItem.getBoolean() ? "True" : "False";
+
 	strDrawText = "";
 	strWidth = 0.0f;
 	cursorX = 0;
