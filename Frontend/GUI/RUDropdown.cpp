@@ -109,6 +109,7 @@ void RUDropdown::toggleOpen()
 	else
 		arrowLocation = "resources/gui/Scrollbar/ArrowDown.bmp";
 	arrow->setBGImageFromLocation(arrowLocation);
+	arrow->requireDrawUpdate();
 
 	drawUpdate = true;
 }
