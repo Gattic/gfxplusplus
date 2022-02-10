@@ -1,4 +1,4 @@
-FROM gattic/shmea-db:latest
+FROM haskellol/shmea-db:docker/pants
 MAINTAINER Lerring
 
 WORKDIR /
