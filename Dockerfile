@@ -1,4 +1,4 @@
-FROM haskellol/shmea-db:docker-pants
+FROM haskellol/schmea-db:docker-pants
 MAINTAINER Lerring
 
 WORKDIR /
