@@ -450,6 +450,16 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 			SDL_RenderFillRect(cGfx->getRenderer(), &tickYRect);
 		}
 	}
+
+	// draw the graphables
+	std::map<shmea::GString, GeneralGraphable*>::iterator it;
+
+	for (it = graphables.begin(); it != graphables.end(); ++it)
+	{
+		GeneralGraphable* g = it->second;
+		if (g)
+			g->updateBackground(cGfx);
+	}
 }
 
 //TODO: Call this function in a separate thread!

@@ -42,7 +42,8 @@ class GeneralGraphable
 		void add(const T* newPoint, bool recompute);
 		template< typename T>
 		void set(const std::vector<T*>& newPoints);
-		virtual void computeAxisRanges(bool = false);
+		virtual void computeAxisRanges(bool additionOptimization = false);
+		virtual void updateBackground(gfxpp* cGfx);
 	};
 
 	template< typename T>
@@ -54,9 +55,10 @@ class GeneralGraphable
 			//
 		}
 
-		virtual void add(const T* newPoint, bool recompute)=0;
-		virtual void set(const std::vector<T*>& newPoints)=0;
+		virtual void add(const T* newPoint, bool recompute) = 0;
+		virtual void set(const std::vector<T*>& newPoints) = 0;
 		virtual void computeAxisRanges(bool additionOptimization = false) = 0;
+		virtual void updateBackground(gfxpp* cGfx) = 0;
 	};
 
 	template< typename T>
@@ -92,6 +94,11 @@ class GeneralGraphable
 		void computeAxisRanges(bool additionOptimization)
 		{
 			g->computeAxisRanges(additionOptimization);
+		}
+
+		void updateBackground(gfxpp* cGfx)
+		{
+			g->updateBackground(cGfx);
 		}
 
 		virtual ~GraphableModel()
@@ -133,6 +140,12 @@ public:
 	{
 		if(object)
 			object->computeAxisRanges(additionOptimization);
+	}
+
+	void updateBackground(gfxpp* cGfx)
+	{
+		if(object)
+			object->updateBackground(cGfx);
 	}
 
 	virtual ~GeneralGraphable()
