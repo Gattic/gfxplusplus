@@ -33,7 +33,6 @@ RULineGraph::~RULineGraph()
 void RULineGraph::add(shmea::GString label, const Point2* newPoint, SDL_Color lineColor, bool recompute)
 {
 	Point2* plotterPoint = new Point2(newPoint->getX(), newPoint->getY());
-
 	if (lines.find(label) == lines.end())
 	{
 		std::vector<Point2*> newPointVec;

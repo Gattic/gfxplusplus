@@ -1,8 +1,11 @@
 set(GraphGUI_src_files
+	GeneralGraphable.h
 	LineGraphable.cpp
 	CandleGraphable.cpp
 	CircleGraphable.cpp
 	ActionBubbleGraphable.cpp
+	GraphableAttr.cpp
+	GraphableAttr.h
 	Graphable.h
 	RUGraph.cpp
 	RUGraph.h

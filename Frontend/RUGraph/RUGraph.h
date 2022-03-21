@@ -19,6 +19,7 @@
 
 #include "../GItems/RUColors.h"
 #include "../GItems/RUComponent.h"
+#include "GeneralGraphable.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <pthread.h>
@@ -52,6 +53,7 @@ private:
 	unsigned int agg; //aggregatelevel of our data
 
 protected:
+	std::map<shmea::GString, GeneralGraphable*> graphables;
 	RULabel* titleLabel;
 	float xMin;
 	float xMax;
@@ -102,6 +104,12 @@ public:
 	RUGraph(int, int, int = QUADRANTS_ONE);
 	virtual ~RUGraph();
 
+	template< typename T>
+	void add(shmea::GString, const T*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, bool = true);
+
+	template< typename T>
+	void set(const shmea::GString&, const std::vector<T*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
 	// gets
 	int getGraphSize() const;
 	int getAxisOriginX() const;
@@ -137,7 +145,8 @@ public:
 	void setSourceAggregate(unsigned int);
 	void setAggregate(unsigned int);
 
-	virtual void update() = 0;
+	virtual void update();
+	virtual void clear(bool = false);
 };
 
 #endif
