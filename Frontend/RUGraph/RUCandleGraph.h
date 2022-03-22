@@ -43,6 +43,7 @@ class RUCandleGraph : public RUGraph
 private:
 
 	std::map<shmea::GString, Graphable<Candle>*> candles;
+	std::map<shmea::GString, Graphable<Point2>*> mLines;
 	std::map<shmea::GString, Graphable<Point2>*> indicators;
 	std::map<shmea::GString, Graphable<ActionBubble>*> trades;
 	std::vector<unsigned int> indicatorPeriods;
@@ -64,6 +65,10 @@ public:
 	//
 	virtual void add(const Candle*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 	virtual void set(const std::vector<Candle*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
+	//
+	virtual void addMLine(shmea::GString, const Point2*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void setMLines(shmea::GString, const std::vector<Point2*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
 	//
 	void setIndicatorPeriods(const std::vector<unsigned int>&);

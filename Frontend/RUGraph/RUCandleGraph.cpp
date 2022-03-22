@@ -71,6 +71,101 @@ void RUCandleGraph::set(const std::vector<Candle*>& graphPoints, SDL_Color lineC
 	drawUpdate = true;
 }
 
+void RUCandleGraph::addMLine(shmea::GString label, const Point2* newPoint, SDL_Color lineColor)
+{
+	Point2* plotterPoint = new Point2(newPoint->getX(), newPoint->getY());
+
+	if (mLines.find(label) == mLines.end())
+	{
+		std::vector<Point2*> newPointVec;
+		newPointVec.push_back(plotterPoint);
+		setIndicator(label, newPointVec, lineColor);
+		return;
+	}
+
+	Graphable<Point2>* cPlotter = indicators[label];
+	//cPlotter->setLocalXMode(true);
+	cPlotter->add(plotterPoint, false);
+
+	// Set the indicator color
+	unsigned int indCounter = 0;
+	std::map<shmea::GString, Graphable<Point2>*>::iterator it2;
+	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
+	{
+		// calculate the hue
+		double hue = ((double)indCounter) / ((double)indicators.size());
+		hue = 1.0f - hue;
+
+		// get the color
+		int8_t redMask = 0xBF;
+		int8_t greenMask = 0xBF;
+		int8_t blueMask = 0xFF * hue;
+
+		// set the color and draw the point
+		SDL_Color cColor;
+		cColor.r = redMask,
+		cColor.g = greenMask;
+		cColor.b = blueMask;
+		cColor.a = SDL_ALPHA_OPAQUE;
+		Graphable<Point2>* g = it2->second;
+		if (g)
+		{
+			g->setColor(cColor);
+			++indCounter;
+		}
+	}
+
+	// DON'T trigger the draw update here
+
+}
+
+void RUCandleGraph::setMLines(shmea::GString label, const std::vector<Point2*>& graphPoints, SDL_Color lineColor)
+{
+	Graphable<Point2>* newPlotter;
+	if (indicators.find(label) != indicators.end())
+		newPlotter = indicators[label];
+	else
+	{
+		newPlotter = new Graphable<Point2>(this, lineColor);
+		if (newPlotter)
+			indicators[label] = newPlotter;
+	}
+
+	//newPlotter->setLocalXMode(true);
+	newPlotter->set(graphPoints);
+
+	// Set the indicator color
+	unsigned int indCounter = 0;
+	std::map<shmea::GString, Graphable<Point2>*>::iterator it2;
+	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
+	{
+		// calculate the hue
+		double hue = ((double)indCounter) / ((double)indicators.size());
+		hue = 1.0f - hue;
+
+		// get the color
+		int8_t redMask = 0xBF;
+		int8_t greenMask = 0xBF;
+		int8_t blueMask = 0xFF * hue;
+
+		// set the color and draw the point
+		SDL_Color cColor;
+		cColor.r = redMask,
+		cColor.g = greenMask;
+		cColor.b = blueMask;
+		cColor.a = SDL_ALPHA_OPAQUE;
+		Graphable<Point2>* g = it2->second;
+		if (g)
+		{
+			g->setColor(cColor);
+			++indCounter;
+		}
+	}
+
+	// trigger the draw update
+	drawUpdate = true;
+}
+
 void RUCandleGraph::setIndicatorPeriods(const std::vector<unsigned int>& newIndPers)
 {
 	indicatorPeriods = newIndPers;
@@ -258,12 +353,21 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 		if (g)
 			g->updateBackground(cGfx);
 	}
+	
+	// draw the marketmaker lines
+	std::map<shmea::GString, Graphable<Point2>*>::iterator it3;
+	for (it3 = mLines.begin(); it3 != mLines.end(); ++it3)
+	{
+		Graphable<Point2>* g = it3->second;
+		if (g)
+			g->updateBackground(cGfx);
+	}
 
 	// draw the trades
-	std::map<shmea::GString, Graphable<ActionBubble>*>::iterator it3;
-	for (it3 = trades.begin(); it3 != trades.end(); ++it3)
+	std::map<shmea::GString, Graphable<ActionBubble>*>::iterator it4;
+	for (it4 = trades.begin(); it4 != trades.end(); ++it4)
 	{
-		Graphable<ActionBubble>* g = it3->second;
+		Graphable<ActionBubble>* g = it4->second;
 		if (g)
 			g->updateBackground(cGfx);
 	}
@@ -289,11 +393,20 @@ void RUCandleGraph::update()
 			g->computeAxisRanges();
 	}
 
-	// compute the trades
-	std::map<shmea::GString, Graphable<ActionBubble>*>::iterator it3;
-	for (it3 = trades.begin(); it3 != trades.end(); ++it3)
+	// compute the marketmaker lines 
+	std::map<shmea::GString, Graphable<Point2>*>::iterator it3;
+	for (it3 = mLines.begin(); it3 != mLines.end(); ++it3)
 	{
-		Graphable<ActionBubble>* g = it3->second;
+		Graphable<Point2>* g = it3->second;
+		if (g)
+			g->computeAxisRanges();
+	}
+
+	// compute the trades
+	std::map<shmea::GString, Graphable<ActionBubble>*>::iterator it4;
+	for (it4 = trades.begin(); it4 != trades.end(); ++it4)
+	{
+		Graphable<ActionBubble>* g = it4->second;
 		if (g)
 			g->computeAxisRanges();
 	}
