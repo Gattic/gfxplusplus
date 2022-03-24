@@ -71,99 +71,28 @@ void RUCandleGraph::set(const std::vector<Candle*>& graphPoints, SDL_Color lineC
 	drawUpdate = true;
 }
 
-void RUCandleGraph::addMLine(shmea::GString label, const Point2* newPoint, SDL_Color lineColor)
+void RUCandleGraph::addMLine(shmea::GString label, const double newPoint, unsigned int endOfGraphX, SDL_Color lineColor)
 {
-	Point2* plotterPoint = new Point2(newPoint->getX(), newPoint->getY());
+	Point2* startPoint = new Point2(0, newPoint);
+	Point2* endPoint = new Point2(endOfGraphX, newPoint);
 
-	if (mLines.find(label) == mLines.end())
-	{
-		std::vector<Point2*> newPointVec;
-		newPointVec.push_back(plotterPoint);
-		setIndicator(label, newPointVec, lineColor);
-		return;
-	}
+	std::vector<Point2*> newPointVec;
+	newPointVec.push_back(startPoint);
+	newPointVec.push_back(endPoint);
 
-	Graphable<Point2>* cPlotter = indicators[label];
-	//cPlotter->setLocalXMode(true);
-	cPlotter->add(plotterPoint, false);
+	Graphable<Point2>* newPlotter = new Graphable<Point2>(this, lineColor);
+	if (newPlotter)
+		mLines[label] = newPlotter;
 
-	// Set the indicator color
-	unsigned int indCounter = 0;
-	std::map<shmea::GString, Graphable<Point2>*>::iterator it2;
-	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
-	{
-		// calculate the hue
-		double hue = ((double)indCounter) / ((double)indicators.size());
-		hue = 1.0f - hue;
-
-		// get the color
-		int8_t redMask = 0xBF;
-		int8_t greenMask = 0xBF;
-		int8_t blueMask = 0xFF * hue;
-
-		// set the color and draw the point
-		SDL_Color cColor;
-		cColor.r = redMask,
-		cColor.g = greenMask;
-		cColor.b = blueMask;
-		cColor.a = SDL_ALPHA_OPAQUE;
-		Graphable<Point2>* g = it2->second;
-		if (g)
-		{
-			g->setColor(cColor);
-			++indCounter;
-		}
-	}
+	newPlotter->set(newPointVec);
 
 	// DON'T trigger the draw update here
 
 }
 
-void RUCandleGraph::setMLines(shmea::GString label, const std::vector<Point2*>& graphPoints, SDL_Color lineColor)
+void RUCandleGraph::resetMLines()
 {
-	Graphable<Point2>* newPlotter;
-	if (indicators.find(label) != indicators.end())
-		newPlotter = indicators[label];
-	else
-	{
-		newPlotter = new Graphable<Point2>(this, lineColor);
-		if (newPlotter)
-			indicators[label] = newPlotter;
-	}
-
-	//newPlotter->setLocalXMode(true);
-	newPlotter->set(graphPoints);
-
-	// Set the indicator color
-	unsigned int indCounter = 0;
-	std::map<shmea::GString, Graphable<Point2>*>::iterator it2;
-	for (it2 = indicators.begin(); it2 != indicators.end(); ++it2)
-	{
-		// calculate the hue
-		double hue = ((double)indCounter) / ((double)indicators.size());
-		hue = 1.0f - hue;
-
-		// get the color
-		int8_t redMask = 0xBF;
-		int8_t greenMask = 0xBF;
-		int8_t blueMask = 0xFF * hue;
-
-		// set the color and draw the point
-		SDL_Color cColor;
-		cColor.r = redMask,
-		cColor.g = greenMask;
-		cColor.b = blueMask;
-		cColor.a = SDL_ALPHA_OPAQUE;
-		Graphable<Point2>* g = it2->second;
-		if (g)
-		{
-			g->setColor(cColor);
-			++indCounter;
-		}
-	}
-
-	// trigger the draw update
-	drawUpdate = true;
+	mLines.clear();	
 }
 
 void RUCandleGraph::setIndicatorPeriods(const std::vector<unsigned int>& newIndPers)

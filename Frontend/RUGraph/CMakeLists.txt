@@ -3,6 +3,7 @@ set(GraphGUI_src_files
 	CandleGraphable.cpp
 	CircleGraphable.cpp
 	ActionBubbleGraphable.cpp
+	SimpleLineGraphable.cpp
 	Graphable.h
 	RUGraph.cpp
 	RUGraph.h

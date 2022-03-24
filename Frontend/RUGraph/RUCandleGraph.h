@@ -67,8 +67,8 @@ public:
 	virtual void set(const std::vector<Candle*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 
 	//
-	virtual void addMLine(shmea::GString, const Point2*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	virtual void setMLines(shmea::GString, const std::vector<Point2*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void addMLine(shmea::GString, const double, unsigned int, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void resetMLines();
 
 	//
 	void setIndicatorPeriods(const std::vector<unsigned int>&);

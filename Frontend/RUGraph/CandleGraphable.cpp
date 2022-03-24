@@ -76,7 +76,7 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 				y_max = y_high;
 			else if (y_low < y_min)
 				y_min = y_low;
-		}
+		}	
 
 		setLocalXMin(local_x_min);
 		setLocalXMax(local_x_max);
