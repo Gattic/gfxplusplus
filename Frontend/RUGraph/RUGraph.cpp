@@ -87,47 +87,6 @@ RUGraph::~RUGraph()
 	sourceAgg = AGG_1m;
 }
 
-template< typename T>
-void RUGraph::add(shmea::GString label, const T* newPoint, SDL_Color lineColor, bool recompute)
-{
-	T* plotterPoint = new T(*newPoint);
-	if (graphables.find(label) == graphables.end())
-	{
-		std::vector<T*> newPointVec;
-		newPointVec.push_back(plotterPoint);
-		set(label, newPointVec, lineColor);
-		return;
-	}
-
-	Graphable<T>* cPlotter = graphables[label];
-	cPlotter->add(plotterPoint, recompute);
-	cPlotter->setColor(lineColor);
-
-	// DON'T trigger the draw update here
-}
-
-template< typename T>
-void RUGraph::set(const shmea::GString& label, const std::vector<T*>& graphPoints, SDL_Color lineColor)
-{
-	Graphable<T>* newPlotter;
-	if (graphables.find(label) != graphables.end())
-	{
-		newPlotter = graphables[label];
-		newPlotter->setColor(lineColor);
-	}
-	else
-	{
-		newPlotter = new Graphable<T>(this, lineColor);
-		if (newPlotter)
-			graphables[label] = newPlotter;
-	}
-
-	newPlotter->set(graphPoints);
-
-	// trigger the draw update
-	drawUpdate = true;
-}
-
 int RUGraph::getGraphSize() const
 {
 	return graphSize;
@@ -460,6 +419,11 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 		if (g)
 			g->updateBackground(cGfx);
 	}
+}
+
+shmea::GString RUGraph::getType() const
+{
+	return "RUGraph";
 }
 
 //TODO: Call this function in a separate thread!

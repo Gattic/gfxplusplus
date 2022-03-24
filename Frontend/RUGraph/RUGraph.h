@@ -145,8 +145,51 @@ public:
 	void setSourceAggregate(unsigned int);
 	void setAggregate(unsigned int);
 
+	virtual shmea::GString getType() const;
 	virtual void update();
 	virtual void clear(bool = false);
 };
+
+template< typename T>
+void RUGraph::add(shmea::GString label, const T* newPoint, SDL_Color lineColor, bool recompute)
+{
+	T* plotterPoint = new T(*newPoint);
+	if (graphables.find(label) == graphables.end())
+	{
+		std::vector<T*> newPointVec;
+		newPointVec.push_back(plotterPoint);
+		set(label, newPointVec, lineColor);
+		return;
+	}
+
+	GeneralGraphable* cPlotter = graphables[label];
+	cPlotter->add(plotterPoint, recompute);
+	cPlotter->setColor(lineColor);
+
+	// DON'T trigger the draw update here
+}
+
+template< typename T>
+void RUGraph::set(const shmea::GString& label, const std::vector<T*>& graphPoints, SDL_Color lineColor)
+{
+	GeneralGraphable* newPlotter;
+	if (graphables.find(label) != graphables.end())
+	{
+		newPlotter = graphables[label];
+		newPlotter->setColor(lineColor);
+	}
+	else
+	{
+		newPlotter = new GeneralGraphable(this, lineColor, T());
+		if (newPlotter)
+			graphables[label] = newPlotter;
+	}
+
+	newPlotter->set(graphPoints);
+
+	// trigger the draw update
+	drawUpdate = true;
+}
+
 
 #endif

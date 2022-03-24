@@ -39,15 +39,16 @@ class GeneralGraphable
 		}
 
 		template< typename T>
-		void add(const T* newPoint, bool recompute);
+		void add(const T* newPoint, bool recompute) { }
 		template< typename T>
-		void set(const std::vector<T*>& newPoints);
-		virtual void computeAxisRanges(bool additionOptimization = false);
-		virtual void updateBackground(gfxpp* cGfx);
+		void set(const std::vector<T*>& newPoints) { }
+		virtual void setColor(SDL_Color newColor) = 0;
+		virtual void computeAxisRanges(bool additionOptimization = false) = 0;
+		virtual void updateBackground(gfxpp* cGfx) = 0;
 	};
 
 	template< typename T>
-	class GraphableConcept
+	class GraphableConcept : public GraphableAbstract
 	{
 	public:
 		virtual ~GraphableConcept()
@@ -57,6 +58,7 @@ class GeneralGraphable
 
 		virtual void add(const T* newPoint, bool recompute) = 0;
 		virtual void set(const std::vector<T*>& newPoints) = 0;
+		virtual void setColor(SDL_Color newColor) = 0;
 		virtual void computeAxisRanges(bool additionOptimization = false) = 0;
 		virtual void updateBackground(gfxpp* cGfx) = 0;
 	};
@@ -66,7 +68,7 @@ class GeneralGraphable
 	{
 	protected:
 
-		Graphable<T*> g;
+		Graphable<T>* g;
 
 	public:
 
@@ -75,11 +77,11 @@ class GeneralGraphable
 			//
 		}
 
-		GraphableModel(const std::vector<T*>& newPoints)
+		GraphableModel(RUGraph* newGraph, SDL_Color newColor)
 		{
-			g->set(newPoints);
+			g = new Graphable<T>(newGraph, newColor);
 		}
-		
+
 		void set(const std::vector<T*>& newPoints)
 		{
 			g->set(newPoints);
@@ -89,6 +91,11 @@ class GeneralGraphable
 		void add(const T* newPoint, bool recompute)
 		{
 			g->add(newPoint, recompute);
+		}
+
+		void setColor(SDL_Color newColor)
+		{
+			g->setColor(newColor);
 		}
 
 		void computeAxisRanges(bool additionOptimization)
@@ -117,9 +124,9 @@ public:
 	}
 
 	template< typename T>
-	GeneralGraphable(T* cGraphable)
+	GeneralGraphable(RUGraph* newGraph, SDL_Color newColor, T t) // Explicit templates on consctuctors do not work
 	{
-		object = new GraphableModel<T>(cGraphable);
+		object = new GraphableModel<T>(newGraph, newColor);
 	}
 
 	template< typename T>
@@ -134,6 +141,12 @@ public:
 	{
 		if(object)
 			object->set(newPoints);
+	}
+
+	void setColor(SDL_Color newColor)
+	{
+		if(object)
+			object->setColor(newColor);
 	}
 
 	void computeAxisRanges(bool additionOptimization = false)

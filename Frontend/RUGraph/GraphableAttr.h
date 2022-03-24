@@ -77,7 +77,7 @@ public:
 	virtual void clear();
 
 	// render
-	virtual void draw(gfxpp*);
+	virtual void draw(gfxpp*) = 0;
 	virtual void updateBackground(gfxpp*);
 };
 
