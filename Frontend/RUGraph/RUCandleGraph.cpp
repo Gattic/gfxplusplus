@@ -71,20 +71,14 @@ void RUCandleGraph::set(const std::vector<Candle*>& graphPoints, SDL_Color lineC
 	drawUpdate = true;
 }
 
-void RUCandleGraph::addMLine(shmea::GString label, const double newPoint, unsigned int endOfGraphX, SDL_Color lineColor)
+void RUCandleGraph::addMLine(shmea::GString label, const double newPoint, SDL_Color lineColor)
 {
-	Point2* startPoint = new Point2(0, newPoint);
-	Point2* endPoint = new Point2(endOfGraphX, newPoint);
-
-	std::vector<Point2*> newPointVec;
-	newPointVec.push_back(startPoint);
-	newPointVec.push_back(endPoint);
-
-	Graphable<Point2>* newPlotter = new Graphable<Point2>(this, lineColor);
+	Graphable<SimpleLine>* newPlotter = new Graphable<SimpleLine>(this, lineColor);
 	if (newPlotter)
 		mLines[label] = newPlotter;
 
-	newPlotter->set(newPointVec);
+	SimpleLine* cPoint = new SimpleLine(newPoint);
+	newPlotter->add(cPoint);
 
 	// DON'T trigger the draw update here
 
@@ -284,10 +278,10 @@ void RUCandleGraph::updateBackground(gfxpp* cGfx)
 	}
 	
 	// draw the marketmaker lines
-	std::map<shmea::GString, Graphable<Point2>*>::iterator it3;
+	std::map<shmea::GString, Graphable<SimpleLine>*>::iterator it3;
 	for (it3 = mLines.begin(); it3 != mLines.end(); ++it3)
 	{
-		Graphable<Point2>* g = it3->second;
+		Graphable<SimpleLine>* g = it3->second;
 		if (g)
 			g->updateBackground(cGfx);
 	}
@@ -323,10 +317,10 @@ void RUCandleGraph::update()
 	}
 
 	// compute the marketmaker lines 
-	std::map<shmea::GString, Graphable<Point2>*>::iterator it3;
+	std::map<shmea::GString, Graphable<SimpleLine>*>::iterator it3;
 	for (it3 = mLines.begin(); it3 != mLines.end(); ++it3)
 	{
-		Graphable<Point2>* g = it3->second;
+		Graphable<SimpleLine>* g = it3->second;
 		if (g)
 			g->computeAxisRanges();
 	}
@@ -358,6 +352,11 @@ void RUCandleGraph::clear(bool toggleDraw)
 	for (it3 = trades.begin(); it3 != trades.end(); ++it3)
 		delete it3->second;
 	trades.clear();
+
+	std::map<shmea::GString, Graphable<SimpleLine>*>::iterator it4;
+	for (it4 = mLines.begin(); it4 != mLines.end(); ++it4)
+		delete it4->second;
+	mLines.clear();
 
 	xMin = FLT_MAX;
 	xMax = FLT_MIN;
