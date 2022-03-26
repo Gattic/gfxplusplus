@@ -21,6 +21,7 @@
 #include "../GItems/RUColors.h"
 #include "../GFXUtilities/Candle.h"
 #include "../GFXUtilities/ActionBubble.h"
+#include "../GFXUtilities/SimpleLine.h"
 #include "Graphable.h"
 #include <SDL2/SDL.h>
 #include <map>
@@ -43,6 +44,7 @@ class RUCandleGraph : public RUGraph
 private:
 
 	std::map<shmea::GString, Graphable<Candle>*> candles;
+	std::map<shmea::GString, Graphable<SimpleLine>*> mLines;
 	std::map<shmea::GString, Graphable<Point2>*> indicators;
 	std::map<shmea::GString, Graphable<ActionBubble>*> trades;
 	std::vector<unsigned int> indicatorPeriods;
@@ -64,6 +66,10 @@ public:
 	//
 	virtual void add(const Candle*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 	virtual void set(const std::vector<Candle*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
+	//
+	virtual void addMLine(shmea::GString, const double, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	virtual void resetMLines();
 
 	//
 	void setIndicatorPeriods(const std::vector<unsigned int>&);

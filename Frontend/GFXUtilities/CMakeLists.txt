@@ -15,6 +15,8 @@ set(GU_src_files
 	Circle.h
 	EventTracker.cpp
 	EventTracker.h
+	SimpleLine.cpp
+	SimpleLine.h
 )
 add_library(GU ${GU_src_files})
 
