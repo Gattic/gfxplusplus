@@ -27,28 +27,9 @@
 #include <map>
 
 // Replicate a vtable with virtual functions.
-// Could also do this with function pointers
 class GeneralGraphable
 {
-	class GraphableAbstract
-	{
-	public:
-		virtual ~GraphableAbstract()
-		{
-			//
-		}
-
-		template< typename T>
-		void add(const T* newPoint, bool recompute) { }
-		template< typename T>
-		void set(const std::vector<T*>& newPoints) { }
-		virtual void setColor(SDL_Color newColor) = 0;
-		virtual void computeAxisRanges(bool additionOptimization = false) = 0;
-		virtual void updateBackground(gfxpp* cGfx) = 0;
-	};
-
-	template< typename T>
-	class GraphableConcept : public GraphableAbstract
+	class GraphableConcept
 	{
 	public:
 		virtual ~GraphableConcept()
@@ -56,15 +37,13 @@ class GeneralGraphable
 			//
 		}
 
-		virtual void add(const T* newPoint, bool recompute) = 0;
-		virtual void set(const std::vector<T*>& newPoints) = 0;
 		virtual void setColor(SDL_Color newColor) = 0;
 		virtual void computeAxisRanges(bool additionOptimization = false) = 0;
 		virtual void updateBackground(gfxpp* cGfx) = 0;
 	};
 
 	template< typename T>
-	class GraphableModel : public GraphableConcept<T>
+	class GraphableModel : public GraphableConcept
 	{
 	protected:
 
@@ -114,7 +93,7 @@ class GeneralGraphable
 		}
 	};
 
-	GraphableAbstract* object;
+	GraphableConcept* object;
 
 public:
 
@@ -133,14 +112,14 @@ public:
 	void add(const T* newPoint, bool recompute)
 	{
 		if(object)
-			object->add(newPoint, recompute);
+			((GraphableModel<T>*)object)->add(newPoint, recompute);
 	}
 
 	template< typename T>
 	void set(const std::vector<T*>& newPoints)
 	{
 		if(object)
-			object->set(newPoints);
+			((GraphableModel<T>*)object)->set(newPoints);
 	}
 
 	void setColor(SDL_Color newColor)
