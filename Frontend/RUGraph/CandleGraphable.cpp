@@ -194,6 +194,9 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 template <>
 void Graphable<Candle>::draw(gfxpp* cGfx)
 {
+	if (!parent)
+		return;
+
 	float xRange = (float)normalizedPoints.size();
 	//float xRange = getXMax() - getXMin();
 	float yRange = getYMax() - getYMin();

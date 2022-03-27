@@ -164,6 +164,9 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 template <>
 void Graphable<Point2>::draw(gfxpp* cGfx)
 {
+	if (!parent)
+		return;
+
 	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
 						   getColor().a);
 

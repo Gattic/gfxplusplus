@@ -186,6 +186,11 @@ unsigned int RUGraph::getAggregate() const
 	return agg;
 }
 
+std::map<shmea::GString, GeneralGraphable*>&  RUGraph::getGraphables()
+{
+	return graphables;
+}
+
 void RUGraph::setGraphSize(int newGraphSize)
 {
 	graphSize = newGraphSize;

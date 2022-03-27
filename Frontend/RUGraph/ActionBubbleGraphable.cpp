@@ -29,12 +29,14 @@ void Graphable<ActionBubble>::computeAxisRanges(bool additionOptimization)
 template <>
 void Graphable<ActionBubble>::draw(gfxpp* cGfx)
 {
-	RUCandleGraph* candleParent = (RUCandleGraph*)parent;
-	Graphable<Candle>* candlePlotter = candleParent->getCandleGraphable();
+	if (!parent)
+		return;
+
+	Graphable<Candle>* candlePlotter = parent->getGraphables()["candles"]->get(Candle());
 	if(!candlePlotter)
 		return;
 
-	float candleWidth = ((float)candleParent->getWidth()) / candleParent->getCandleGraphableNormalizedSize();
+	float candleWidth = ((float)parent->getWidth()) / candlePlotter->size();
 	float yRange = getYMax() - getYMin();
 	float pointYGap = ((float)parent->getHeight()) / yRange;
 

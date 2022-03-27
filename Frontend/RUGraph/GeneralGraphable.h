@@ -87,6 +87,11 @@ class GeneralGraphable
 			g->updateBackground(cGfx);
 		}
 
+		Graphable<T>* get(T t)
+		{
+			return g;
+		}
+
 		virtual ~GraphableModel()
 		{
 			//
@@ -138,6 +143,14 @@ public:
 	{
 		if(object)
 			object->updateBackground(cGfx);
+	}
+
+	template< typename T>
+	Graphable<T>* get(T t)
+	{
+		if(object)
+			return ((GraphableModel<T>*)object)->get(t);
+		return NULL;
 	}
 
 	virtual ~GeneralGraphable()
