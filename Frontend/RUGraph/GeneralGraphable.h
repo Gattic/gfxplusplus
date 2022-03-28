@@ -37,6 +37,8 @@ class GeneralGraphable
 			//
 		}
 
+		virtual bool isVisible() const = 0;
+		virtual void setVisible(bool newVisible) = 0;
 		virtual void setColor(SDL_Color newColor) = 0;
 		virtual void computeAxisRanges(bool additionOptimization = false) = 0;
 		virtual void updateBackground(gfxpp* cGfx) = 0;
@@ -70,6 +72,16 @@ class GeneralGraphable
 		void add(const T* newPoint, bool recompute)
 		{
 			g->add(newPoint, recompute);
+		}
+
+		bool isVisible() const
+		{
+			return g->isVisible();
+		}
+
+		void setVisible(bool newVisible)
+		{
+			g->setVisible(newVisible);
 		}
 
 		void setColor(SDL_Color newColor)
@@ -125,6 +137,19 @@ public:
 	{
 		if(object)
 			((GraphableModel<T>*)object)->set(newPoints);
+	}
+
+	bool isVisible() const
+	{
+		if(object)
+			return object->isVisible();
+		return false;
+	}
+
+	void setVisible(bool newVisible)
+	{
+		if(object)
+			object->setVisible(newVisible);
 	}
 
 	void setColor(SDL_Color newColor)

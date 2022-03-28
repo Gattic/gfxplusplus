@@ -37,6 +37,7 @@ class Graphable : public GraphableAttr
 {
 private:
 	std::vector<T*> points;
+	bool visible;
 
 public:
 
@@ -51,6 +52,8 @@ public:
 
 	unsigned int size() const;
 	unsigned int normalizedSize() const;
+	bool isVisible() const;
+	void setVisible(bool);
 	void add(const T*, bool = true);
 	void set(const std::vector<T*>&);
 	virtual void clear();
@@ -63,7 +66,7 @@ public:
 template <class T>
 Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor) : GraphableAttr(newParent, newColor)
 {
-	//
+	visible = true;
 }
 
 template <class T>
@@ -88,6 +91,18 @@ template <class T>
 unsigned int Graphable<T>::normalizedSize() const
 {
 	return normalizedPoints.size();
+}
+
+template <class T>
+bool Graphable<T>::isVisible() const
+{
+	return visible;
+}
+
+template <class T>
+void Graphable<T>::setVisible(bool newVisible)
+{
+	visible = newVisible;
 }
 
 template <class T>
@@ -144,6 +159,7 @@ void Graphable<T>::clear()
 
 	points.clear();
 	normalizedPoints.clear();
+	visible = false;
 }
 
 #endif

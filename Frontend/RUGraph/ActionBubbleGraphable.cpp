@@ -16,7 +16,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
 #include "RUGraph.h"
-#include "RUCandleGraph.h"
 #include "../GFXUtilities/ActionBubble.h"
 
 template <>
