@@ -35,6 +35,9 @@ void Graphable<ActionBubble>::draw(gfxpp* cGfx)
 	if(!candlePlotter)
 		return;
 
+	if((candlePlotter->size() == 0) || (candlePlotter->normalizedPoints.size() == 0))
+		return;
+
 	float candleWidth = ((float)parent->getWidth()) / candlePlotter->size();
 	float yRange = getYMax() - getYMin();
 	float pointYGap = ((float)parent->getHeight()) / yRange;
