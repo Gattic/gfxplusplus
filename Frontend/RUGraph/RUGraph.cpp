@@ -421,7 +421,7 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 	for (it = graphables.begin(); it != graphables.end(); ++it)
 	{
 		GeneralGraphable* g = it->second;
-		if (g)
+		if ((g) && (g->isVisible()))
 			g->updateBackground(cGfx);
 	}
 }
