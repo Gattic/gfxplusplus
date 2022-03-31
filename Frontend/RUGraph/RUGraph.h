@@ -163,7 +163,10 @@ void RUGraph::add(shmea::GString label, const T* newPoint, SDL_Color lineColor, 
 		return;
 	}
 
-	GeneralGraphable* cPlotter = graphables[label];
+	GeneralGraphable* cPlotter = graphables[label]; // How is this NULL???
+	if(!cPlotter)
+		return;
+
 	cPlotter->add(plotterPoint, recompute);
 	cPlotter->setColor(lineColor);
 
@@ -177,13 +180,17 @@ void RUGraph::set(const shmea::GString& label, const std::vector<T*>& graphPoint
 	if (graphables.find(label) != graphables.end())
 	{
 		newPlotter = graphables[label];
+		if(!newPlotter)
+			return;
+
 		newPlotter->setColor(lineColor);
 	}
 	else
 	{
-		newPlotter = new GeneralGraphable(this, lineColor, T());
-		if (newPlotter)
-			graphables[label] = newPlotter;
+		newPlotter = new GeneralGraphable(this, lineColor, T());//TODO: Why does this crash with make debug?
+		if (!newPlotter)
+			return;
+		graphables[label] = newPlotter;
 	}
 
 	newPlotter->set(graphPoints);

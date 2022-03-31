@@ -31,6 +31,9 @@ void Graphable<ActionBubble>::draw(gfxpp* cGfx)
 	if (!parent)
 		return;
 
+	if (!parent->getGraphables()["candles"])
+		return;
+
 	Graphable<Candle>* candlePlotter = parent->getGraphables()["candles"]->get(Candle());
 	if(!candlePlotter)
 		return;

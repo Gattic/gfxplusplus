@@ -442,6 +442,7 @@ void RUGraph::update()
 		if (g)
 			g->computeAxisRanges();
 	}
+	drawUpdate = true;
 }
 
 void RUGraph::clear(bool toggleDraw)
