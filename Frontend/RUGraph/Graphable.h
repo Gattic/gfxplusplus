@@ -24,10 +24,6 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-#include "../GFXUtilities/point2.h"
-#include "../GFXUtilities/Candle.h"
-#include "../Graphics/graphics.h"
-#include "Backend/Database/GList.h"
 #include "GraphableAttr.h"
 
 class RUGraph;
@@ -60,7 +56,7 @@ public:
 
 	// render
 	virtual void draw(gfxpp*);
-	void computeAxisRanges(bool = false);
+	virtual void computeAxisRanges(bool = false);
 };
 
 template <class T>

@@ -38,6 +38,8 @@ class GeneralGraphable
 		}
 
 		virtual bool isVisible() const = 0;
+		virtual unsigned int size() const = 0;
+		virtual unsigned int normalizedSize() const = 0;
 		virtual void setVisible(bool newVisible) = 0;
 		virtual void setColor(SDL_Color newColor) = 0;
 		virtual void computeAxisRanges(bool additionOptimization = false) = 0;
@@ -77,6 +79,16 @@ class GeneralGraphable
 		bool isVisible() const
 		{
 			return g->isVisible();
+		}
+
+		unsigned int size() const
+		{
+			return g->size();
+		}
+
+		unsigned int normalizedSize() const
+		{
+			return g->normalizedSize();
 		}
 
 		void setVisible(bool newVisible)
@@ -144,6 +156,20 @@ public:
 		if(object)
 			return object->isVisible();
 		return false;
+	}
+
+	unsigned int size() const
+	{
+		if(object)
+			return object->size();
+		return 0;
+	}
+
+	unsigned int normalizedSize() const
+	{
+		if(object)
+			return object->normalizedSize();
+		return 0;
 	}
 
 	void setVisible(bool newVisible)

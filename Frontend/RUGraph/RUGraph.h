@@ -155,7 +155,7 @@ template< typename T>
 void RUGraph::add(shmea::GString label, const T* newPoint, SDL_Color lineColor, bool recompute)
 {
 	T* plotterPoint = new T(*newPoint);
-	if (graphables.find(label) == graphables.end())
+	if ((graphables.find(label) == graphables.end()) || (graphables[label] == NULL))
 	{
 		std::vector<T*> newPointVec;
 		newPointVec.push_back(plotterPoint);
@@ -163,7 +163,7 @@ void RUGraph::add(shmea::GString label, const T* newPoint, SDL_Color lineColor, 
 		return;
 	}
 
-	GeneralGraphable* cPlotter = graphables[label]; // How is this NULL???
+	GeneralGraphable* cPlotter = graphables[label];
 	if(!cPlotter)
 		return;
 
@@ -176,7 +176,7 @@ void RUGraph::add(shmea::GString label, const T* newPoint, SDL_Color lineColor, 
 template< typename T>
 void RUGraph::set(const shmea::GString& label, const std::vector<T*>& graphPoints, SDL_Color lineColor)
 {
-	GeneralGraphable* newPlotter;
+	GeneralGraphable* newPlotter = NULL;
 	if (graphables.find(label) != graphables.end())
 	{
 		newPlotter = graphables[label];
@@ -187,10 +187,12 @@ void RUGraph::set(const shmea::GString& label, const std::vector<T*>& graphPoint
 	}
 	else
 	{
-		newPlotter = new GeneralGraphable(this, lineColor, T());//TODO: Why does this crash with make debug?
+		newPlotter = new GeneralGraphable(this, lineColor, T());
 		if (!newPlotter)
 			return;
 		graphables[label] = newPlotter;
+		if (!graphables[label])
+			return;
 	}
 
 	newPlotter->set(graphPoints);
