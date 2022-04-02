@@ -14,57 +14,54 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GSERVICE
-#define _GSERVICE
+#ifndef _RUACTIONBUBBLE
+#define _RUACTIONBUBBLE
 
-#include "../Database/GString.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+#include <map>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <string>
-#include <time.h>
 #include <vector>
 
-namespace shmea {
-class ServiceData;
-};
+class gfxpp;
+class Point2;
 
-namespace GNet {
-
-class GServer;
-class Sockets;
-class Connection;
-class newServiceArgs;
-
-class Service
+class ActionBubble
 {
-	friend GServer;
-	friend Sockets;
-
 protected:
-	// timestamp variable to store service start and end time
-	static shmea::GString name;
-	int64_t timeExecuted;
-	pthread_t* cThread;
-	bool running;
 
-	static void* launchService(void* y);
-	virtual shmea::ServiceData* execute(const shmea::ServiceData*) = 0;
-	void StartService(newServiceArgs*);
-	void ExitService(newServiceArgs*);
-
-	static void ExecuteService(GServer*, const shmea::ServiceData*, Connection* = NULL);
+	float cost;
+	int quantity;
+	double radius;
+	Point2* focalPoint;
+	int actionType;
 
 public:
-	Service();
-	virtual ~Service();
 
-	bool getRunning() const;
+	const static double AB_DEFAULT_RADIUS = 20.0f;
 
-	virtual Service* MakeService(GServer*) const = 0;
-	virtual shmea::GString getName() const = 0;
-};
+	const static int ACTION_BUY = 0;
+	const static int ACTION_SELL = 1;
+
+	// constructors & destructor
+	ActionBubble();
+	ActionBubble(int, float, int, int);
+	virtual ~ActionBubble();
+
+	void setFocalPoint(const Point2*);
+	void setRadius(double);
+	void setCost(float);
+	void setQuantity(int);
+	void setActionType(int);
+
+	const Point2* getFocalPoint() const;
+	double getRadius() const;
+	float getCost() const;
+	int getQuantity() const;
+	int getActionType() const;
 };
 
 #endif

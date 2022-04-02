@@ -75,7 +75,7 @@ void RUDrawComponent::updateBackground(gfxpp* cGfx)
 
 void RUDrawComponent::clear(bool toggleDraw)
 {
-	std::map<std::string, Graphable*>::iterator it;
+	std::map<shmea::GString, Graphable*>::iterator it;
 
 	for (it = lines.begin(); it != lines.end(); ++it)
 		delete it->second;
@@ -92,14 +92,14 @@ void RUDrawComponent::addCircle(const Point2* focalPoint, double radius)//this w
 {
 	// printf("Circle(%f, %f, %f)\n", focalPoint->getX(), focalPoint->getY(), radius);
 
-	std::string newCircleName = "Circle: " + shmea::GType::longTOstring(circles.size());
+	shmea::GString newCircleName = "Circle: " + shmea::GType::longTOstring(circles.size());
 	SDL_Color newCircleColor = {0x00, 0x00, 0xFF, 0xFF};
 	Circle* newCircle = new Circle(this, newCircleColor);
 	newCircle->addFocalPoint(focalPoint);
 	newCircle->setRadius(radius);
 	prevCircle = newCircle;
 
-	lines.insert(std::pair<std::string, Graphable*>(newCircleName, newCircle));
+	lines.insert(std::pair<shmea::GString, Graphable*>(newCircleName, newCircle));
 	circles.push_back(newCircle);
 
 	drawUpdate = true;
@@ -131,24 +131,24 @@ void RUDrawComponent::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int e
 	}
 }
 
-void RUDrawComponent::add(gfxpp* cGfx, const std::string& label, const Point2& newPoint)
+void RUDrawComponent::add(gfxpp* cGfx, const shmea::GString& label, const Point2& newPoint)
 {
 	//
 }
 
-void RUDrawComponent::set(gfxpp* cGfx, const std::string& label, const std::vector<Point2*>& graphPoints,
+void RUDrawComponent::set(gfxpp* cGfx, const shmea::GString& label, const std::vector<Point2*>& graphPoints,
 				  SDL_Color lineColor)
 {
 	//
 }
 
-void RUDrawComponent::set(gfxpp* cGfx, const std::string& label, const shmea::GList& graphPoints,
+void RUDrawComponent::set(gfxpp* cGfx, const shmea::GString& label, const shmea::GList& graphPoints,
 				  SDL_Color lineColor)
 {
 	//
 }
 
-std::string RUDrawComponent::getType() const
+shmea::GString RUDrawComponent::getType() const
 {
 	return "RUDrawComponent";
 }

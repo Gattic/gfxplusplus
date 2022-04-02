@@ -34,7 +34,7 @@ gfxpp::gfxpp()
 	errorFlag = initHelper(true, "gfxplusplus");
 }
 
-gfxpp::gfxpp(std::string newTitle, int newRenderStatus, bool fullScreenMode, int newWidth,
+gfxpp::gfxpp(shmea::GString newTitle, int newRenderStatus, bool fullScreenMode, int newWidth,
 			 int newHeight)
 {
 	systemCursor = NULL;
@@ -55,7 +55,7 @@ SDL_Renderer* gfxpp::getRenderer()
 	return renderer;
 }
 
-int gfxpp::initHelper(bool fullscreenMode, std::string title)
+int gfxpp::initHelper(bool fullscreenMode, shmea::GString title)
 {
 	running = false;
 	hunterZolomon = 1.0f;
@@ -238,7 +238,7 @@ void gfxpp::run()
 
 	// the display loop
 	display();
-	finish();
+	//finish();
 }
 
 void gfxpp::display()

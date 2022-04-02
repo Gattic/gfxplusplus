@@ -27,13 +27,23 @@
 #include "RUColors.h"
 #include "RUComponent.h"
 
-GPanel::GPanel(const std::string& newName, int newWidth, int newHeight)
+GPanel::GPanel(const shmea::GString& newName, int newWidth, int newHeight)
 {
 	name = newName;
 	width = newWidth;
 	height = newHeight;
 	focus = false;
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+
+	qMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(qMutex, NULL);
+}
+
+GPanel::~GPanel()
+{
+	pthread_mutex_destroy(qMutex);
+	if (qMutex)
+		free(qMutex);
 }
 
 void GPanel::onShow(gfxpp* cGfx)
@@ -72,7 +82,7 @@ void GPanel::addSubItem(GItem* newItem, unsigned int newZIndex)
 	if (!newItem)
 		return;
 
-	std::string itemName = newItem->getName();
+	shmea::GString itemName = newItem->getName();
 	if (getItemByName(itemName))
 	{
 		printf("GUI item name '%s' already exists. Skipping.\n", itemName.c_str());
@@ -147,6 +157,38 @@ void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPane
 	}
 }
 
+void GPanel::processQ()
+{
+	//
+	while(updateQueue.size() > 0)
+	{
+		popQ();
+	}
+}
+
+void GPanel::addToQ(const shmea::ServiceData* cData)
+{
+	pthread_mutex_lock(qMutex);
+	updateQueue.push(cData);
+	pthread_mutex_unlock(qMutex);
+}
+
+void GPanel::popQ()
+{
+	const shmea::ServiceData* cData;
+	pthread_mutex_lock(qMutex);
+	cData = updateQueue.front();
+	updateQueue.pop();
+	pthread_mutex_unlock(qMutex);
+
+	updateFromQ(cData);
+}
+
+void GPanel::updateFromQ(const shmea::ServiceData* cData)
+{
+	// Keep this empty in this class
+}
+
 void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 {
 	if (!focus)
@@ -164,6 +206,10 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 	if (!((width > 0) && (height > 0)))
 		return;
 
+	// Update the GUI based on a message queue
+	processQ();
+
+	// Do we want to redraw the panel
 	if (getDrawUpdateRequired())
 	{
 		drawUpdate = false;
@@ -244,15 +290,15 @@ void GPanel::updateBackground(gfxpp* cGfx)
 	//
 }
 
-std::string GPanel::getType() const
+shmea::GString GPanel::getType() const
 {
 	return "GPanel";
 }
 
-void GPanel::MsgBox(std::string title, std::string msg, int type)
+void GPanel::MsgBox(shmea::GString title, shmea::GString msg, int type, GeneralListener f)
 {
 	// Type = Message Box, ConfirmBox, or InputBox
-	RUMsgBox* newMsgBox = new RUMsgBox(this, title, msg, type);
+	RUMsgBox* newMsgBox = new RUMsgBox(this, title, msg, type, f);
 
 	newMsgBox->setX((getWidth() / 2.0f) - (newMsgBox->getWidth() / 2.0f));
 	newMsgBox->setY((getHeight() / 2.0f) - (newMsgBox->getHeight() / 2.0f));

@@ -18,6 +18,8 @@
 #define _GPANEL
 
 #include "GItem.h"
+#include "Backend/Database/ServiceData.h"
+#include "Backend/Database/GString.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <pthread.h>
@@ -27,6 +29,7 @@
 #include <string>
 #include <time.h>
 #include <vector>
+#include <queue>
 
 class gfxpp;
 class RUComponent;
@@ -36,6 +39,13 @@ class GLayout;
 class GPanel : public GItem
 {
 protected:
+
+	std::queue<const shmea::ServiceData*> updateQueue;
+	pthread_mutex_t* qMutex;
+
+	void processQ();
+	void popQ();
+	virtual void updateFromQ(const shmea::ServiceData*);
 
 	// Lifetime (virtual) functions
 	virtual void onStart() = 0;
@@ -47,8 +57,10 @@ protected:
 
 public:
 
-	GPanel(const std::string&, int, int);
+	GPanel(const shmea::GString&, int, int);
+	virtual ~GPanel();
 
+	void addToQ(const shmea::ServiceData*);
 	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
@@ -60,9 +72,9 @@ public:
 	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
 	virtual void updateBackgroundHelper(gfxpp*);
 
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 
-	void MsgBox(std::string, std::string, int);
+	void MsgBox(shmea::GString, shmea::GString, int, GeneralListener = GeneralListener());
 };
 
 #endif

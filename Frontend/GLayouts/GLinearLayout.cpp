@@ -21,7 +21,7 @@
 #include "../GItems/Mini/RUBorderComponent.h"
 #include "../Graphics/graphics.h"
 
-GLinearLayout::GLinearLayout(std::string layoutName, int newOrientation)
+GLinearLayout::GLinearLayout(shmea::GString layoutName, int newOrientation)
 {
 	name = layoutName;
 	layoutType = 1; // 0 = Relative; 1 = Linear
@@ -146,7 +146,7 @@ void GLinearLayout::updateBackgroundHelper(gfxpp* cGfx)
 	}
 }
 
-std::string GLinearLayout::getType() const
+shmea::GString GLinearLayout::getType() const
 {
 	return "GLinearLayout";
 }

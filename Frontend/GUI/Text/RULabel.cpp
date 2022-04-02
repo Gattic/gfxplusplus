@@ -23,7 +23,7 @@ RULabel::RULabel()
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 }
 
-RULabel::RULabel(std::string newText)
+RULabel::RULabel(shmea::GString newText)
 {
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 	setText(newText);
@@ -39,7 +39,7 @@ void RULabel::updateBackground(gfxpp* cGfx)
 	drawText(cGfx);
 }
 
-std::string RULabel::getType() const
+shmea::GString RULabel::getType() const
 {
 	return "RULabel";
 }

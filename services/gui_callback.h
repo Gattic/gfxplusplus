@@ -14,57 +14,60 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GSERVICE
-#define _GSERVICE
+#ifndef _GUI_CALLBACK_PROG
+#define _GUI_CALLBACK_PROG
 
-#include "../Database/GString.h"
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <time.h>
-#include <vector>
+#include "Backend/Database/ServiceData.h"
+#include "Backend/Networking/service.h"
 
-namespace shmea {
-class ServiceData;
-};
-
-namespace GNet {
-
-class GServer;
-class Sockets;
-class Connection;
-class newServiceArgs;
-
-class Service
+class GUI_Callback : public GNet::Service
 {
-	friend GServer;
-	friend Sockets;
+private:
 
-protected:
-	// timestamp variable to store service start and end time
-	static shmea::GString name;
-	int64_t timeExecuted;
-	pthread_t* cThread;
-	bool running;
-
-	static void* launchService(void* y);
-	virtual shmea::ServiceData* execute(const shmea::ServiceData*) = 0;
-	void StartService(newServiceArgs*);
-	void ExitService(newServiceArgs*);
-
-	static void ExecuteService(GServer*, const shmea::ServiceData*, Connection* = NULL);
+	GNet::GServer* serverInstance;
+	GPanel* cPanel;
 
 public:
-	Service();
-	virtual ~Service();
+	GUI_Callback()
+	{
+		serverInstance = NULL;
+		cPanel = NULL;
+	}
 
-	bool getRunning() const;
+	GUI_Callback(GNet::GServer* newInstance, GPanel* newPanel)
+	{
+		serverInstance = newInstance;
+		cPanel = newPanel;
+	}
 
-	virtual Service* MakeService(GServer*) const = 0;
-	virtual shmea::GString getName() const = 0;
-};
+	~GUI_Callback()
+	{
+		serverInstance = NULL; // Not ours to delete
+		cPanel = NULL;	   // Not ours to delete
+	}
+
+	shmea::ServiceData* execute(const shmea::ServiceData* data)
+	{
+		if (!serverInstance)
+			return NULL;
+
+		if (!cPanel)
+			return NULL;
+
+		cPanel->addToQ(data);
+
+		return NULL;
+	}
+
+	GNet::Service* MakeService(GNet::GServer* newInstance) const
+	{
+		return new GUI_Callback(newInstance, cPanel);
+	}
+
+	shmea::GString getName() const
+	{
+		return "GUI_Callback";
+	}
 };
 
 #endif

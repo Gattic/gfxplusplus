@@ -20,9 +20,9 @@
 #include "RUImageComponent.h"
 
 // set default image paths
-const std::string RUScrollbar::arrowUpLocation = "resources/gui/Scrollbar/ArrowUp.bmp";
-const std::string RUScrollbar::arrowDownLocation = "resources/gui/Scrollbar/ArrowDown.bmp";
-const std::string RUScrollbar::scrollBarLocation = "resources/gui/Scrollbar/Scrollbar.bmp";
+const shmea::GString RUScrollbar::arrowUpLocation = "resources/gui/Scrollbar/ArrowUp.bmp";
+const shmea::GString RUScrollbar::arrowDownLocation = "resources/gui/Scrollbar/ArrowDown.bmp";
+const shmea::GString RUScrollbar::scrollBarLocation = "resources/gui/Scrollbar/Scrollbar.bmp";
 
 RUScrollbar::RUScrollbar()
 {
@@ -239,8 +239,8 @@ void RUScrollbar::calculateBarPos()
 		return;
 
 	// draw the bar in the right spot
-	int blockSpace = getHeight() - (arrowSpace * 2);
-	int blockSize = blockSpace / maxValue;
+	float blockSpace = getHeight() - (arrowSpace * 2);
+	float blockSize = blockSpace / maxValue;
 	int blockOffset = arrowSpace + (blockSize * value);
 	int newHeight = blockSize * optionsShown;
 
@@ -282,7 +282,7 @@ void RUScrollbar::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int even
 	drawUpdate = true;
 }
 
-std::string RUScrollbar::getType() const
+shmea::GString RUScrollbar::getType() const
 {
 	return "RUScrollbar";
 }

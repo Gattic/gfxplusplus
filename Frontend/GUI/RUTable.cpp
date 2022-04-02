@@ -198,7 +198,7 @@ void RUTable::updateLabels()
 	}
 
 	// Put the scrollbar back
-	int newMaxValue = numberOfRows() - rowsShown;
+	int newMaxValue = numberOfRows();
 	if (newMaxValue < 0)
 	{
 		newMaxValue = numberOfRows();
@@ -218,7 +218,8 @@ void RUTable::updateLabels()
 		std::vector<RULabel*> newRow;
 		for (unsigned int col = 0; col < numberOfCols(); ++col)
 		{
-			RULabel* newItem = new RULabel(getCell(row, col).c_str());
+			RULabel* newItem = new RULabel();
+			newItem->setText(getCell(row, col));
 			newItem->setMarginX(col * cellWidth);
 			newItem->setMarginY(row * cellHeight);
 			newItem->setWidth(cellWidth);
@@ -273,10 +274,18 @@ void RUTable::refreshLabels()
 			textLabels[row][col]->setWidth(cellWidth);
 			textLabels[row][col]->setHeight(cellHeight);
 			// textLabels[row][col]->setFontSize(cellHeight / 2);
-			textLabels[row][col]->setText(getCell(row + cIndex, col).c_str());
+			textLabels[row][col]->setText(getCell(row + cIndex, col));
 		}
 	}
 
+	// Hide the scrollbar if we dont need it
+	if (numberOfRows() > (unsigned int)scrollbar->getOptionsShown())
+		scrollbar->setVisible(true);
+	else
+		scrollbar->setVisible(false);
+
+	std::pair<int, int> offset(0, 0);
+	calculateSubItemPositions(offset);
 	drawUpdate = true;
 }
 
@@ -294,7 +303,7 @@ void RUTable::updateBackground(gfxpp* cGfx)
  * @param eventY the y-coordinate of the click
  * @param scrollType the type of scroll
  */
-void RUTable::onMouseWheel(GPanel* cPanel, int eventX, int eventY, int scrollType)
+void RUTable::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY, int scrollType)
 {
 	// printf("RUTable: onMouseWheel(%d);\n", scrollType);
 
@@ -315,7 +324,7 @@ void RUTable::onMouseWheel(GPanel* cPanel, int eventX, int eventY, int scrollTyp
 	}
 }
 
-std::string RUTable::getType() const
+shmea::GString RUTable::getType() const
 {
 	return "RUTable";
 }

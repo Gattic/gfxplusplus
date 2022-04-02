@@ -24,59 +24,51 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-#include "../GFXUtilities/point2.h"
-#include "../GFXUtilities/Candle.h"
-#include "../Graphics/graphics.h"
-#include "Backend/Database/GList.h"
-#include "RUGraph.h"
+#include "GraphableAttr.h"
+
+class RUGraph;
 
 template <class T>
-class Graphable
+class Graphable : public GraphableAttr
 {
 private:
-	RUGraph* parent;
 	std::vector<T*> points;
-	std::vector<T*> normalizedPoints;
-	float yMin;
-	float yMax;
-
-	bool redoRange;
-	SDL_Color lineColor;
-
-	void computeAxisRanges(gfxpp*, bool = false);
+	bool visible;
 
 public:
+
+	std::vector<T*> normalizedPoints;
 
 	const static int TEXTURE_MAX_DIM = 16384;
 
 	// constructors & destructor
+	Graphable();
 	Graphable(RUGraph*, SDL_Color);
 	virtual ~Graphable();
 
-	// gets
-	SDL_Color getColor() const;
-
-	// sets
-	void setColor(SDL_Color);
-	void add(gfxpp*, const T*);
-	void set(gfxpp*, const std::vector<T*>&);
+	unsigned int size() const;
+	unsigned int normalizedSize() const;
+	bool isVisible() const;
+	void setVisible(bool);
+	void add(const T*, bool = true);
+	void set(const std::vector<T*>&);
 	virtual void clear();
 
 	// render
-	virtual void updateBackground(gfxpp*);
 	virtual void draw(gfxpp*);
+	virtual void computeAxisRanges(bool = false);
 };
 
 template <class T>
-Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor)
+Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor) : GraphableAttr(newParent, newColor)
 {
-	parent = newParent;
-	setColor(newColor);
+	visible = true;
+}
 
-	yMin = 0.0f;
-	yMax = 0.0f;
-
-	redoRange = true;
+template <class T>
+Graphable<T>::Graphable()
+{
+	//
 }
 
 template <class T>
@@ -86,37 +78,49 @@ Graphable<T>::~Graphable()
 }
 
 template <class T>
-SDL_Color Graphable<T>::getColor() const
+unsigned int Graphable<T>::size() const
 {
-	return lineColor;
+	return points.size();
 }
 
 template <class T>
-void Graphable<T>::set(gfxpp* cGfx, const std::vector<T*>& newPoints)
+unsigned int Graphable<T>::normalizedSize() const
+{
+	return normalizedPoints.size();
+}
+
+template <class T>
+bool Graphable<T>::isVisible() const
+{
+	return visible;
+}
+
+template <class T>
+void Graphable<T>::setVisible(bool newVisible)
+{
+	visible = newVisible;
+}
+
+template <class T>
+void Graphable<T>::set(const std::vector<T*>& newPoints)
 {
 	if (newPoints.empty())
 		return;
 
 	points = newPoints;
-	computeAxisRanges(cGfx);//sets redoRange automatically
+	computeAxisRanges();//sets redoRange automatically
 }
 
 // This function is recommended for TimeSeries optimizations.
 template <class T>
-void Graphable<T>::add(gfxpp* cGfx, const T* newPoint)
+void Graphable<T>::add(const T* newPoint, bool recompute)
 {
 	if (!newPoint)
 		return;
 
 	points.push_back(new T(*newPoint));
-	computeAxisRanges(cGfx, true);
-}
-
-
-template <class T>
-void Graphable<T>::setColor(SDL_Color newColor)
-{
-	lineColor = newColor;
+	if(recompute)
+		computeAxisRanges(true);
 }
 
 /*
@@ -151,32 +155,7 @@ void Graphable<T>::clear()
 
 	points.clear();
 	normalizedPoints.clear();
-
-	parent = NULL;
-	yMin = 0.0f;
-	yMax = 0.0f;
-
-	redoRange = true;
-}
-
-template <class T>
-void Graphable<T>::updateBackground(gfxpp* cGfx)
-{
-	if(!cGfx)
-		return;
-
-	//if(!rawGraph)
-	//	return;
-
-	// Set the render target to draw the cached raw draw space
-	//SDL_SetRenderTarget(cGfx->getRenderer(), rawGraph);
-	//draw(cGfx);
-
-	// draw the line
-	SDL_SetRenderTarget(cGfx->getRenderer(), parent->getBackground());
-	draw(cGfx);
-
-	redoRange = false;
+	visible = false;
 }
 
 #endif

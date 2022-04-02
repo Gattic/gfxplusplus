@@ -35,7 +35,7 @@ GFont::GFont()
 	loadLetters();
 }
 
-GFont::GFont(SDL_Renderer* newRenderer, std::string newFontPath)
+GFont::GFont(SDL_Renderer* newRenderer, shmea::GString newFontPath)
 {
 	cRenderer = newRenderer;
 	fontPath = newFontPath;
@@ -73,9 +73,16 @@ GFont::~GFont()
 	fontPath = "";
 	fontSize = DEFAULT_FONT_SIZE;
 
-	//if (font)
-	//	TTF_CloseFont(font);
+	if (font)
+		TTF_CloseFont(font);
 	font = NULL;
+
+	for (std::map<char, GLetter*>::iterator itr = textureMap.begin(); itr != textureMap.end(); ++itr)
+	{
+		delete itr->second;
+	}
+
+	textureMap.clear();
 
 	// DONT FREE THIS
 	cRenderer = NULL;
@@ -102,11 +109,11 @@ void GFont::loadLetters()
 		}
 
 		SDL_Texture* textTex = SDL_CreateTextureFromSurface(cRenderer, textMessage);
+		if (textMessage)
+			SDL_FreeSurface(textMessage);
 		if (!textTex)
 		{
 			printf("[GUI] Texture error: %s\n", SDL_GetError());
-			if (textMessage)
-				SDL_FreeSurface(textMessage);
 			return;
 		}
 
@@ -154,7 +161,7 @@ int GFont::getFontSize() const
 	return fontSize;
 }
 
-std::string GFont::getFontPath() const
+shmea::GString GFont::getFontPath() const
 {
 	return fontPath;
 }

@@ -33,7 +33,7 @@ public:
 	Candle();
 	Candle(float, float, float, float, float);
 	Candle(const Candle&);
-	~Candle();
+	virtual ~Candle();
 
 	// get
 	float getX() const;
@@ -109,6 +109,16 @@ public:
 		bool lowChange = ((deltaLow > -DBL_EPSILON) && (deltaLow < DBL_EPSILON));
 
 		return (xChange && openChange && closeChange && highChange && lowChange);
+	}
+
+	bool operator<(const Candle& c2) const // ONLY COMPARES X
+	{
+		return (getX() < c2.getX());
+	}
+
+	bool operator>(const Candle& c2) const // ONLY COMPARES X
+	{
+		return (getX() > c2.getX());
 	}
 };
 

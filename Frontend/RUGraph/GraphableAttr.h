@@ -14,77 +14,71 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUMSGBOX
-#define _RUMSGBOX
+#ifndef _GRAPHABLEATTR_H
+#define _GRAPHABLEATTR_H
 
-#include "../GItems/RUComponent.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
+#include "../GFXUtilities/point2.h"
+#include "../GFXUtilities/Candle.h"
+#include "../Graphics/graphics.h"
+#include "Backend/Database/GList.h"
 
-class gfxpp;
-class RUButton;
-class RUTextbox;
-class RULabel;
-class RUImageComponent;
+class RUGraph;
 
-class RUMsgBox : public RUComponent
+class GraphableAttr
 {
 protected:
-	GPanel* panel;
-	shmea::GString title;
-	shmea::GString message;
-	int type;
-
-	static shmea::GString OK_BUTTON;
-	static shmea::GString YES_BUTTON;
-	static shmea::GString NO_BUTTON;
-	static shmea::GString SUBMIT_BUTTON;
-
-	static const int DEFAULT_WIDTH = 500;
-	static const int DEFAULT_HEIGHT = 180;
-
-	// message
-	RULabel* lbltitle;
-	RULabel* lblmsg;
-
-	// confirm
-	RUButton* msgButtonOK;
-
-	// yes no
-	RUButton* confirmButtonYES;
-	RUButton* confirmButtonNO;
-	int confirmButtonClicked;
-
-	// input box
-	RUTextbox* inputText;
-	RUButton* inputButtonSubmit;
-	shmea::GString inputSubmitText;
-
-	// event listeners
-	GeneralListener MouseDownListener;
-
-	// events
-	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
+	RUGraph* parent;
+	bool redoRange;
+	bool localXMode;
+	bool localYMode;
+	float localXMin;
+	float localXMax;
+	float localYMin;
+	float localYMax;
+	SDL_Color lineColor;
 
 public:
-	static const int MESSAGEBOX = 0;
-	static const int CONFIRMBOX = 1;
-	static const int INPUTBOX = 2;
+
+	const static int TEXTURE_MAX_DIM = 16384;
 
 	// constructors & destructor
-	RUMsgBox(GPanel*, shmea::GString, shmea::GString, int, GeneralListener = GeneralListener());
-	~RUMsgBox();
+	GraphableAttr();
+	GraphableAttr(RUGraph*, SDL_Color);
+	virtual ~GraphableAttr();
 
-	// events
-	void msgButtonOKClicked(gfxpp*);
-	void confirmButtonYESClicked(gfxpp*);
-	void confirmButtonNOClicked(gfxpp*);
-	void inputButtonSUBMITClicked(gfxpp*);
+	// gets
+	float getXMin() const;
+	float getXMax() const;
+	float getYMin() const;
+	float getYMax() const;
+	bool getLocalXMode() const;
+	float getLocalXMin() const;
+	float getLocalXMax() const;
+	bool getLocalYMode() const;
+	float getLocalYMin() const;
+	float getLocalYMax() const;
+	SDL_Color getColor() const;
+
+	// sets
+	void setLocalXMode(bool);
+	void setLocalXMin(float);
+	void setLocalXMax(float);
+	void setLocalYMode(bool);
+	void setLocalYMin(float);
+	void setLocalYMax(float);
+	void setColor(SDL_Color);
+	virtual void clear();
 
 	// render
+	virtual void draw(gfxpp*) = 0;
 	virtual void updateBackground(gfxpp*);
-	virtual shmea::GString getType() const;
 };
 
 #endif

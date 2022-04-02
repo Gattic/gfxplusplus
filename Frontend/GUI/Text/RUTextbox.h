@@ -39,7 +39,7 @@ public:
 	void setStaticBorder(bool);
 	virtual void hover(gfxpp*);
 	virtual void unhover(gfxpp*);
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 };
 
 #endif

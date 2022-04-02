@@ -26,7 +26,7 @@ RUDropdown::RUDropdown()
 {
 	toggleBorder(true);
 	open = false;
-	OptionChangedListener = 0;
+	OptionChangedListener = GeneralListener();
 
 	// selected label
 	selectedIndex = -1;
@@ -95,7 +95,7 @@ unsigned int RUDropdown::getSelectedIndex()
  * @brief get selected text
  * @details gets the text content of the selected label
  */
-std::string RUDropdown::getSelectedText() const
+shmea::GString RUDropdown::getSelectedText() const
 {
 	return selectedLabel->getText();
 }
@@ -109,6 +109,7 @@ void RUDropdown::toggleOpen()
 	else
 		arrowLocation = "resources/gui/Scrollbar/ArrowDown.bmp";
 	arrow->setBGImageFromLocation(arrowLocation);
+	arrow->requireDrawUpdate();
 
 	drawUpdate = true;
 }
@@ -183,7 +184,7 @@ void RUDropdown::setSelectedIndex(unsigned int newIndex)
 	drawUpdate = true;
 }
 
-void RUDropdown::addOption(std::string newItemText)
+void RUDropdown::addOption(shmea::GString newItemText)
 {
 	// add the label
 	lbItems->addOption(newItemText);
@@ -219,7 +220,7 @@ void RUDropdown::updateBackground(gfxpp* cGfx)
 	//
 }
 
-void RUDropdown::setOptionChangedListener(void (GPanel::*f)(int))
+void RUDropdown::setOptionChangedListener(GeneralListener f)
 {
 	OptionChangedListener = f;
 }
@@ -251,8 +252,7 @@ void RUDropdown::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY
 	// On Option changed event
 	if (getSelectedIndex() != prevSelectedIndex)
 	{
-		if (OptionChangedListener != 0)
-			(cPanel->*OptionChangedListener)(getSelectedIndex());
+		OptionChangedListener.call(getSelectedIndex());
 	}
 	prevSelectedIndex = getSelectedIndex();
 
@@ -287,7 +287,7 @@ void RUDropdown::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int event
 	drawUpdate = true;
 }
 
-std::string RUDropdown::getType() const
+shmea::GString RUDropdown::getType() const
 {
 	return "RUDropdown";
 }

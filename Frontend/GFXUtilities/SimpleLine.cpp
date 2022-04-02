@@ -14,45 +14,39 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUCIRCLE
-#define _RUCIRCLE
+#include "SimpleLine.h"
 
-#include "Graphable.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <map>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <vector>
-
-class gfxpp;
-class RUGraph;
-class Point2;
-
-class Circle : public Graphable
+SimpleLine::SimpleLine()
 {
-private:
-	std::map<int, std::map<int, int> > heatmap;
-	std::vector<const Point2*> foci;
-	double radius;
-	int maxHit;
+	set(0.0f);
+}
 
-public:
-	// constructors & destructor
-	Circle(RUGraph*, SDL_Color);
-	~Circle();
+SimpleLine::SimpleLine(double newY)
+{
+	set(newY);
+}
 
-	void addFocalPoint(const Point2*);
-	void setRadius(double);
-	void createHeatmap();
+SimpleLine::SimpleLine(const SimpleLine& p)
+{
+	set(p.y);
+}
 
-	const Point2* getFocalPoint(unsigned int) const;
-	double getRadius() const;
+SimpleLine::~SimpleLine()
+{
+	set(0.0f);
+}
 
-	virtual void draw(gfxpp*);
-	virtual std::string getType() const;
-};
+double SimpleLine::getY() const
+{
+	return y;
+}
 
-#endif
+void SimpleLine::set(double newY)
+{
+	setY(newY);
+}
+
+void SimpleLine::setY(double newY)
+{
+	y = newY;
+}

@@ -45,6 +45,15 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 	gridEnabled = false;
 	gridLineWidth = DEFAULT_GRIDLINE_WIDTH;
 
+	xMin = FLT_MAX;
+	xMax = FLT_MIN;
+	yMin = FLT_MAX;
+	yMax = FLT_MIN;
+	vscale = 1.0;
+	period = P_1Y;
+	agg = AGG_1m;
+	sourceAgg = AGG_1m;
+
 	// checkbox label
 	titleLabel = new RULabel();
 	titleLabel->setWidth(350);
@@ -67,6 +76,15 @@ RUGraph::~RUGraph()
 	gridEnabled = false;
 	gridLineWidth = 0;
 	quadrants = QUADRANTS_ONE;
+
+	xMin = FLT_MAX;
+	xMax = FLT_MIN;
+	yMin = FLT_MAX;
+	yMax = FLT_MIN;
+	vscale = 1.0;
+	period = P_1Y;
+	agg = AGG_1m;
+	sourceAgg = AGG_1m;
 }
 
 int RUGraph::getGraphSize() const
@@ -128,6 +146,51 @@ float RUGraph::getQuadrantOffsetY() const
 	return quadrantOffsetY;
 }
 
+float RUGraph::getXMin() const
+{
+	return xMin;
+}
+
+float RUGraph::getXMax() const
+{
+	return xMax;
+}
+
+float RUGraph::getYMin() const
+{
+	return yMin;
+}
+
+float RUGraph::getYMax() const
+{
+	return yMax;
+}
+
+float RUGraph::getVScale() const
+{
+	return vscale;
+}
+
+unsigned int RUGraph::getPeriod() const
+{
+	return period;
+}
+
+unsigned int RUGraph::getSourceAggregate() const
+{
+	return sourceAgg;
+}
+
+unsigned int RUGraph::getAggregate() const
+{
+	return agg;
+}
+
+std::map<shmea::GString, GeneralGraphable*>  RUGraph::getGraphables()
+{
+	return graphables;
+}
+
 void RUGraph::setGraphSize(int newGraphSize)
 {
 	graphSize = newGraphSize;
@@ -158,9 +221,9 @@ void RUGraph::setQuadrants(int newQuadrants)
 	drawUpdate = true;
 }
 
-void RUGraph::setTitleLabel(std::string newLabel)
+void RUGraph::setTitleLabel(shmea::GString newLabel)
 {
-	if (newLabel == "" || newLabel.empty())
+	if (newLabel.length() == 0)
 	{
 		titleLabel->setVisible(false);
 		return;
@@ -170,8 +233,74 @@ void RUGraph::setTitleLabel(std::string newLabel)
 	titleLabel->setVisible(true);
 }
 
+void RUGraph::setXMin(float newXMin)
+{
+	xMin = newXMin;
+}
+
+void RUGraph::setXMax(float newXMax)
+{
+	xMax = newXMax;
+}
+
+void RUGraph::setYMin(float newYMin)
+{
+	yMin = newYMin;
+}
+
+void RUGraph::setYMax(float newYMax)
+{
+	yMax = newYMax;
+}
+
+void RUGraph::setVScale(float newVScale)
+{
+	vscale = newVScale;
+}
+
+void RUGraph::setPeriod(unsigned int newPeriod)
+{
+	period = newPeriod;
+}
+
+void RUGraph::setSourceAggregate(unsigned int newSrcAggregate)
+{
+	sourceAgg = newSrcAggregate;
+}
+
+void RUGraph::setAggregate(unsigned int newAggregate)
+{
+	agg = newAggregate;
+	update();
+}
+
+
+void RUGraph::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
+{
+	// printf("RUGraph: onMouseDown(%d, %d);\n", eventX, eventY);
+	update();
+}
+void RUGraph::onMouseUp(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
+{
+	// printf("RUGraph: onMouseUp(%d, %d);\n", eventX, eventY);
+	update();
+}
+
 void RUGraph::updateBackground(gfxpp* cGfx)
 {
+	// set the background color
+	SDL_SetRenderDrawColor(cGfx->getRenderer(), getBGColor().r, getBGColor().g,
+						   getBGColor().b, 0xFF);
+
+	// set the background rect
+	SDL_Rect fullRect;
+	fullRect.x = 0;
+	fullRect.y = 0;
+	fullRect.w = width;
+	fullRect.h = height;
+
+	SDL_RenderFillRect(cGfx->getRenderer(), &fullRect);
+
 	// draw the axes
 	if (axisWidth > 0)
 	{
@@ -285,4 +414,50 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 			SDL_RenderFillRect(cGfx->getRenderer(), &tickYRect);
 		}
 	}
+
+	// draw the graphables
+	std::map<shmea::GString, GeneralGraphable*>::iterator it;
+
+	for (it = graphables.begin(); it != graphables.end(); ++it)
+	{
+		GeneralGraphable* g = it->second;
+		if ((g) && (g->isVisible()))
+			g->updateBackground(cGfx);
+	}
+}
+
+shmea::GString RUGraph::getType() const
+{
+	return "RUGraph";
+}
+
+//TODO: Call this function in a separate thread!
+void RUGraph::update()
+{
+	// compute the graphables
+	std::map<shmea::GString, GeneralGraphable*>::iterator it;
+	for (it = graphables.begin(); it != graphables.end(); ++it)
+	{
+		GeneralGraphable* g = it->second;
+		if (g)
+			g->computeAxisRanges();
+	}
+	drawUpdate = true;
+}
+
+void RUGraph::clear(bool toggleDraw)
+{
+	std::map<shmea::GString, GeneralGraphable*>::iterator it;
+
+	for (it = graphables.begin(); it != graphables.end(); ++it)
+		delete it->second;
+	graphables.clear();
+
+	xMin = FLT_MAX;
+	xMax = FLT_MIN;
+	yMin = FLT_MAX;
+	yMax = FLT_MIN;
+
+	if (toggleDraw)
+		drawUpdate = true;
 }

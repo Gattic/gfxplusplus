@@ -1,15 +1,17 @@
 set(GraphGUI_src_files
+	GeneralGraphable.h
 	LineGraphable.cpp
 	CandleGraphable.cpp
+	CircleGraphable.cpp
+	ActionBubbleGraphable.cpp
+	GraphableAttr.cpp
+	GraphableAttr.h
+	SimpleLineGraphable.cpp
 	Graphable.h
 	RUGraph.cpp
 	RUGraph.h
 	#RUDrawComponent.cpp # And Reimplement Circle too
 	#RUDrawComponent.h
-	RULineGraph.cpp
-	RULineGraph.h
-	RUCandleGraph.cpp
-	RUCandleGraph.h
 )
 add_library(GraphGUI ${GraphGUI_src_files})
 

@@ -14,57 +14,44 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GSERVICE
-#define _GSERVICE
+#ifndef _RUCIRCLE
+#define _RUCIRCLE
 
-#include "../Database/GString.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+#include <map>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <string>
-#include <time.h>
 #include <vector>
 
-namespace shmea {
-class ServiceData;
-};
+class gfxpp;
+class Point2;
 
-namespace GNet {
-
-class GServer;
-class Sockets;
-class Connection;
-class newServiceArgs;
-
-class Service
+class Circle
 {
-	friend GServer;
-	friend Sockets;
-
 protected:
-	// timestamp variable to store service start and end time
-	static shmea::GString name;
-	int64_t timeExecuted;
-	pthread_t* cThread;
-	bool running;
 
-	static void* launchService(void* y);
-	virtual shmea::ServiceData* execute(const shmea::ServiceData*) = 0;
-	void StartService(newServiceArgs*);
-	void ExitService(newServiceArgs*);
-
-	static void ExecuteService(GServer*, const shmea::ServiceData*, Connection* = NULL);
+	double radius;
+	int maxHit;
 
 public:
-	Service();
-	virtual ~Service();
 
-	bool getRunning() const;
+	std::map<int, std::map<int, int> > heatmap;
+	std::vector<const Point2*> foci;
 
-	virtual Service* MakeService(GServer*) const = 0;
-	virtual shmea::GString getName() const = 0;
-};
+	// constructors & destructor
+	Circle();
+	~Circle();
+
+	void addFocalPoint(const Point2*);
+	void setRadius(double);
+	void createHeatmap();
+
+	const Point2* getFocalPoint(unsigned int) const;
+	double getRadius() const;
+	int getMaxHit() const;
 };
 
 #endif

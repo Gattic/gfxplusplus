@@ -36,7 +36,7 @@ void RUTextbox::updateBackground(gfxpp* cGfx)
 	drawText(cGfx);
 }
 
-std::string RUTextbox::getType() const
+shmea::GString RUTextbox::getType() const
 {
 	return "RUTextbox";
 }

@@ -87,7 +87,7 @@ void RUProgressBar::updateBackground(gfxpp* cGfx)
 	SDL_RenderFillRect(cGfx->getRenderer(), &barRect);
 }
 
-std::string RUProgressBar::getType() const
+shmea::GString RUProgressBar::getType() const
 {
 	return "RUProgressBar";
 }

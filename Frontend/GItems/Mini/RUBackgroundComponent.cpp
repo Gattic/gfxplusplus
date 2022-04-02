@@ -158,7 +158,7 @@ SDL_Color RUBackgroundComponent::getBGColor() const
 	return bgColor;
 }
 
-void RUBackgroundComponent::setBGImageFromLocation(const std::string& newBGImageLocation)
+void RUBackgroundComponent::setBGImageFromLocation(const shmea::GString& newBGImageLocation)
 {
 	if (bgImageLocation.length() == 0)
 		return;

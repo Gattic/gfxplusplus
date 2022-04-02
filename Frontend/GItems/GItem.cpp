@@ -53,6 +53,9 @@ GItem::~GItem()
 {
 	eventsStatus = NULL;
 
+	if(background)
+		SDL_DestroyTexture(background);
+	background = NULL;
 	//Do more here?
 }
 
@@ -61,7 +64,7 @@ int GItem::getID() const
 	return id;
 }
 
-std::string GItem::getName() const
+shmea::GString GItem::getName() const
 {
 	return name;
 }
@@ -78,7 +81,7 @@ GItem* GItem::getItemByID(int compID)
 	return NULL;
 }
 
-GItem* GItem::getItemByName(const std::string& compName)
+GItem* GItem::getItemByName(const shmea::GString& compName)
 {
 	for (unsigned int i = 0; i < subitems.size(); ++i)
 	{
@@ -110,7 +113,7 @@ void GItem::setID(int newID)
 	id = newID;
 }
 
-void GItem::setName(const std::string& newName)
+void GItem::setName(const shmea::GString& newName)
 {
 	name = newName;
 }
@@ -136,7 +139,7 @@ void GItem::setZIndex(unsigned int newZIndex)
 	zindex = newZIndex;
 }
 
-/*void GItem::setBGImageFromLocation(const std::string& newBGImageLocation)
+/*void GItem::setBGImageFromLocation(const shmea::GString& newBGImageLocation)
 {
 	if (!bgComp)
 		return;
@@ -179,9 +182,6 @@ void GItem::addSubItem(GItem* newItem, unsigned int newZIndex)
 
 void GItem::removeItem(gfxpp* cGfx, int itemID)
 {
-	if (!itemID)
-		return;
-
 	for (unsigned int i = 0; i < subitems.size(); ++i)
 	{
 		if (subitems[i]->getID() == itemID)
@@ -193,7 +193,7 @@ void GItem::removeItem(gfxpp* cGfx, int itemID)
 	}
 }
 
-void GItem::removeItem(gfxpp* cGfx, const std::string& itemName)
+void GItem::removeItem(gfxpp* cGfx, const shmea::GString& itemName)
 {
 	if (itemName == "")
 		return;
