@@ -31,7 +31,9 @@ void Graphable<ActionBubble>::draw(gfxpp* cGfx)
 	if (!parent)
 		return;
 
-	if (!parent->getGraphables()["candles"])
+	std::map<shmea::GString, GeneralGraphable*> gs = parent->getGraphables();
+	shmea::GString candleLabel = "candles";
+	if ((gs.find(candleLabel) == gs.end()) || (gs[candleLabel] == NULL))
 		return;
 
 	Graphable<Candle>* candlePlotter = parent->getGraphables()["candles"]->get(Candle());

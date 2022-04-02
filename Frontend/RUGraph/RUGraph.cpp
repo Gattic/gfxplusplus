@@ -186,7 +186,7 @@ unsigned int RUGraph::getAggregate() const
 	return agg;
 }
 
-std::map<shmea::GString, GeneralGraphable*>&  RUGraph::getGraphables()
+std::map<shmea::GString, GeneralGraphable*>  RUGraph::getGraphables()
 {
 	return graphables;
 }

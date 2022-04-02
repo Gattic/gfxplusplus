@@ -128,7 +128,7 @@ public:
 	unsigned int getPeriod() const;
 	unsigned int getSourceAggregate() const;
 	unsigned int getAggregate() const;
-	std::map<shmea::GString, GeneralGraphable*>&  getGraphables();
+	std::map<shmea::GString, GeneralGraphable*>  getGraphables();
 
 	// sets
 	void setGraphSize(int);
