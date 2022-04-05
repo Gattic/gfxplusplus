@@ -216,10 +216,10 @@ void gfxpp::run()
 	{
 		// Set the FPS Component
 		fpsLabel = new RULabel();
-		fpsLabel->setWidth(150);
-		fpsLabel->setHeight(30);
+		fpsLabel->setWidth(60);
+		fpsLabel->setHeight(20);
 		fpsLabel->setX(10);
-		fpsLabel->setY(1045);
+		fpsLabel->setY(1050);
 		fpsLabel->setText("");
 		// fpsLabel->setFontSize(40);
 		// fpsLabel->toggleBG(false);
