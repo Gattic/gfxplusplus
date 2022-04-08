@@ -172,10 +172,10 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 		//float newXValue = i * pointXGap + (pointXGap / 2);
 		float newXValue = ((i/agg) * pointXGap)+ (pointXGap / 2);
 		normalizedPoints[normalCounter]->setX(parent->getAxisOriginX() + newXValue);
-		normalizedPoints[normalCounter]->setOpen(parent->getAxisOriginY() + parent->getHeight() - aggOpenValue);
-		normalizedPoints[normalCounter]->setClose(parent->getAxisOriginY() + parent->getHeight() - aggCloseValue);
-		normalizedPoints[normalCounter]->setHigh(parent->getAxisOriginY() + parent->getHeight() - aggHighValue);
-		normalizedPoints[normalCounter]->setLow(parent->getAxisOriginY() + parent->getHeight() - aggLowValue);
+		normalizedPoints[normalCounter]->setOpen(parent->getAxisOriginY() + (float)parent->getHeight() - aggOpenValue);
+		normalizedPoints[normalCounter]->setClose(parent->getAxisOriginY() + (float)parent->getHeight() - aggCloseValue);
+		normalizedPoints[normalCounter]->setHigh(parent->getAxisOriginY() + (float)parent->getHeight() - aggHighValue);
+		normalizedPoints[normalCounter]->setLow(parent->getAxisOriginY() + (float)parent->getHeight() - aggLowValue);
 
 		// The draw container
 		++normalCounter;

@@ -116,12 +116,21 @@ void Graphable<Circle>::computeAxisRanges(bool additionOptimization)
 
 	for (; i < points.size(); ++i)
 	{
-		float newXValue = (points[i]->getCenter()->getX() - getXMin()) * getXMax();
-		float newYValue = (points[i]->getCenter()->getY() - getYMin()) * getYMax();
+		float newXValue = ((points[i]->getCenter()->getX() - getXMin()) / (getXMax()-getXMin())) * ((float)parent->getWidth());
+		//printf("bounds[%u]: %d:%d\n", i, parent->getWidth(), parent->getHeight());
+		//printf("xRange[%u]: %f:%f\n", i, getXMin(), getXMax());
+		//printf("unscaledXValue[%u]: %f\n", i, (points[i]->getCenter()->getX() - getXMin()));
+		//printf("newXValue[%u]: %f\n", i, newXValue);
+		float newYValue = ((points[i]->getCenter()->getY() - getYMin()) / (getYMax()-getYMin())) * ((float)parent->getHeight());
+		//printf("yRange[%u]: %f:%f\n", i, getYMin(), getYMax());
+		//printf("unscaledYValue[%u]: %f\n", i, (points[i]->getCenter()->getY() - getYMin()));
+		//printf("newYValue[%u]: %f\n", i, newYValue);
+		//printf("adjustedYValue[%u]: %f\n", i, (float)parent->getHeight()-newYValue);
+		//printf("-----\n");
 
 		normalizedPoints[i]->setRadius(points[i]->getRadius());
 		normalizedPoints[i]->setCenter(new Point2(parent->getAxisOriginX() + newXValue,
-			parent->getAxisOriginY() + parent->getHeight() - newYValue));
+							parent->getAxisOriginY() + (float)parent->getHeight() - newYValue));
 	}
 
 	parent->requireDrawUpdate();

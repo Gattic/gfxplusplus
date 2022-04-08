@@ -148,7 +148,7 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 		float newXValue = (normalCounter * pointXGap);
 		//float newXValue = i * pointXGap;
 		normalizedPoints[normalCounter]->setX(parent->getAxisOriginX() + newXValue);
-		normalizedPoints[normalCounter]->setY(parent->getAxisOriginY() + parent->getHeight() - aggValue);
+		normalizedPoints[normalCounter]->setY(parent->getAxisOriginY() + (float)parent->getHeight() - aggValue);
 
 		// The draw container
 		++normalCounter;
