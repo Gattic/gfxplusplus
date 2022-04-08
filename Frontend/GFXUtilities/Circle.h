@@ -33,25 +33,20 @@ class Circle
 {
 protected:
 
+	Point2* center;
 	double radius;
-	int maxHit;
 
 public:
 
-	std::map<int, std::map<int, int> > heatmap;
-	std::vector<const Point2*> foci;
-
 	// constructors & destructor
 	Circle();
-	~Circle();
+	virtual ~Circle();
 
-	void addFocalPoint(const Point2*);
+	void setCenter(const Point2*);
 	void setRadius(double);
-	void createHeatmap();
 
-	const Point2* getFocalPoint(unsigned int) const;
+	const Point2* getCenter() const;
 	double getRadius() const;
-	int getMaxHit() const;
 };
 
 #endif
