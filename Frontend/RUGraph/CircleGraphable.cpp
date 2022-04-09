@@ -86,7 +86,7 @@ void Graphable<Circle>::computeAxisRanges(bool additionOptimization)
 		if(x_min < parent->getXMin())
 			parent->setXMin(x_min);
 		if(x_max > parent->getXMax())
-			parent->setXMax(x_max * vscale);
+			parent->setXMax(x_max);
 
 		if(y_min < parent->getYMin())
 			parent->setYMin(y_min);
