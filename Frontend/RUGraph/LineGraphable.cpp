@@ -187,6 +187,7 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 		return;
 
 	//printf("norm-size: %lu\n", normalizedPoints.size());
+	redoRange = true;
 	if((redoRange) || (normalizedPoints.size() < 2))
 	{
 		Point2* prevPoint = NULL;

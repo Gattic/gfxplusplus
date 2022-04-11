@@ -53,16 +53,6 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 	period = P_1Y;
 	agg = AGG_1m;
 	sourceAgg = AGG_1m;
-
-	// checkbox label
-	titleLabel = new RULabel();
-	titleLabel->setWidth(350);
-	titleLabel->setHeight(30);
-	titleLabel->setMarginX(getMarginX() + (width / 2) - (titleLabel->getWidth() / 2));
-	titleLabel->setMarginY(getMarginY() - 30);
-	titleLabel->setText("");
-	titleLabel->setVisible(false);
-	addSubItem(titleLabel);
 }
 
 RUGraph::~RUGraph()
@@ -221,18 +211,6 @@ void RUGraph::setQuadrants(int newQuadrants)
 	drawUpdate = true;
 }
 
-void RUGraph::setTitleLabel(shmea::GString newLabel)
-{
-	if (newLabel.length() == 0)
-	{
-		titleLabel->setVisible(false);
-		return;
-	}
-
-	titleLabel->setText(newLabel);
-	titleLabel->setVisible(true);
-}
-
 void RUGraph::setXMin(float newXMin)
 {
 	xMin = newXMin;
@@ -278,12 +256,10 @@ void RUGraph::setAggregate(unsigned int newAggregate)
 void RUGraph::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUGraph: onMouseDown(%d, %d);\n", eventX, eventY);
-	update();
 }
 void RUGraph::onMouseUp(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 {
 	// printf("RUGraph: onMouseUp(%d, %d);\n", eventX, eventY);
-	update();
 }
 
 void RUGraph::updateBackground(gfxpp* cGfx)
@@ -417,7 +393,6 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 
 	// draw the graphables
 	std::map<shmea::GString, GeneralGraphable*>::iterator it;
-
 	for (it = graphables.begin(); it != graphables.end(); ++it)
 	{
 		GeneralGraphable* g = it->second;
@@ -431,18 +406,28 @@ shmea::GString RUGraph::getType() const
 	return "RUGraph";
 }
 
-//TODO: Call this function in a separate thread!
 void RUGraph::update()
 {
-	// compute the graphables
+	// launch a new thread as to not block the graph
+	pthread_t* cThread = (pthread_t*)malloc(sizeof(pthread_t));
+	pthread_create(cThread, NULL, &computeGraph, (void*)this);
+	if (cThread)
+		pthread_detach(*cThread);
+}
+
+void* RUGraph::computeGraph(void* y)
+{
+	// Compute the graphables
+	RUGraph* cGraph = (RUGraph*)y;
 	std::map<shmea::GString, GeneralGraphable*>::iterator it;
-	for (it = graphables.begin(); it != graphables.end(); ++it)
+	for (it = cGraph->graphables.begin(); it != cGraph->graphables.end(); ++it)
 	{
 		GeneralGraphable* g = it->second;
 		if (g)
 			g->computeAxisRanges();
 	}
-	drawUpdate = true;
+	cGraph->drawUpdate = true;
+	return NULL;
 }
 
 void RUGraph::clear(bool toggleDraw)

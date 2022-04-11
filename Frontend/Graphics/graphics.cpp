@@ -571,7 +571,10 @@ void gfxpp::display()
 		{
 			// Render the focused panel
 			if (focusedPanel)
+			{
+				SDL_RenderClear(renderer);
 				focusedPanel->updateBackgroundHelper(this);
+			}
 		}
 		else if (renderStatus == _3D)
 		{
