@@ -179,16 +179,9 @@ void GraphableAttr::updateBackground(gfxpp* cGfx)
 	if(!cGfx)
 		return;
 
-	//if(!rawGraph)
-	//	return;
-
-	// Set the render target to draw the cached raw draw space
-	//SDL_SetRenderTarget(cGfx->getRenderer(), rawGraph);
-	//draw(cGfx);
-
 	// draw the line
-	SDL_SetRenderTarget(cGfx->getRenderer(), parent->getBackground());
 	draw(cGfx);
+	//parent->requireDrawUpdate();
 
 	redoRange = false;
 }

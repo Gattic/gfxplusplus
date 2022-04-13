@@ -86,7 +86,7 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 		if(x_min < parent->getXMin())
 			parent->setXMin(x_min);
 		if(x_max > parent->getXMax())
-			parent->setXMax(x_max * vscale);
+			parent->setXMax(x_max);
 
 		if(y_min < parent->getYMin())
 			parent->setYMin(y_min);
@@ -148,7 +148,7 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 		float newXValue = (normalCounter * pointXGap);
 		//float newXValue = i * pointXGap;
 		normalizedPoints[normalCounter]->setX(parent->getAxisOriginX() + newXValue);
-		normalizedPoints[normalCounter]->setY(parent->getAxisOriginY() + parent->getHeight() - aggValue);
+		normalizedPoints[normalCounter]->setY(parent->getAxisOriginY() + (float)parent->getHeight() - aggValue);
 
 		// The draw container
 		++normalCounter;
@@ -187,6 +187,7 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 		return;
 
 	//printf("norm-size: %lu\n", normalizedPoints.size());
+	redoRange = true;
 	if((redoRange) || (normalizedPoints.size() < 2))
 	{
 		Point2* prevPoint = NULL;

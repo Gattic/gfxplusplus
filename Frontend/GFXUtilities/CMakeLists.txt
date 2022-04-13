@@ -13,6 +13,8 @@ set(GU_src_files
 	ActionBubble.h
 	Circle.cpp
 	Circle.h
+	Ellipse.cpp
+	Ellipse.h
 	EventTracker.cpp
 	EventTracker.h
 	SimpleLine.cpp

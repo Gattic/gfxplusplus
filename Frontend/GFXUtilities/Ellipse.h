@@ -14,40 +14,44 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#include "Circle.h"
-#include "point2.h"
+#ifndef _RUELLIPSE
+#define _RUELLIPSE
 
-Circle::Circle()
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+#include <map>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <vector>
+
+class gfxpp;
+class Point2;
+
+class Ellipse
 {
-	radius = 0.0f;
-	center=new Point2(0,0);
-}
+protected:
 
-Circle::~Circle()
-{
-	radius = 0.0f;
-	center=NULL;
-}
+	double radius;
+	int maxHit;
 
-void Circle::setCenter(const Point2* newCenter)
-{
-	if (!newCenter)
-		return;
+public:
 
-	center = new Point2(newCenter->getX(), newCenter->getY());
-}
+	std::map<int, std::map<int, int> > heatmap;
+	std::vector<const Point2*> foci;
 
-void Circle::setRadius(double newRadius)
-{
-	radius = newRadius;
-}
+	// constructors & destructor
+	Ellipse();
+	~Ellipse();
 
-const Point2* Circle::getCenter() const
-{
-	return center;
-}
+	void addFocalPoint(const Point2*);
+	void setRadius(double);
+	void createHeatmap();
 
-double Circle::getRadius() const
-{
-	return radius;
-}
+	const Point2* getFocalPoint(unsigned int) const;
+	double getRadius() const;
+	int getMaxHit() const;
+};
+
+#endif

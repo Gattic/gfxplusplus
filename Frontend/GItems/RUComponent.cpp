@@ -100,7 +100,6 @@ void RUComponent::updateBackgroundHelper(gfxpp* cGfx)
 
 		// Assign the background as the render target and reset the background
 		SDL_SetRenderTarget(cGfx->getRenderer(), background);
-		SDL_RenderClear(cGfx->getRenderer());
 		SDL_SetTextureBlendMode(background, SDL_BLENDMODE_BLEND);
 
 		// draw the background

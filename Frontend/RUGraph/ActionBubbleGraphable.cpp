@@ -88,9 +88,9 @@ void Graphable<ActionBubble>::draw(gfxpp* cGfx)
 
 				float yVal = (cFocalPoint->getY() - getYMin()) * pointYGap;
 				if(cBubble->getActionType() == ActionBubble::ACTION_BUY)
-					yVal = parent->getHeight() - yVal - (candleWidth*3.0f);
+					yVal = (float)parent->getHeight() - yVal - (candleWidth*3.0f);
 				else if(cBubble->getActionType() == ActionBubble::ACTION_SELL)
-					yVal = parent->getHeight() - yVal + (candleWidth*3.0f);
+					yVal = (float)parent->getHeight() - yVal + (candleWidth*3.0f);
 				yVal += drawY;
 	
 				// set the color and draw the point
