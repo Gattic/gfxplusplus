@@ -57,41 +57,29 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 			float y_high = c->getHigh();
 			float y_low = c->getLow();
 
-			if (x_pt > local_x_max)
-				local_x_max = x_pt;
-			else if (x_pt < local_x_min)
-				local_x_min = x_pt;
+			// Local X check
+			if (x_pt > getLocalXMax())
+				setLocalXMax(x_pt);
+			else if (x_pt < getLocalXMin())
+				setLocalXMin(x_pt);
+	
+			// Local Y check
+			if (y_high > getLocalYMax())
+				setLocalYMax(y_high);
+			else if (y_low < getLocalYMin())
+				setLocalYMin(y_low);
+		}
 
-			if (y_high > local_y_max)
-				local_y_max = y_high;
-			else if (y_low < local_y_min)
-				local_y_min = y_low;
+		// Set the parents
+		if(getLocalXMin() < parent->getXMin())
+			parent->setXMin(getLocalXMin());
+		if(getLocalXMax() > parent->getXMax())
+			parent->setXMax(getLocalXMax());
 
-			if (x_pt > x_max)
-				x_max = x_pt;
-			else if (x_pt < x_min)
-				x_min = x_pt;
-
-			if (y_high > y_max)
-				y_max = y_high;
-			else if (y_low < y_min)
-				y_min = y_low;
-		}	
-
-		setLocalXMin(local_x_min);
-		setLocalXMax(local_x_max);
-		setLocalYMin(local_y_min);
-		setLocalYMax(local_y_max * vscale);
-
-		if(x_min < parent->getXMin())
-			parent->setXMin(x_min);
-		if(x_max > parent->getXMax())
-			parent->setXMax(x_max);
-
-		if(y_min < parent->getYMin())
-			parent->setYMin(y_min);
-		if(y_max * vscale > parent->getYMax())
-			parent->setYMax(y_max * vscale);
+		if(getLocalYMin() < parent->getYMin())
+			parent->setYMin(getLocalYMin());
+		if(getLocalYMax() > parent->getYMax())
+			parent->setYMax(getLocalYMax());
 	}
 
 	//printf("Candle-PRE[%s]: %f:%f\n", parent->getName().c_str(), getLocalXMax(), getLocalXMin());
