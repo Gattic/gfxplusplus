@@ -738,3 +738,8 @@ void gfxpp::finish()
 	TTF_Quit();
 	IMG_Quit();
 }
+
+bool gfxpp::getRunning() const
+{
+	return running;
+}

@@ -90,7 +90,7 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 
 		if(y_min < parent->getYMin())
 			parent->setYMin(y_min);
-		if(y_max > parent->getYMax())
+		if(y_max * vscale > parent->getYMax())
 			parent->setYMax(y_max * vscale);
 	}
 
