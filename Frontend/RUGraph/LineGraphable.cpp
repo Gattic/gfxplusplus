@@ -175,67 +175,32 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 		return;
 
 	//printf("norm-size: %lu\n", normalizedPoints.size());
-	redoRange = true;
-	if((redoRange) || (normalizedPoints.size() < 2))
+	Point2* prevPoint = NULL;
+	unsigned int i = 0;
+	for (; i < normalizedPoints.size(); ++i)
 	{
-		Point2* prevPoint = NULL;
-		unsigned int i = 0;
-		for (; i < normalizedPoints.size(); ++i)
+		// add it to the background
+		Point2* cPoint = normalizedPoints[i];
+
+		// draw a thick line from the previous to the current point
+		if ((prevPoint) && (i > 0))
 		{
-			// add it to the background
-			Point2* cPoint = normalizedPoints[i];
-
-			// draw a thick line from the previous to the current point
-			if ((prevPoint) && (i > 0))
+			/*if(parent->getName() == "RoRGraph")
 			{
-				/*if(parent->getName() == "RoRGraph")
-				{
-					printf("Dim[%s]: %d:%d\n", parent->getName().c_str(), parent->getWidth(), parent->getWidth());
-					printf("Range[%s]: %f:%f\n", parent->getName().c_str(), getYMin(), getYMax());
-					printf("LocalRange[%s]: %f:%f\n", parent->getName().c_str(), getLocalYMin(), getLocalYMax());
-					printf("p[%s][%u]:  (%f, %f); c(%f, %f)\n", parent->getName().c_str(), i, prevPoint->getX(), prevPoint->getY(), cPoint->getX(), cPoint->getY());
-					printf("-----\n");
-				}*/
-				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
-								   cPoint->getX(), cPoint->getY() - 1);
-				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
-								   cPoint->getX(), cPoint->getY());
-				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
-								   cPoint->getX(), cPoint->getY() + 1);
-			}
-
-			prevPoint = cPoint;
+				printf("Dim[%s]: %d:%d\n", parent->getName().c_str(), parent->getWidth(), parent->getWidth());
+				printf("Range[%s]: %f:%f\n", parent->getName().c_str(), getYMin(), getYMax());
+				printf("LocalRange[%s]: %f:%f\n", parent->getName().c_str(), getLocalYMin(), getLocalYMax());
+				printf("p[%s][%u]:  (%f, %f); c(%f, %f)\n", parent->getName().c_str(), i, prevPoint->getX(), prevPoint->getY(), cPoint->getX(), cPoint->getY());
+				printf("-----\n");
+			}*/
+			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
+							   cPoint->getX(), cPoint->getY() - 1);
+			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
+							   cPoint->getX(), cPoint->getY());
+			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
+							   cPoint->getX(), cPoint->getY() + 1);
 		}
-	}
-	else
-	{
-		//
-		SDL_Rect dRect;
-		dRect.x = 0;
-		dRect.y = 0;
-		dRect.w = parent->getWidth() - pointXGap;
-		dRect.h = parent->getHeight();
-		SDL_RenderCopy(cGfx->getRenderer(), parent->getBackground(), NULL, &dRect);
 
-		unsigned int i = normalizedPoints.size()-1;
-		Point2* prevPoint = normalizedPoints[i-1];
-		for (; i < normalizedPoints.size(); ++i)
-		{
-			// add it to the background
-			Point2* cPoint = normalizedPoints[i];
-
-			// draw a thick line from the previous to the current point
-			if ((prevPoint) && (i > 0))
-			{
-				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
-								   cPoint->getX(), cPoint->getY() - 1);
-				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
-								   cPoint->getX(), cPoint->getY());
-				SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
-								   cPoint->getX(), cPoint->getY() + 1);
-			}
-
-			prevPoint = cPoint;
-		}
+		prevPoint = cPoint;
 	}
 }
