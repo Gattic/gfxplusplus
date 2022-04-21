@@ -33,54 +33,43 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 	{
 		// Is the latest y not within the current range?
 		float cY = points[points.size()-1]->getY();
-		if(!((cY >= getYMin()) && (cY <= getYMax())))
+		if((cY < getYMin()) || (cY > getYMax()))
 			redoRange = true;
 	}
 
-	redoRange = true;
-	float vscale = parent->getVScale();
-	if(redoRange)
+	//redoRange = true;
+	unsigned int i = 0;
+	//if(redoRange)
+		//i = points.size()-1;
+	for (; i < points.size(); ++i)
 	{
-		float x_max = points[0]->getX();
-		float x_min = x_max;
-		float local_x_max = x_max;
-		float local_x_min = x_min;
+		Point2* pt = points[i];
+		float x_pt = pt->getX();
+		float y_pt = pt->getY();
 
-		float y_max = parent->getYMax();
-		float y_min = parent->getYMin();
-		float local_y_max = points[0]->getY();
-		float local_y_min = local_y_max;
+		// Local X check
+		if (x_pt > getLocalXMax())
+			setLocalXMax(x_pt);
+		else if (x_pt < getLocalXMin())
+			setLocalXMin(x_pt);
 
-		for (unsigned int i = 1; i < points.size(); ++i)
-		{
-			Point2* pt = points[i];
-			float x_pt = pt->getX();
-			float y_pt = pt->getY();
-
-			// Local X check
-			if (x_pt > getLocalXMax())
-				setLocalXMax(x_pt);
-			else if (x_pt < getLocalXMin())
-				setLocalXMin(x_pt);
-	
-			// Local Y check
-			if (y_pt > getLocalYMax())
-				setLocalYMax(y_pt);
-			else if (y_pt < getLocalYMin())
-				setLocalYMin(y_pt);
-		}
-
-		// Set the parents
-		if(getLocalXMin() < parent->getXMin())
-			parent->setXMin(getLocalXMin());
-		if(getLocalXMax() > parent->getXMax())
-			parent->setXMax(getLocalXMax());
-
-		if(getLocalYMin() < parent->getYMin())
-			parent->setYMin(getLocalYMin());
-		if(getLocalYMax() > parent->getYMax())
-			parent->setYMax(getLocalYMax());
+		// Local Y check
+		if (y_pt > getLocalYMax())
+			setLocalYMax(y_pt);
+		else if (y_pt < getLocalYMin())
+			setLocalYMin(y_pt);
 	}
+
+	// Set the parents
+	if(getLocalXMin() < parent->getXMin())
+		parent->setXMin(getLocalXMin());
+	if(getLocalXMax() > parent->getXMax())
+		parent->setXMax(getLocalXMax());
+
+	if(getLocalYMin() < parent->getYMin())
+		parent->setYMin(getLocalYMin());
+	if(getLocalYMax() > parent->getYMax())
+		parent->setYMax(getLocalYMax());
 
 	//==============================================Normalize the points==============================================
 
@@ -111,9 +100,9 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 		normalizedPoints.erase(normalizedPoints.begin()+normalizedPoints.size()-1);
 	}
 
-	unsigned int i = 0;
-	if(!redoRange)
-		i = points.size()-1;
+	i = 0;
+	//if(!redoRange)
+		//i = points.size()-1;
 
 	// Aggregate helpers
 	unsigned int aggCounter = 0;
@@ -158,23 +147,9 @@ void Graphable<Point2>::draw(gfxpp* cGfx)
 	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
 						   getColor().a);
 
-	float xRange = (float)normalizedPoints.size(); // normalizedPoints per x axis
-	//float xRange = getXMax() - getXMin();
-	float yRange = getYMax() - getYMin();
-	//printf("Line[%s]: xRange: %f\n", parent->getName().c_str(),  xRange);
-
-	unsigned int agg = parent->getAggregate();
-	float pointXGap = ((float)parent->getWidth()) / xRange;
-	float pointYGap = ((float)parent->getHeight()) / yRange;
-
-	if(isinf(pointXGap))
-		return;
-
-	// Dont draw with bad data
-	if(! ((xRange == points.size()/agg) || (xRange == (points.size()/agg)+1)) )
-		return;
-
+	float vscale = parent->getVScale();
 	//printf("norm-size: %lu\n", normalizedPoints.size());
+
 	Point2* prevPoint = NULL;
 	unsigned int i = 0;
 	for (; i < normalizedPoints.size(); ++i)

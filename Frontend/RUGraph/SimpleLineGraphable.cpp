@@ -34,43 +34,31 @@ void Graphable<SimpleLine>::computeAxisRanges(bool additionOptimization)
 	{
 		// Is the latest y not within the current range?
 		float cY = points[points.size()-1]->getY();
-		if(!((cY >= getYMin()) && (cY <= getYMax())))
+		if((cY < getYMin()) || (cY > getYMax()))
 			redoRange = true;
 	}
 
-	redoRange = true;
-	float vscale = parent->getVScale();
-	if(redoRange)
+	//redoRange = true;
+	unsigned int i = 0;
+	//if(redoRange)
+		//i = points.size()-1;
+	for (; i < points.size(); ++i)
 	{
-		float y_max = parent->getYMax();
-		float y_min = parent->getYMin();
-		float local_y_max = points[0]->getY();
-		float local_y_min = local_y_max;
+		SimpleLine* pt = points[i];
+		float y_pt = pt->getY();
 
-		for (unsigned int i = 1; i < points.size(); ++i)
-		{
-			SimpleLine* pt = points[i];
-			float y_pt = pt->getY();
-
-			if (y_pt > local_y_max)
-				local_y_max = y_pt;
-			else if (y_pt < local_y_min)
-				local_y_min = y_pt;
-
-			if (y_pt > y_max)
-				y_max = y_pt;
-			else if (y_pt < y_min)
-				y_min = y_pt;
-		}
-
-		setLocalYMin(local_y_min);
-		setLocalYMax(local_y_max * vscale);
-
-		if(y_min < parent->getYMin())
-			parent->setYMin(y_min);
-		if(y_max > parent->getYMax())
-			parent->setYMax(y_max * vscale);
+		// Local Y check
+		if (y_pt > getLocalYMax())
+			setLocalYMax(y_pt);
+		else if (y_pt < getLocalYMin())
+			setLocalYMin(y_pt);
 	}
+
+	// Set the parents
+	if(getLocalYMin() < parent->getYMin())
+		parent->setYMin(getLocalYMin());
+	if(getLocalYMax() > parent->getYMax())
+		parent->setYMax(getLocalYMax());
 
 	//==============================================Normalize the points==============================================
 
@@ -95,9 +83,9 @@ void Graphable<SimpleLine>::computeAxisRanges(bool additionOptimization)
 		normalizedPoints.erase(normalizedPoints.begin()+normalizedPoints.size()-1);
 	}
 
-	unsigned int i = 0;
-	if(!redoRange)
-		i = points.size()-1;
+	i = 0;
+	//if(!redoRange)
+		//i = points.size()-1;
 
 	// Aggregate helpers
 	unsigned int aggCounter = 0;
@@ -133,6 +121,7 @@ void Graphable<SimpleLine>::computeAxisRanges(bool additionOptimization)
 template <>
 void Graphable<SimpleLine>::draw(gfxpp* cGfx)
 {
+	float vscale = parent->getVScale();
 	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
 						   getColor().a);
 
