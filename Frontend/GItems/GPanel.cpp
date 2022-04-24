@@ -157,12 +157,15 @@ void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPane
 	}
 }
 
-void GPanel::processQ()
+void GPanel::processQ(gfxpp* cGfx)
 {
 	//
-	while(updateQueue.size() > 0)
+	unsigned int counter = 0;
+	unsigned int maxAtOnce = 100; // Smaller the number, slower but more fluid graphics
+	while((updateQueue.size() > 0) && (cGfx->getRunning()) && (counter < maxAtOnce))
 	{
 		popQ();
+		++counter;
 	}
 }
 
@@ -207,7 +210,7 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 		return;
 
 	// Update the GUI based on a message queue
-	processQ();
+	processQ(cGfx);
 
 	// Do we want to redraw the panel
 	if (getDrawUpdateRequired())
