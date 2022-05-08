@@ -14,39 +14,39 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#include "SimpleLine.h"
+#include "Horizontal_Line.h"
 
-SimpleLine::SimpleLine()
+Horizontal_Line::Horizontal_Line()
 {
 	set(0.0f);
 }
 
-SimpleLine::SimpleLine(double newY)
+Horizontal_Line::Horizontal_Line(double newY)
 {
 	set(newY);
 }
 
-SimpleLine::SimpleLine(const SimpleLine& p)
+Horizontal_Line::Horizontal_Line(const Horizontal_Line& p)
 {
 	set(p.y);
 }
 
-SimpleLine::~SimpleLine()
+Horizontal_Line::~Horizontal_Line()
 {
 	set(0.0f);
 }
 
-double SimpleLine::getY() const
+double Horizontal_Line::getY() const
 {
 	return y;
 }
 
-void SimpleLine::set(double newY)
+void Horizontal_Line::set(double newY)
 {
 	setY(newY);
 }
 
-void SimpleLine::setY(double newY)
+void Horizontal_Line::setY(double newY)
 {
 	y = newY;
 }

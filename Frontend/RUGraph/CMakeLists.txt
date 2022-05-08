@@ -6,7 +6,7 @@ set(GraphGUI_src_files
 	ActionBubbleGraphable.cpp
 	GraphableAttr.cpp
 	GraphableAttr.h
-	SimpleLineGraphable.cpp
+	HLineGraphable.cpp
 	Graphable.h
 	RUGraph.cpp
 	RUGraph.h
