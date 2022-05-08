@@ -77,6 +77,31 @@ RUGraph::~RUGraph()
 	sourceAgg = AGG_1m;
 }
 
+std::vector<shmea::GString> RUGraph::getNames() const
+{
+	std::vector<shmea::GString> retNames;
+	std::map<shmea::GString, GeneralGraphable*>::const_iterator it;
+	for (it = graphables.begin(); it != graphables.end(); ++it)
+		retNames.push_back(it->first);
+	return retNames;
+}
+
+void RUGraph::remove(const shmea::GString& cName)
+{
+	std::map<shmea::GString, GeneralGraphable*>::iterator it;
+	for (it = graphables.begin(); it != graphables.end(); ++it)
+	{
+		if(it->first != cName)
+			continue;
+
+		GeneralGraphable* gg = it->second;
+		graphables.erase(it);
+		delete gg;
+		it = graphables.begin();
+	}
+	graphables.clear();
+}
+
 int RUGraph::getGraphSize() const
 {
 	return graphSize;

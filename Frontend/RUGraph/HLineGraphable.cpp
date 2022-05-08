@@ -15,13 +15,13 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
-#include "../GFXUtilities/SimpleLine.h"
 #include "RUGraph.h"
+#include "../GFXUtilities/Horizontal_Line.h"
 
 //TODO: Separate Scalar1D from Point2D and implement this add fncality
 
 template <>
-void Graphable<SimpleLine>::computeAxisRanges(bool additionOptimization)
+void Graphable<Horizontal_Line>::computeAxisRanges(bool additionOptimization)
 {
 	if (!parent)
 		return;
@@ -44,7 +44,7 @@ void Graphable<SimpleLine>::computeAxisRanges(bool additionOptimization)
 		//i = points.size()-1;
 	for (; i < points.size(); ++i)
 	{
-		SimpleLine* pt = points[i];
+		Horizontal_Line* pt = points[i];
 		float y_pt = pt->getY();
 
 		// Local Y check
@@ -74,7 +74,7 @@ void Graphable<SimpleLine>::computeAxisRanges(bool additionOptimization)
 	// Size up the normalized points vec
 	while(normalizedPoints.size() < xRange)
 	{
-		SimpleLine* newPoint = new SimpleLine();
+		Horizontal_Line* newPoint = new Horizontal_Line();
 		normalizedPoints.push_back(newPoint);
 	}
 
@@ -119,7 +119,7 @@ void Graphable<SimpleLine>::computeAxisRanges(bool additionOptimization)
 }
 
 template <>
-void Graphable<SimpleLine>::draw(gfxpp* cGfx)
+void Graphable<Horizontal_Line>::draw(gfxpp* cGfx)
 {
 	float vscale = parent->getVScale();
 	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
@@ -131,7 +131,7 @@ void Graphable<SimpleLine>::draw(gfxpp* cGfx)
 	for (unsigned int i = 0; i < normalizedPoints.size(); ++i)
 	{
 		// add it to the background
-		SimpleLine* cPoint = normalizedPoints[i];
+		Horizontal_Line* cPoint = normalizedPoints[i];
 
 		SDL_RenderDrawLine(cGfx->getRenderer(), parent->getAxisOriginX(), cPoint->getY() - 1,
 								   parent->getAxisOriginX() + parent->getWidth(), cPoint->getY() - 1);

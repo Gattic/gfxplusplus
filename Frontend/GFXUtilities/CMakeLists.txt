@@ -17,8 +17,8 @@ set(GU_src_files
 	Ellipse.h
 	EventTracker.cpp
 	EventTracker.h
-	SimpleLine.cpp
-	SimpleLine.h
+	Horizontal_Line.cpp
+	Horizontal_Line.h
 )
 add_library(GU ${GU_src_files})
 
