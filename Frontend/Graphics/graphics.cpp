@@ -128,7 +128,7 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title)
 	}
 	else
 		window =
-			SDL_CreateWindow("gfxplusplus", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+			SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 							 getWidth(), getHeight(), SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	if (!window)
