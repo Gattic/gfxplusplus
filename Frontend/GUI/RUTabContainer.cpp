@@ -37,13 +37,6 @@ RUTabContainer::~RUTabContainer()
 		if (items[i].first)
 			delete items[i].first;
 		items[i].first = NULL;
-
-		for (unsigned int j = 0; j < items[i].second.size(); ++j)
-		{
-			if (items[i].second[j])
-				delete items[i].second[j];
-			items[i].second[j] = NULL;
-		}
 	}
 
 	optionsShown = 0;
@@ -99,6 +92,9 @@ void RUTabContainer::setHeight(int newHeight)
 			items[i].first->setMarginY(0);
 			items[i].first->setHeight(0);
 			// items[i].first->setFontSize(0);
+
+			if(items[i].second)
+				items[i].second->setMarginY(getHeight()*1.5f);
 		}
 	}
 
@@ -112,7 +108,7 @@ void RUTabContainer::setOptionsShown(unsigned int newOptionsShown)
 	drawUpdate = true;
 }
 
-void RUTabContainer::addTab(shmea::GString newItemText)
+void RUTabContainer::addTab(shmea::GString newItemText, GItem* tabItem)
 {
 	if (!optionsShown)
 		return;
@@ -151,11 +147,21 @@ void RUTabContainer::addTab(shmea::GString newItemText)
 		newLabel->setVisible(false);
 	}
 
-	// add the label
-	std::pair<RULabel*, std::vector<GItem*> > newItem;
+	// Add the label
+	RUTab newItem;
 	newItem.first = newLabel;
-	items.push_back(newItem);
 	addSubItem(newLabel);
+
+	// Add the child to show if it exists
+	if(tabItem)
+	{
+		newItem.second = tabItem;
+		tabItem->setMarginY(getHeight()*1.5f);
+		addSubItem(tabItem);
+	}
+
+	// Submit to the container
+	items.push_back(newItem);
 
 	// Auto select first added tab
 	if (items.size() == 1)
@@ -166,21 +172,6 @@ void RUTabContainer::addTab(shmea::GString newItemText)
 	}
 
 	drawUpdate = true;
-}
-
-void RUTabContainer::addItemToTab(shmea::GString tabText, GItem* tabItem)
-{
-
-	for (unsigned int i = 0; i < items.size(); ++i)
-	{
-		if (items[i].first->getText() == tabText)
-		{
-			items[i].second.push_back(tabItem);
-			drawUpdate = true;
-			return;
-		}
-	}
-	printf("addItemToTab() failed. Tab with text '%s' not found.\n", tabText.c_str());
 }
 
 /*!
@@ -287,23 +278,27 @@ void RUTabContainer::updateBackground(gfxpp* cGfx)
 			{
 				if (i == tabSelected)
 				{
-					std::vector<GItem*> selectedTabContainer = items[i].second;
-					// Show selected tab items
-					for (unsigned int j = 0; j < selectedTabContainer.size(); ++j)
-						selectedTabContainer[j]->setVisible(true);
+					// Show selected tab item
+					if(items[i].second)
+						items[i].second->setVisible(true);
 				}
 				else
 				{
 					// Add/Remove highlight if not selected
 					if (i == itemHovered)
+					{
 						items[i].first->setBGColor(RUColors::DEFAULT_BUTTON_BLUE);
+						items[i].first->requireDrawUpdate();
+					}
 					else
+					{
 						items[i].first->setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+						items[i].first->requireDrawUpdate();
+					}
 
-					std::vector<GItem*> tabContainer = items[i].second;
-					// Hide unselected tabs' GItems
-					for (unsigned int j = 0; j < tabContainer.size(); ++j)
-						tabContainer[j]->setVisible(false);
+					// Hide unselected tabs' GItem
+					if(items[i].second)
+						items[i].second->setVisible(false);
 				}
 			}
 			else
@@ -313,9 +308,15 @@ void RUTabContainer::updateBackground(gfxpp* cGfx)
 				{
 					// Add/Remove hover highlight
 					if (i == itemHovered)
+					{
 						items[i].first->setBGColor(RUColors::DEFAULT_BUTTON_BLUE);
+						items[i].first->requireDrawUpdate();
+					}
 					else
+					{
 						items[i].first->setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+						items[i].first->requireDrawUpdate();
+					}
 				}
 			}
 		}
@@ -331,21 +332,17 @@ void RUTabContainer::updateLabels()
 {
 	for (unsigned int i = 0; i < items.size(); ++i)
 	{
-		if (optionsShown > 0)
-		{
-			int labelWidth = (getWidth() - (getPaddingX() * optionsShown)) / optionsShown;
-			int labelHeight = getHeight();
-			items[i].first->setHeight(labelHeight);
-			// items[i].first->setFontSize(labelHeight / 2);
-			items[i].first->setVisible(i < optionsShown);
-		}
-		else
-		{
-			items[i].first->setMarginY(0);
-			items[i].first->setHeight(0);
-			// items[i].first->setFontSize(0);
-			items[i].first->setVisible(false);
-		}
+		if (!items[i].second)
+			continue;
+
+		int labelWidth = (getWidth() - (getPaddingX() * optionsShown)) / optionsShown;
+		int labelHeight = getHeight();
+		items[i].first->setHeight(labelHeight);
+		// items[i].first->setFontSize(labelHeight / 2);
+		items[i].first->setVisible(i < optionsShown);
+
+		// Put the item below the tabs
+		items[i].second->setMarginY(labelHeight*1.5f);
 	}
 
 	std::pair<int, int> offset(0, 0);
