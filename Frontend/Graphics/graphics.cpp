@@ -615,7 +615,7 @@ void gfxpp::display()
 		// fps
 		now = SDL_GetTicks();
 		float cFrames = ((float)frames * 1000.0f) / ((float)(now - then));
-		if (fpsLabel)
+		if ((fpsLabel) && (running))
 		{
 			char fpsBuffer[26];
 			bzero(&fpsBuffer, 26);
@@ -628,7 +628,7 @@ void gfxpp::display()
 			SDL_Delay((cFrames - MAX_FRAMES_PER_SECOND) * 10.0f);
 
 		// global gui elements
-		if (fpsLabel)
+		if ((fpsLabel) && (running))
 			fpsLabel->updateBackgroundHelper(this);
 
 		// Update the screen
