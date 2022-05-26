@@ -31,18 +31,17 @@ gfxpp::gfxpp()
 	height = 600;
 	renderStatus = _2D;
 
-	errorFlag = initHelper(true, "gfxplusplus");
+	errorFlag = initHelper(false, "gfxplusplus", true);
 }
 
-gfxpp::gfxpp(shmea::GString newTitle, int newRenderStatus, bool fullScreenMode, int newWidth,
-			 int newHeight)
+gfxpp::gfxpp(shmea::GString newTitle, int newRenderStatus, bool fullScreenMode, bool compatMode, int newWidth, int newHeight)
 {
 	systemCursor = NULL;
 	renderStatus = newRenderStatus;
 	width = newWidth;
 	height = newHeight;
 
-	errorFlag = initHelper(fullScreenMode, newTitle);
+	errorFlag = initHelper(fullScreenMode, newTitle, compatMode);
 }
 
 int gfxpp::getErrorFlag() const
@@ -55,7 +54,7 @@ SDL_Renderer* gfxpp::getRenderer()
 	return renderer;
 }
 
-int gfxpp::initHelper(bool fullscreenMode, shmea::GString title)
+int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode)
 {
 	running = false;
 	hunterZolomon = 1.0f;
@@ -114,9 +113,12 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title)
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	if (fullscreenMode)
 	{
-		window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-								  getWidth(), getHeight(),
-								  SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP);
+		if(compatMode)
+			window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+								  getWidth(), getHeight(), SDL_WINDOW_FULLSCREEN_DESKTOP);
+		else
+			window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+								  getWidth(), getHeight(), SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP);
 
 		// get the width and height
 		SDL_DisplayMode DM;
@@ -127,9 +129,14 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title)
 		height = DM.h;
 	}
 	else
-		window =
-			SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+	{
+		if(compatMode)
+			window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+							 getWidth(), getHeight(), SDL_WINDOW_RESIZABLE);
+		else
+			window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 							 getWidth(), getHeight(), SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	}
 
 	if (!window)
 	{
@@ -140,7 +147,7 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title)
 
 	if (renderStatus == _2D)
 	{
-		int errorNo = init2D();
+		int errorNo = init2D(compatMode);
 		if (errorNo < 0)
 			return errorNo;
 	}
@@ -154,10 +161,13 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title)
 	return 0;
 }
 
-int gfxpp::init2D()
+int gfxpp::init2D(bool compatMode)
 {
 	// Create a new renderer; -1 loads the default video driver we need
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+	if(compatMode)
+		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_TARGETTEXTURE);
+	else
+		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	if (!renderer)
 	{
 		printf("[GFX] Renderer error: %s\n", SDL_GetError());
@@ -627,7 +637,7 @@ void gfxpp::display()
 	}
 }
 
-void gfxpp::changeRenderStatus(int newRenderStatus)
+void gfxpp::changeRenderStatus(int newRenderStatus, bool compatMode)
 {
 	if (renderStatus != newRenderStatus)
 	{
@@ -636,7 +646,7 @@ void gfxpp::changeRenderStatus(int newRenderStatus)
 		renderStatus = newRenderStatus;
 		if (renderStatus == _2D)
 		{
-			errorNo = init2D();
+			errorNo = init2D(compatMode);
 
 			// Set the FPS Component
 			fpsLabel = new RULabel();
