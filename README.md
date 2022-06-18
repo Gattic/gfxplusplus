@@ -1,4 +1,4 @@
-# gfxplusplus v0.56 Beta
+# gfxplusplus v0.57 Beta
 
 ## Discord
 
