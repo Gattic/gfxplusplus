@@ -14,83 +14,42 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#include "point2.h"
+#ifndef _GSTANDARDIZABLE
+#define _GSTANDARDIZABLE
 
-Point2::Point2()
+#include <cfloat>
+#include "GList.h"
+
+namespace shmea {
+
+class GStandardizable
 {
-	setX(0.0f);
-	setY(0.0f);
-}
+protected:
+	float xMin;
+	float xMax;
+	float yMin;
+	float yMax;
 
-Point2::Point2(double newX, double newY)
-{
-	setX(newX);
-	setY(newY);
-}
+public:
 
-Point2::Point2(const Point2& p)
-{
-	setX(p.x);
-	setY(p.y);
-}
+	bool redoRange;
 
-Point2::~Point2()
-{
-	setX(0.0f);
-	setY(0.0f);
-}
+	GStandardizable();
+	virtual ~GStandardizable();
 
-double Point2::getX() const
-{
-	return x;
-}
+	// gets
+	float getXMin() const;
+	float getXMax() const;
+	float getYMin() const;
+	float getYMax() const;
 
-double Point2::getY() const
-{
-	return y;
-}
+	// sets
+	void setXMin(float);
+	void setXMax(float);
+	void setYMin(float);
+	void setYMax(float);
+	virtual void clear();
+};
+};
 
-double Point2::length() const
-{
-	return sqrt(x * x + y * y);
-}
-
-void Point2::set(double newX, double newY)
-{
-	setX(newX);
-	setY(newY);
-}
-
-void Point2::setX(double newX)
-{
-	x = newX;
-}
-
-void Point2::setY(double newY)
-{
-	y = newY;
-}
-
-void Point2::normalize()
-{
-	double len = length();
-	if (len == 0.0f)
-		return;
-
-	x /= len;
-	y /= len;
-}
-
-shmea::GList Point2::toXVectorData() const
-{
-	shmea::GList xData;
-	xData.addFloat(getX());
-	return xData;
-}
-
-shmea::GList Point2::toYVectorData() const
-{
-	shmea::GList yData;
-	yData.addFloat(getY());
-	return yData;
-}
+#endif

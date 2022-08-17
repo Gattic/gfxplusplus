@@ -47,31 +47,19 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 		float y_high = c->getHigh();
 		float y_low = c->getLow();
 
-		// Local X check
-		if (x_pt > getLocalXMax())
-			setLocalXMax(x_pt);
-		else if (x_pt < getLocalXMin())
-			setLocalXMin(x_pt);
-	
-		// Local Y check
-		if (y_high > getLocalYMax())
-			setLocalYMax(y_high);
-		else if (y_low < getLocalYMin())
-			setLocalYMin(y_low);
+		setXMax(x_pt);
+		setXMin(x_pt);
+		setYMax(y_high);
+		setYMin(y_low);
 	}
 
 	// Set the parents
-	if(getLocalXMin() < parent->getXMin())
-		parent->setXMin(getLocalXMin());
-	if(getLocalXMax() > parent->getXMax())
-		parent->setXMax(getLocalXMax());
+	parent->setXMin(getXMin());
+	parent->setXMax(getXMax());
+	parent->setYMin(getYMin());
+	parent->setYMax(getYMax());
 
-	if(getLocalYMin() < parent->getYMin())
-		parent->setYMin(getLocalYMin());
-	if(getLocalYMax() > parent->getYMax())
-		parent->setYMax(getLocalYMax());
-
-	//printf("Candle-PRE[%s]: %f:%f\n", parent->getName().c_str(), getLocalXMax(), getLocalXMin());
+	//printf("Candle-PRE[%s]: %f:%f\n", parent->getName().c_str(), getXMax(), getXMin());
 
 	//==============================================Normalize the points==============================================
 

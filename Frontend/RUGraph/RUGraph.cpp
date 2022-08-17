@@ -45,10 +45,6 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 	gridEnabled = false;
 	gridLineWidth = DEFAULT_GRIDLINE_WIDTH;
 
-	xMin = FLT_MAX;
-	xMax = FLT_MIN;
-	yMin = FLT_MAX;
-	yMax = FLT_MIN;
 	vscale = 1.0;
 	period = P_1Y;
 	agg = AGG_1m;
@@ -67,10 +63,6 @@ RUGraph::~RUGraph()
 	gridLineWidth = 0;
 	quadrants = QUADRANTS_ONE;
 
-	xMin = FLT_MAX;
-	xMax = FLT_MIN;
-	yMin = FLT_MAX;
-	yMax = FLT_MIN;
 	vscale = 1.0;
 	period = P_1Y;
 	agg = AGG_1m;
@@ -161,26 +153,6 @@ float RUGraph::getQuadrantOffsetY() const
 	return quadrantOffsetY;
 }
 
-float RUGraph::getXMin() const
-{
-	return xMin;
-}
-
-float RUGraph::getXMax() const
-{
-	return xMax;
-}
-
-float RUGraph::getYMin() const
-{
-	return yMin;
-}
-
-float RUGraph::getYMax() const
-{
-	return yMax;
-}
-
 float RUGraph::getVScale() const
 {
 	return vscale;
@@ -234,26 +206,6 @@ void RUGraph::setQuadrants(int newQuadrants)
 {
 	quadrants = newQuadrants;
 	drawUpdate = true;
-}
-
-void RUGraph::setXMin(float newXMin)
-{
-	xMin = newXMin;
-}
-
-void RUGraph::setXMax(float newXMax)
-{
-	xMax = newXMax;
-}
-
-void RUGraph::setYMin(float newYMin)
-{
-	yMin = newYMin;
-}
-
-void RUGraph::setYMax(float newYMax)
-{
-	yMax = newYMax;
 }
 
 void RUGraph::setVScale(float newVScale)
@@ -462,11 +414,6 @@ void RUGraph::clear(bool toggleDraw)
 	for (it = graphables.begin(); it != graphables.end(); ++it)
 		delete it->second;
 	graphables.clear();
-
-	xMin = FLT_MAX;
-	xMax = FLT_MIN;
-	yMin = FLT_MAX;
-	yMax = FLT_MIN;
 
 	if (toggleDraw)
 		drawUpdate = true;
