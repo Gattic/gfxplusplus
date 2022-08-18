@@ -46,29 +46,17 @@ void Graphable<Circle>::computeAxisRanges(bool additionOptimization)
 		float x_pt = pt->getX();
 		float y_pt = pt->getY();
 
-		// Local X check
-		if (x_pt > getLocalXMax())
-			setLocalXMax(x_pt);
-		else if (x_pt < getLocalXMin())
-			setLocalXMin(x_pt);
-
-		// Local Y check
-		if (y_pt > getLocalYMax())
-			setLocalYMax(y_pt);
-		else if (y_pt < getLocalYMin())
-			setLocalYMin(y_pt);
+		setXMax(x_pt);
+		setXMin(x_pt);
+		setYMax(y_pt);
+		setYMin(y_pt);
 	}
 
 	// Set the parents
-	if(getLocalXMin() < parent->getXMin())
-		parent->setXMin(getLocalXMin());
-	if(getLocalXMax() > parent->getXMax())
-		parent->setXMax(getLocalXMax());
-
-	if(getLocalYMin() < parent->getYMin())
-		parent->setYMin(getLocalYMin());
-	if(getLocalYMax() > parent->getYMax())
-		parent->setYMax(getLocalYMax());
+	parent->setXMin(getXMin());
+	parent->setXMax(getXMax());
+	parent->setYMin(getYMin());
+	parent->setYMax(getYMax());
 
 	//==============================================Normalize the points==============================================
 

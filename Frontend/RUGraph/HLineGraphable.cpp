@@ -47,18 +47,13 @@ void Graphable<Horizontal_Line>::computeAxisRanges(bool additionOptimization)
 		Horizontal_Line* pt = points[i];
 		float y_pt = pt->getY();
 
-		// Local Y check
-		if (y_pt > getLocalYMax())
-			setLocalYMax(y_pt);
-		else if (y_pt < getLocalYMin())
-			setLocalYMin(y_pt);
+		setYMax(y_pt);
+		setYMin(y_pt);
 	}
 
 	// Set the parents
-	if(getLocalYMin() < parent->getYMin())
-		parent->setYMin(getLocalYMin());
-	if(getLocalYMax() > parent->getYMax())
-		parent->setYMax(getLocalYMax());
+	parent->setYMin(getYMin());
+	parent->setYMax(getYMax());
 
 	//==============================================Normalize the points==============================================
 
