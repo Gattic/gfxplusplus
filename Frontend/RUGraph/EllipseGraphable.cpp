@@ -19,7 +19,7 @@
 #include "../GFXUtilities/Ellipse.h"
 
 template <>
-void Graphable<Ellipse>::computeAxisRanges(bool additionOptimization)
+void Graphable<Ellipse>::normalizePoints(bool additionOptimization)
 {
 	if (!parent)
 		return;

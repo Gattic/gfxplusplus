@@ -46,8 +46,8 @@ public:
 	void setX(double);
 	void setY(double);
 	void normalize();
-	virtual shmea::GList toXVectorData() const;
-	virtual shmea::GList toYVectorData() const;
+	virtual shmea::GPointer<const shmea::GList> toXVectorData() const;
+	virtual shmea::GPointer<const shmea::GList> toYVectorData() const;
 
 	// operators
 	inline Point2 operator+(Point2 v)

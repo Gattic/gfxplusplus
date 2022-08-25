@@ -18,14 +18,15 @@
 #define _GSTANDITEM
 
 #include "GList.h"
+#include "GPointer.h"
 
 namespace shmea {
 
 class StandItem
 {
 public:
-	virtual GList toXVectorData() const = 0;
-	virtual GList toYVectorData() const = 0;
+	virtual GPointer<const GList> toXVectorData() const = 0;
+	virtual GPointer<const GList> toYVectorData() const = 0;
 };
 };
 

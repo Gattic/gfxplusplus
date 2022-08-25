@@ -97,3 +97,17 @@ int ActionBubble::getActionType() const
 {
 	return actionType;
 }
+
+shmea::GPointer<const shmea::GList> ActionBubble::toXVectorData() const
+{
+	shmea::GList* xData = new shmea::GList();
+	// No data
+	return shmea::GPointer<const shmea::GList>(xData);
+}
+
+shmea::GPointer<const shmea::GList> ActionBubble::toYVectorData() const
+{
+	shmea::GList* yData = new shmea::GList();
+	// No data
+	return shmea::GPointer<const shmea::GList>(yData);
+}

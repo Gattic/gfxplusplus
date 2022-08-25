@@ -57,6 +57,7 @@ public:
 	// render
 	virtual void draw(gfxpp*);
 	virtual void computeAxisRanges(bool = false);
+	virtual void normalizePoints(bool = false);
 };
 
 template <class T>
@@ -156,6 +157,53 @@ void Graphable<T>::clear()
 	points.clear();
 	normalizedPoints.clear();
 	visible = false;
+}
+
+template <class T>
+void Graphable<T>::computeAxisRanges(bool additionOptimization)
+{
+	if (points.empty())
+		return;
+
+	redoRange = !additionOptimization;
+	if(additionOptimization)
+	{
+		// Is the latest y not within the current range?
+		const T* cY = points[points.size()-1];
+		shmea::GPointer<const shmea::GList> yList = cY->toYVectorData();
+		for(unsigned int i = 0; i < yList->size(); ++i)
+		{
+			if(((*yList)[i] < getYMin()) || ((*yList)[i] > getYMax()))
+			{
+				redoRange = true;
+				break;
+			}
+		}
+	}
+
+	//redoRange = true;
+	unsigned int i = 0;
+	//if(redoRange)
+		//i = points.size()-1;
+	for (; i < points.size(); ++i)
+	{
+		const T* pt = points[i];
+		shmea::GPointer<const shmea::GList> xList = pt->toXVectorData();
+		for(unsigned int i = 0; i < xList->size(); ++i)
+		{
+			setYMax((*xList)[i]);
+			setYMin((*xList)[i]);
+		}
+
+		shmea::GPointer<const shmea::GList> yList = pt->toYVectorData();
+		for(unsigned int i = 0; i < yList->size(); ++i)
+		{
+			setYMax((*yList)[i]);
+			setYMin((*yList)[i]);
+		}
+	}
+
+	normalizePoints(additionOptimization);
 }
 
 #endif

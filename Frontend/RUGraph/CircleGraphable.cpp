@@ -19,38 +19,13 @@
 #include "../GFXUtilities/Circle.h"
 
 template <>
-void Graphable<Circle>::computeAxisRanges(bool additionOptimization)
+void Graphable<Circle>::normalizePoints(bool additionOptimization)
 {
 	if (!parent)
 		return;
 
 	if (points.empty())
 		return;
-
-	redoRange = !additionOptimization;
-	if(additionOptimization)
-	{
-		// Is the latest y not within the current range?
-		float cY = points[points.size()-1]->getCenter()->getY();
-		if(!((cY >= getYMin()) && (cY <= getYMax())))
-			redoRange = true;
-	}
-
-	//redoRange = true;
-	unsigned int i = 0;
-	//if(redoRange)
-		//i = points.size()-1;
-	for (; i < points.size(); ++i)
-	{
-		const Point2* pt = points[i]->getCenter();
-		float x_pt = pt->getX();
-		float y_pt = pt->getY();
-
-		setXMax(x_pt);
-		setXMin(x_pt);
-		setYMax(y_pt);
-		setYMin(y_pt);
-	}
 
 	// Set the parents
 	parent->setXMin(getXMin());
@@ -74,7 +49,7 @@ void Graphable<Circle>::computeAxisRanges(bool additionOptimization)
 		normalizedPoints.erase(normalizedPoints.begin()+normalizedPoints.size()-1);
 	}
 
-	i = 0;
+	unsigned i = 0;
 	//if(!redoRange)
 		//i = points.size()-1;
 

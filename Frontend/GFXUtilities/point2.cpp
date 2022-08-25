@@ -81,16 +81,16 @@ void Point2::normalize()
 	y /= len;
 }
 
-shmea::GList Point2::toXVectorData() const
+shmea::GPointer<const shmea::GList> Point2::toXVectorData() const
 {
-	shmea::GList xData;
-	xData.addFloat(getX());
-	return xData;
+	shmea::GList* xData = new shmea::GList();
+	xData->addFloat(getX());
+	return shmea::GPointer<const shmea::GList>(xData);
 }
 
-shmea::GList Point2::toYVectorData() const
+shmea::GPointer<const shmea::GList> Point2::toYVectorData() const
 {
-	shmea::GList yData;
-	yData.addFloat(getY());
-	return yData;
+	shmea::GList* yData = new shmea::GList();
+	yData->addFloat(getY());
+	return shmea::GPointer<const shmea::GList>(yData);
 }
