@@ -33,7 +33,7 @@ class RUImageComponent : public RUComponent
 public:
 	// constructors & destructor
 	RUImageComponent(const shmea::GString&);
-	RUImageComponent(shmea::Image*);
+	RUImageComponent(shmea::GPointer<shmea::Image>);
 	~RUImageComponent();
 
 	// render

@@ -25,9 +25,9 @@ RUImageComponent::RUImageComponent(const shmea::GString& newBGImageLocation)
 	setBGImageFromLocation(newBGImageLocation);
 }
 
-RUImageComponent::RUImageComponent(shmea::Image* newBGImage)
+RUImageComponent::RUImageComponent(shmea::GPointer<shmea::Image> newBGImage)
 {
-	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+	//setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 	setBGImage(newBGImage);
 }
 

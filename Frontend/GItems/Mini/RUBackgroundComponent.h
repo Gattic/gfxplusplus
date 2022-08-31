@@ -19,6 +19,7 @@
 
 #include "../RUItemArea.h"
 #include "Backend/Database/GString.h"
+#include "Backend/Database/GPointer.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_opengl.h>
@@ -40,7 +41,7 @@ class RUBackgroundComponent : public virtual RUItemArea
 protected:
 	bool bgEnabled;
 	SDL_Surface* surfaceTheUSA;
-	shmea::Image* bgImage;
+	shmea::GPointer<shmea::Image> bgImage;
 	SDL_Color bgColor;
 	shmea::GString bgImageLocation;
 	int bgImageType;
@@ -49,7 +50,7 @@ protected:
 	void refreshImage();
 
 	void fromSurface(SDL_Surface*);
-	void fromImage(shmea::Image*);
+	void fromImage(shmea::GPointer<shmea::Image>);
 
 public:
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -93,7 +94,7 @@ public:
 	void toggleBG(bool);
 	void setBGImageFromLocation(const shmea::GString&);
 	void setBGImageFromSurface(SDL_Surface*);
-	void setBGImage(shmea::Image*);
+	void setBGImage(shmea::GPointer<shmea::Image>);
 	void setBGColor(SDL_Color);
 
 	// render
