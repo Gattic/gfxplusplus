@@ -167,7 +167,7 @@ int gfxpp::init2D(bool compatMode)
 	if(compatMode)
 		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_TARGETTEXTURE);
 	else
-		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 	if (!renderer)
 	{
 		printf("[GFX] Renderer error: %s\n", SDL_GetError());
