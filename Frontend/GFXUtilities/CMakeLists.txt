@@ -19,6 +19,8 @@ set(GU_src_files
 	EventTracker.h
 	Horizontal_Line.cpp
 	Horizontal_Line.h
+	gnode.cpp
+	gnode.h
 )
 add_library(GU ${GU_src_files})
 
