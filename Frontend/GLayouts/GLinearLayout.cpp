@@ -146,6 +146,13 @@ void GLinearLayout::updateBackgroundHelper(gfxpp* cGfx)
 	}
 }
 
+void GLinearLayout::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
+{
+	std::pair<int, int> parentOffset(0, 0);
+	calculateSubItemPositions(parentOffset);
+	drawUpdate = true;
+}
+
 shmea::GString GLinearLayout::getType() const
 {
 	return "GLinearLayout";
