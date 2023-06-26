@@ -10,6 +10,8 @@
 
 `g++`
 
+`libpng-dev`
+
 SDL2 graphics library
 `libsdl2-dev`
 
