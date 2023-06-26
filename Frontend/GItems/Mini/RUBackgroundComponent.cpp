@@ -137,9 +137,9 @@ void RUBackgroundComponent::fromImage(shmea::GPointer<shmea::Image> newBGImage)
 	// SDL_BLENDMODE_ADD instead?
 	SDL_SetSurfaceBlendMode(newImageSurface, SDL_BLENDMODE_NONE);
 
-	printf("fromImage(%d, %d)\n", getWidth(), getHeight());
-	printf("fromGImage(%d, %d)\n", bgImage->getWidth(), bgImage->getHeight());
-	printf("img-info(%d, %d)\n", newImageSurface->pitch, newImageSurface->format->BytesPerPixel);
+	//printf("fromImage(%d, %d)\n", getWidth(), getHeight());
+	//printf("fromGImage(%d, %d)\n", bgImage->getWidth(), bgImage->getHeight());
+	//printf("img-info(%d, %d)\n", newImageSurface->pitch, newImageSurface->format->BytesPerPixel);
 	for (int cy = 0; cy < bgImage->getHeight(); ++cy)
 	{
 		for (int cx = 0; cx < bgImage->getWidth(); ++cx)
