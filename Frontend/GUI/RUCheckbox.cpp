@@ -80,6 +80,7 @@ void RUCheckbox::toggleCheck()
 	checkbox->setBGImageFromLocation(checkboxLocation);
 
 	checkbox->requireDrawUpdate();
+	drawUpdate = true;
 }
 
 void RUCheckbox::setWidth(int newWidth)
@@ -95,6 +96,7 @@ void RUCheckbox::setWidth(int newWidth)
 	checkboxLabel->setMarginX(checkbox->getWidth());
 	checkboxLabel->setWidth(getWidth() - checkbox->getWidth());
 
+	checkbox->requireDrawUpdate();
 	drawUpdate = true;
 }
 
@@ -111,6 +113,7 @@ void RUCheckbox::setHeight(int newHeight)
 	// update the checkbox
 	checkbox->setHeight(getHeight());
 
+	checkbox->requireDrawUpdate();
 	drawUpdate = true;
 }
 
@@ -124,6 +127,7 @@ void RUCheckbox::setCheck(bool value)
 		checkboxLocation = "resources/gui/Checkbox/unchecked.bmp";
 	checkbox->setBGImageFromLocation(checkboxLocation);
 
+	checkbox->requireDrawUpdate();
 	drawUpdate = true;
 }
 

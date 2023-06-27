@@ -23,7 +23,7 @@
 RUBackgroundComponent::RUBackgroundComponent()
 {
 	bgEnabled = true;
-	bgImage = NULL;
+	bgColorEnabled = true;
 	surfaceTheUSA = NULL;
 	bgImageLocation = DEFAULT_IMAGE_BG;
 	bgImageType = TYPE_NONE;
@@ -33,7 +33,7 @@ RUBackgroundComponent::RUBackgroundComponent()
 RUBackgroundComponent::RUBackgroundComponent(SDL_Color newBGColor)
 {
 	bgEnabled = true;
-	bgImage = NULL;
+	bgColorEnabled = true;
 	surfaceTheUSA = NULL;
 	bgImageLocation = DEFAULT_IMAGE_BG;
 	bgImageType = TYPE_NONE;
@@ -43,10 +43,7 @@ RUBackgroundComponent::RUBackgroundComponent(SDL_Color newBGColor)
 RUBackgroundComponent::~RUBackgroundComponent()
 {
 	bgEnabled = false;
-
-	if (bgImage)
-		delete bgImage;
-	bgImage = NULL;
+	bgColorEnabled = false;
 
 	if (surfaceTheUSA)
 		SDL_FreeSurface(surfaceTheUSA);
@@ -108,6 +105,7 @@ void RUBackgroundComponent::fromSurface(SDL_Surface* newSurfaceImage)
 			// Current surface pixel
 			// printf("(x,y): %d:%d\n", x, y);
 			const unsigned char* surfacePixelData = (const unsigned char*)newSurfaceImage->pixels;
+			//TODO: Fix pointer logic via fromImage!!!!!!
 			unsigned int cPixel =
 				*((unsigned int*)(surfacePixelData + (y * newSurfaceImage->pitch) +
 								  (x * sizeof(unsigned int))));
@@ -123,34 +121,58 @@ void RUBackgroundComponent::fromSurface(SDL_Surface* newSurfaceImage)
 	}
 }
 
-void RUBackgroundComponent::fromImage(shmea::Image* newBGImage)
+void RUBackgroundComponent::fromImage(shmea::GPointer<shmea::Image> newBGImage)
 {
 	bgImage = newBGImage;
 	bgImageType = TYPE_GIMAGE;
-	for (int y = 0; y < bgImage->getHeight(); ++y)
+
+	SDL_Surface* newImageSurface = SDL_CreateRGBSurface(0, bgImage->getWidth(), bgImage->getHeight(), 32, rmask, gmask, bmask, amask);
+	if (!newImageSurface)
 	{
-		for (int x = 0; x < bgImage->getWidth(); ++x)
+		printf("[GUI] Surface SDL_CreateRGBSurface fail: %s\n", SDL_GetError());
+		return;
+	}
+
+	// Success
+	// SDL_BLENDMODE_ADD instead?
+	SDL_SetSurfaceBlendMode(newImageSurface, SDL_BLENDMODE_NONE);
+
+	//printf("fromImage(%d, %d)\n", getWidth(), getHeight());
+	//printf("fromGImage(%d, %d)\n", bgImage->getWidth(), bgImage->getHeight());
+	//printf("img-info(%d, %d)\n", newImageSurface->pitch, newImageSurface->format->BytesPerPixel);
+	for (int cy = 0; cy < bgImage->getHeight(); ++cy)
+	{
+		for (int cx = 0; cx < bgImage->getWidth(); ++cx)
 		{
 			// Current image pixel
-			unsigned int cPixel = 0x00000000;
-			shmea::RGBA c = bgImage->GetPixel(x, y);
+			/*unsigned int cPixel = 0x00000000;
+			shmea::RGBA c = bgImage->GetPixel(cx, cy);
 			((unsigned char*)&cPixel)[RED_INDEX] = c.r;
 			((unsigned char*)&cPixel)[GREEN_INDEX] = c.g;
 			((unsigned char*)&cPixel)[BLUE_INDEX] = c.b;
-			((unsigned char*)&cPixel)[ALPHA_INDEX] = c.a;
+			((unsigned char*)&cPixel)[ALPHA_INDEX] = c.a;*/
+			//printf("cx,cy: (%d,%d): 0x%08X\n", cx, cy, cPixel);
+			shmea::RGBA c = bgImage->GetPixel(cx, cy);
+			uint32_t cPixel = SDL_MapRGBA(newImageSurface->format, c.r, c.g, c.b, c.a);
 
 			// Copy it to the surface
-			// printf("(x,y): %d:%d\n", x, y);
-			unsigned int* surfacePixelData = (unsigned int*)surfaceTheUSA->pixels;
-			*((unsigned int*)(surfacePixelData + (y * surfaceTheUSA->pitch) +
-							  (x * sizeof(unsigned int)))) = cPixel;
+			// printf("(cx,cy): %d:%d\n", cx, cy);
+			uint8_t* surfacePixelData = (uint8_t*)newImageSurface->pixels;
+			*((unsigned int*)(surfacePixelData + (cy * newImageSurface->pitch) + (cx * newImageSurface->format->BytesPerPixel))) = cPixel;
 		}
 	}
+
+	setBGImageFromSurface(newImageSurface);
 }
 
 bool RUBackgroundComponent::getBGEnabled() const
 {
 	return bgEnabled;
+}
+
+bool RUBackgroundComponent::getBGColorEnabled() const
+{
+	return bgColorEnabled;
 }
 
 SDL_Color RUBackgroundComponent::getBGColor() const
@@ -204,12 +226,17 @@ void RUBackgroundComponent::toggleBG(bool newBGEnabled)
 	drawUpdate = true;
 }
 
-void RUBackgroundComponent::setBGImage(shmea::Image* newBGImage)
+void RUBackgroundComponent::toggleBGColor(bool newBGColorEnabled)
+{
+	bgColorEnabled = newBGColorEnabled;
+	drawUpdate = true;
+}
+
+void RUBackgroundComponent::setBGImage(shmea::GPointer<shmea::Image> newBGImage)
 {
 	if (!newBGImage)
 		return;
 
-	printf("DERP0\n");
 	fromImage(newBGImage);
 }
 
@@ -233,8 +260,11 @@ void RUBackgroundComponent::updateBGBackground(gfxpp* cGfx)
 	bgRect.w = getWidth();
 	bgRect.h = getHeight();
 
-	SDL_SetRenderDrawColor(cGfx->getRenderer(), bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-	SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
+	if (bgColorEnabled)
+	{
+		SDL_SetRenderDrawColor(cGfx->getRenderer(), bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+		SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
+	}
 
 	// draw the background image
 	if (!bgImageType)
@@ -254,5 +284,19 @@ void RUBackgroundComponent::updateBGBackground(gfxpp* cGfx)
 		return;
 	}
 
-	SDL_RenderCopy(cGfx->getRenderer(), bgImageTex, NULL, NULL);
+	SDL_RenderCopy(cGfx->getRenderer(), bgImageTex, &bgRect, NULL);
+
+	/*if(bgImage)
+	{
+		for (int cx = 0; cx < bgImage->getWidth(); ++cx)
+		{
+			for (int cy = 0; cy < bgImage->getHeight(); ++cy)
+			{
+				shmea::RGBA c = bgImage->GetPixel(cx, cy);
+				SDL_SetRenderDrawColor(cGfx->getRenderer(), c.r, c.g, c.b, c.a);
+				SDL_RenderDrawPoint(cGfx->getRenderer(), cx, cy);
+				
+			}
+		}
+	}*/
 }

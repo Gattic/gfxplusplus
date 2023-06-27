@@ -21,6 +21,7 @@
 
 RUTabContainer::RUTabContainer()
 {
+	tabHeight = 20;
 	orientation = HORIZONTAL_TABS;
 	optionsShown = 0;
 	itemHovered = (unsigned int)-1;
@@ -39,9 +40,26 @@ RUTabContainer::~RUTabContainer()
 		items[i].first = NULL;
 	}
 
+	tabHeight = 20;
+	orientation = HORIZONTAL_TABS;
 	optionsShown = 0;
 	prevTabSelected = -1;
 	tabSelected = -1;
+}
+
+int RUTabContainer::getHeight() const
+{
+	int retHeight = tabHeight + getMarginY();
+	if (size() > 0)
+	{
+		if ((tabSelected != (unsigned int)-1) && (tabSelected < size()))
+		{
+			if(items[tabSelected].second)
+				retHeight += items[tabSelected].second->getHeight();
+		}
+	}
+
+	return retHeight;
 }
 
 unsigned int RUTabContainer::getOptionsShown() const
@@ -67,13 +85,13 @@ void RUTabContainer::setWidth(int newWidth)
 	if (items.size() + 1 > optionsShown)
 	{
 		for (unsigned int i = 0; i < items.size(); ++i)
-			items[i].first->setWidth(width);
+			items[i].first->setWidth(getWidth());
 	}
 
 	drawUpdate = true;
 }
 
-void RUTabContainer::setHeight(int newHeight)
+void RUTabContainer::setTabHeight(int newHeight)
 {
 	height = newHeight;
 
@@ -82,7 +100,7 @@ void RUTabContainer::setHeight(int newHeight)
 	{
 		if (optionsShown > 0)
 		{
-			int labelHeight = getHeight() / optionsShown;
+			int labelHeight = tabHeight;
 			// items[i]->setMarginY(i * labelHeight);
 			items[i].first->setHeight(labelHeight);
 			// items[i].first->setFontSize(labelHeight / 2);
@@ -94,7 +112,7 @@ void RUTabContainer::setHeight(int newHeight)
 			// items[i].first->setFontSize(0);
 
 			if(items[i].second)
-				items[i].second->setMarginY(getHeight()*1.5f);
+				items[i].second->setMarginY(tabHeight*1.5f);
 		}
 	}
 
@@ -104,7 +122,7 @@ void RUTabContainer::setHeight(int newHeight)
 void RUTabContainer::setOptionsShown(unsigned int newOptionsShown)
 {
 	optionsShown = newOptionsShown;
-	setWidth((width * optionsShown) + (getPaddingX() * optionsShown));
+	setWidth((getWidth() * optionsShown) + (getPaddingX() * optionsShown));
 	drawUpdate = true;
 }
 
@@ -130,7 +148,7 @@ void RUTabContainer::addTab(shmea::GString newItemText, GItem* tabItem)
 	if (optionsShown > 0)
 	{
 		int labelWidth = (getWidth() - (getPaddingX() * optionsShown)) / optionsShown;
-		int labelHeight = getHeight();
+		int labelHeight = tabHeight;
 		if (items.size() > 0)
 			newLabel->setMarginX(items.size() * labelWidth + (items.size() * getPaddingX()));
 
@@ -156,7 +174,7 @@ void RUTabContainer::addTab(shmea::GString newItemText, GItem* tabItem)
 	if(tabItem)
 	{
 		newItem.second = tabItem;
-		tabItem->setMarginY(getHeight()*1.5f);
+		tabItem->setMarginY(tabHeight*1.5f);
 		addSubItem(tabItem);
 	}
 
@@ -336,7 +354,7 @@ void RUTabContainer::updateLabels()
 			continue;
 
 		int labelWidth = (getWidth() - (getPaddingX() * optionsShown)) / optionsShown;
-		int labelHeight = getHeight();
+		int labelHeight = tabHeight;
 		items[i].first->setHeight(labelHeight);
 		// items[i].first->setFontSize(labelHeight / 2);
 		items[i].first->setVisible(i < optionsShown);
