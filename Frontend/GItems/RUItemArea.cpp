@@ -166,6 +166,16 @@ void RUItemArea::setVisible(bool newVisibility)
 	visible = newVisibility;
 }
 
+void RUItemArea::show()
+{
+	visible = true;
+}
+
+void RUItemArea::hide()
+{
+	visible = false;
+}
+
 void RUItemArea::requireDrawUpdate()
 {
 	drawUpdate = true;
