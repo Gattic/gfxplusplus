@@ -238,6 +238,7 @@ void RUBackgroundComponent::setBGImage(shmea::GPointer<shmea::Image> newBGImage)
 		return;
 
 	fromImage(newBGImage);
+	drawUpdate = true;
 }
 
 void RUBackgroundComponent::setBGColor(SDL_Color newBGColor)
