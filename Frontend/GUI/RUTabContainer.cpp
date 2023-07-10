@@ -17,7 +17,7 @@
 #include "RUTabContainer.h"
 #include "../GItems/RUColors.h"
 #include "../Graphics/graphics.h"
-#include "Text/RULabel.h"
+#include "Text/RUButton.h"
 
 RUTabContainer::RUTabContainer()
 {
@@ -28,6 +28,8 @@ RUTabContainer::RUTabContainer()
 	itemHovered = (unsigned int)-1;
 	prevTabSelected = (unsigned int)-1;
 	tabSelected = (unsigned int)-1;
+
+	toggleBG(false);
 }
 
 RUTabContainer::~RUTabContainer()
@@ -131,7 +133,7 @@ void RUTabContainer::setTabsVisible(bool newTabsVisible)
 
 	for (unsigned int i = 0; i < items.size(); ++i)
 	{
-		RULabel* cLabel = items[i].first;
+		RUButton* cLabel = items[i].first;
 		if (!cLabel)
 			continue;
 
@@ -160,11 +162,11 @@ void RUTabContainer::addTab(shmea::GString newItemText, GItem* tabItem)
 	}
 
 	// create the new item label
-	RULabel* newLabel = new RULabel(newItemText);
+	RUButton* newLabel = new RUButton();
+	newLabel->setText(newItemText);
 	newLabel->setMarginX(0);
 	newLabel->setWidth(newLabelWidth);
 	newLabel->setCursor(SDL_SYSTEM_CURSOR_HAND);
-	newLabel->toggleBorder(true);
 	if (optionsShown > 0)
 	{
 		int labelWidth = (getWidth() - (getPaddingX() * optionsShown)) / optionsShown;
@@ -222,7 +224,7 @@ void RUTabContainer::clearOptions()
 	subitems.clear();
 	for (unsigned int i = 0; i < items.size(); ++i)
 	{
-		RULabel* cLabel = items[i].first;
+		RUButton* cLabel = items[i].first;
 		if (!cLabel)
 			continue;
 
@@ -272,7 +274,7 @@ void RUTabContainer::setSelectedTab(shmea::GString tabName)
 	{
 		for (unsigned int i = 0; i < items.size(); ++i)
 		{
-			RULabel* tabItem = items[i].first;
+			RUButton* tabItem = items[i].first;
 			if (!tabItem)
 				continue;
 

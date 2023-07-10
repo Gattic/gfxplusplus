@@ -297,7 +297,7 @@ void GPanel::updateBackground(gfxpp* cGfx)
 	fullRect.w = width;
 	fullRect.h = height;
 
-	drawVerticalGradient(cGfx->getRenderer(), fullRect, RUColors::COLOR_DARK_GRAY, RUColors::COLOR_BLACK);
+	drawVerticalGradient(cGfx->getRenderer(), fullRect, RUColors::COLOR_DARK_GRAY, RUColors::COLOR_BLACK, 0);
 }
 
 shmea::GString GPanel::getType() const

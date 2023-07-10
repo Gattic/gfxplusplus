@@ -27,7 +27,7 @@ RUBackgroundComponent::RUBackgroundComponent()
 	surfaceTheUSA = NULL;
 	bgImageLocation = DEFAULT_IMAGE_BG;
 	bgImageType = TYPE_NONE;
-	setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
+	setBGColor(RUColors::COLOR_TRANSPARENT);
 }
 
 RUBackgroundComponent::RUBackgroundComponent(SDL_Color newBGColor)
@@ -264,7 +264,8 @@ void RUBackgroundComponent::updateBGBackground(gfxpp* cGfx)
 	if (bgColorEnabled)
 	{
 		SDL_SetRenderDrawColor(cGfx->getRenderer(), bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-		SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
+		//SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
+		drawVerticalGradient(cGfx->getRenderer(), bgRect, getBGColor(), getBGColor(), 10);
 	}
 
 	// draw the background image
@@ -302,8 +303,8 @@ void RUBackgroundComponent::updateBGBackground(gfxpp* cGfx)
 	}*/
 }
 
-void RUBackgroundComponent::drawVerticalGradient(SDL_Renderer* renderer, SDL_Rect rect, SDL_Color color1, SDL_Color color2)
-{
+void RUBackgroundComponent::drawVerticalGradient(SDL_Renderer* renderer, SDL_Rect rect, SDL_Color color1, SDL_Color color2, int cornerRadius)
+{   
     int startY = rect.y;
     int endY = rect.y + rect.h;
 
@@ -313,17 +314,60 @@ void RUBackgroundComponent::drawVerticalGradient(SDL_Renderer* renderer, SDL_Rec
     float deltaB = (float)(color2.b - color1.b) / rect.h;
     float deltaA = (float)(color2.a - color1.a) / rect.h;
 
-    // Draw each vertical line
+    // Draw the vertical gradient with adjustable round corners
     for (int y = startY; y < endY; ++y)
-    {
+    {   
         // Calculate current color
         Uint8 r = color1.r + (Uint8)(deltaR * (y - startY));
         Uint8 g = color1.g + (Uint8)(deltaG * (y - startY));
         Uint8 b = color1.b + (Uint8)(deltaB * (y - startY));
         Uint8 a = color1.a + (Uint8)(deltaA * (y - startY));
 
-        // Set the color and draw the line
-        SDL_SetRenderDrawColor(renderer, r, g, b, a);
-        SDL_RenderDrawLine(renderer, rect.x, y, rect.x + rect.w, y);
+        // Draw each pixel within the rectangle
+        for (int x = rect.x; x < rect.x + rect.w; ++x)
+        {   
+            // Check if the pixel is within the rounded corner area
+            bool drawPixel = true;
+
+            if (x < rect.x + cornerRadius && y < rect.y + cornerRadius)    // Top-left corner
+            {   
+                int dx = x - (rect.x + cornerRadius);
+                int dy = y - (rect.y + cornerRadius);
+                drawPixel = (dx * dx + dy * dy) <= (cornerRadius * cornerRadius);
+            }
+            else if (x >= rect.x + rect.w - cornerRadius && y < rect.y + cornerRadius)    // Top-right corner
+            {   
+                int dx = x - (rect.x + rect.w - cornerRadius - 1);
+                int dy = y - (rect.y + cornerRadius);
+                drawPixel = (dx * dx + dy * dy) <= (cornerRadius * cornerRadius);
+            }
+            else if (x < rect.x + cornerRadius && y >= rect.y + rect.h - cornerRadius)    // Bottom-left corner
+            {   
+                int dx = x - (rect.x + cornerRadius);
+                int dy = y - (rect.y + rect.h - cornerRadius - 1);
+                drawPixel = (dx * dx + dy * dy) <= (cornerRadius * cornerRadius);
+            }
+            else if (x >= rect.x + rect.w - cornerRadius && y >= rect.y + rect.h - cornerRadius)    // Bottom-right corner
+            {   
+                int dx = x - (rect.x + rect.w - cornerRadius - 1);
+                int dy = y - (rect.y + rect.h - cornerRadius - 1);
+                drawPixel = (dx * dx + dy * dy) <= (cornerRadius * cornerRadius);
+            }
+            else if (x < rect.x + cornerRadius)    // Left edge
+            {
+                drawPixel = (x - rect.x) <= cornerRadius;
+            }
+            else if (x >= rect.x + rect.w - cornerRadius)    // Right edge
+            {
+                drawPixel = (rect.x + rect.w - x - 1) <= cornerRadius;
+            }
+
+            // Draw the pixel if it is within the rounded corner area
+            if (drawPixel)
+            {   
+                SDL_SetRenderDrawColor(renderer, r, g, b, a);
+                SDL_RenderDrawPoint(renderer, x, y);
+            }
+        }
     }
 }

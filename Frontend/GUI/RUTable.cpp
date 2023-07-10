@@ -35,6 +35,8 @@ RUTable::RUTable()
 	scrollbar->setOptionsShown(0);
 	scrollbar->setVisible(false);
 	addSubItem(scrollbar);
+
+	setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
 }
 
 /*!

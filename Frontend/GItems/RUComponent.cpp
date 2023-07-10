@@ -20,6 +20,12 @@
 #include "../Graphics/graphics.h"
 #include "Mini/RUBackgroundComponent.h"
 #include "Mini/RUBorderComponent.h"
+#include "RUColors.h"
+
+RUComponent::RUComponent()
+{
+	setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
+}
 
 void RUComponent::calculateSubItemPositions(std::pair<int, int> parentOffset)
 {
@@ -117,6 +123,15 @@ void RUComponent::updateBackgroundHelper(gfxpp* cGfx)
 		// Reset the render target to default
 		SDL_SetRenderTarget(cGfx->getRenderer(), NULL);
 	}
+
+	// set the background rect
+	SDL_Rect fullRect;
+	fullRect.x = 0;
+	fullRect.y = 0;
+	fullRect.w = width;
+	fullRect.h = height;
+
+	//drawVerticalGradient(cGfx->getRenderer(), fullRect, getBGColor(), getBGColor(), 20);
 
 	// draw the background
 	SDL_Rect dRect = getLocationRect();

@@ -37,6 +37,8 @@ RUMsgBox::RUMsgBox(GPanel* gPanel, shmea::GString newTitle, shmea::GString newMe
 
 	setWidth(DEFAULT_WIDTH);
 	setHeight(DEFAULT_HEIGHT);
+	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+	toggleBG(true);
 	setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
 	setBorderWidth(2);
 	toggleBorder(true);

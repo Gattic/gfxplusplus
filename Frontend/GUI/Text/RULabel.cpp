@@ -21,10 +21,14 @@
 RULabel::RULabel()
 {
 	//
+	toggleBG(false);
+	//setBGColor(RUColors::COLOR_TRANSPARENT);
 }
 
 RULabel::RULabel(shmea::GString newText)
 {
+	toggleBG(false);
+	//setBGColor(RUColors::COLOR_TRANSPARENT);
 	setText(newText);
 }
 

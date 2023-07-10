@@ -22,6 +22,7 @@ RUTextbox::RUTextbox()
 {
 	readOnly = false;
 	staticBorder = false;
+	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 	// Draw a bg image instead of color?
 	setCursor(SDL_SYSTEM_CURSOR_IBEAM);
 }

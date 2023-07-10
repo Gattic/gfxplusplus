@@ -32,7 +32,8 @@ RUDropdown::RUDropdown()
 	selectedIndex = -1;
 	prevSelectedIndex = -1;
 	selectedLabel = new RULabel();
-	selectedLabel->setBGColor(getBGColor());
+	selectedLabel->setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+	selectedLabel->toggleBG(true);
 	selectedLabel->toggleBorder(true);
 	addSubItem(selectedLabel);
 
