@@ -28,7 +28,6 @@ RUTabContainer::RUTabContainer()
 	itemHovered = (unsigned int)-1;
 	prevTabSelected = (unsigned int)-1;
 	tabSelected = (unsigned int)-1;
-	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 }
 
 RUTabContainer::~RUTabContainer()

@@ -301,3 +301,29 @@ void RUBackgroundComponent::updateBGBackground(gfxpp* cGfx)
 		}
 	}*/
 }
+
+void RUBackgroundComponent::drawVerticalGradient(SDL_Renderer* renderer, SDL_Rect rect, SDL_Color color1, SDL_Color color2)
+{
+    int startY = rect.y;
+    int endY = rect.y + rect.h;
+
+    // Calculate color deltas
+    float deltaR = (float)(color2.r - color1.r) / rect.h;
+    float deltaG = (float)(color2.g - color1.g) / rect.h;
+    float deltaB = (float)(color2.b - color1.b) / rect.h;
+    float deltaA = (float)(color2.a - color1.a) / rect.h;
+
+    // Draw each vertical line
+    for (int y = startY; y < endY; ++y)
+    {
+        // Calculate current color
+        Uint8 r = color1.r + (Uint8)(deltaR * (y - startY));
+        Uint8 g = color1.g + (Uint8)(deltaG * (y - startY));
+        Uint8 b = color1.b + (Uint8)(deltaB * (y - startY));
+        Uint8 a = color1.a + (Uint8)(deltaA * (y - startY));
+
+        // Set the color and draw the line
+        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+        SDL_RenderDrawLine(renderer, rect.x, y, rect.x + rect.w, y);
+    }
+}

@@ -290,7 +290,14 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 
 void GPanel::updateBackground(gfxpp* cGfx)
 {
-	//
+	// set the background rect
+	SDL_Rect fullRect;
+	fullRect.x = 0;
+	fullRect.y = 0;
+	fullRect.w = width;
+	fullRect.h = height;
+
+	drawVerticalGradient(cGfx->getRenderer(), fullRect, RUColors::COLOR_DARK_GRAY, RUColors::COLOR_BLACK);
 }
 
 shmea::GString GPanel::getType() const

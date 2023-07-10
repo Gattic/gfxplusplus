@@ -20,12 +20,11 @@
 
 RULabel::RULabel()
 {
-	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+	//
 }
 
 RULabel::RULabel(shmea::GString newText)
 {
-	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 	setText(newText);
 }
 
