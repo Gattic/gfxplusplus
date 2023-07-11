@@ -333,44 +333,50 @@ void RUBackgroundComponent::drawVerticalGradient(SDL_Renderer* renderer, SDL_Rec
 
         std::vector<SDL_Point> pixelsToDraw;
 
-        for (int x = rectX; x < rectXW; ++x)
+        for (int x = rectX; x < rectXW + 1; ++x)
         {
             // Check if the pixel is within the rounded corner area
             bool drawPixel = true;
 
-            int dx, dy;
+            int dx = 0, dy = 0;
 
             if (x < rectX + cornerRadius)
             {
-		// Calculate the left side of the rect
+                // Calculate the left side of the rect
                 dx = x - (rectX + cornerRadius);
                 if (y < rectY + cornerRadius) // Top left corner
                     dy = y - (rectY + cornerRadius);
                 else if (y >= rectYH - cornerRadius) // Bottom left corner
                     dy = y - (rectYH - cornerRadius);
                 else
-		{
-		    if (y < rectY || y >= rectYH)
-			drawPixel = false;
-		    else if (x < rectX || x >= rectXW)
-			drawPixel = false;
-		}
+                {
+                    if (y < rectY || y >= rectYH)
+                        drawPixel = false;
+                    else if (x < rectX)
+                    {
+                        drawPixel = false;
+                        dx = x - rectX;
+                    }
+                }
             }
             else if (x >= rectXW - cornerRadius)
             {
-		// Calculate the right side of the rect
+                // Calculate the right side of the rect
                 dx = x - (rectXW - cornerRadius);
                 if (y < rectY + cornerRadius) // Top right corner
                     dy = y - (rectY + cornerRadius);
                 else if (y >= rectYH - cornerRadius) // Bottom right corner
                     dy = y - (rectYH - cornerRadius);
                 else
-		{
-		    if (y < rectY || y >= rectYH)
-			drawPixel = false;
-		    else if (x < rectX || x >= rectXW)
-			drawPixel = false;
-		}
+                {
+                    if (y < rectY || y >= rectYH)
+                        drawPixel = false;
+                    else if (x > rectXW)
+                    {
+                        drawPixel = false;
+                        dx = x - rectXW;
+                    }
+                }
             }
             else if (y < rectY + cornerRadius || y >= rectYH - cornerRadius)
             {
