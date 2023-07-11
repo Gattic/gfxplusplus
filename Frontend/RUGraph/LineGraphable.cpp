@@ -129,41 +129,29 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 template <>
 void Graphable<Point2>::draw(gfxpp* cGfx)
 {
-	if (!parent)
-		return;
+    if (!parent)
+        return;
 
-	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
-						   getColor().a);
+    SDL_Color color = getColor();
+    SDL_SetRenderDrawColor(cGfx->getRenderer(), color.r, color.g, color.b, color.a);
 
-	float vscale = parent->getVScale();
-	//printf("norm-size: %lu\n", normalizedPoints.size());
+    float vscale = parent->getVScale();
 
-	Point2* prevPoint = NULL;
-	unsigned int i = 0;
-	for (; i < normalizedPoints.size(); ++i)
-	{
-		// add it to the background
-		Point2* cPoint = normalizedPoints[i];
+    if (normalizedPoints.empty())
+        return;
 
-		// draw a thick line from the previous to the current point
-		if ((prevPoint) && (i > 0))
-		{
-			/*if(parent->getName() == "RoRGraph")
-			{
-				printf("Dim[%s]: %d:%d\n", parent->getName().c_str(), parent->getWidth(), parent->getWidth());
-				printf("Range[%s]: %f:%f\n", parent->getName().c_str(), getYMin(), getYMax());
-				printf("LocalRange[%s]: %f:%f\n", parent->getName().c_str(), getYMin(), getYMax());
-				printf("p[%s][%u]:  (%f, %f); c(%f, %f)\n", parent->getName().c_str(), i, prevPoint->getX(), prevPoint->getY(), cPoint->getX(), cPoint->getY());
-				printf("-----\n");
-			}*/
-			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() - 1,
-							   cPoint->getX(), cPoint->getY() - 1);
-			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY(),
-							   cPoint->getX(), cPoint->getY());
-			SDL_RenderDrawLine(cGfx->getRenderer(), prevPoint->getX(), prevPoint->getY() + 1,
-							   cPoint->getX(), cPoint->getY() + 1);
-		}
+    // Prepare the points array for SDL_RenderDrawLines
+    std::vector<SDL_Point> points(normalizedPoints.size());
 
-		prevPoint = cPoint;
-	}
+    for (unsigned int i = 0; i < normalizedPoints.size(); ++i)
+    {
+        Point2* cPoint = normalizedPoints[i];
+        SDL_Point point;
+        point.x = static_cast<int>(cPoint->getX());
+        point.y = static_cast<int>(cPoint->getY());
+        points[i] = point;
+    }
+
+    // Draw all the lines at once
+    SDL_RenderDrawLines(cGfx->getRenderer(), &points[0], points.size());
 }
