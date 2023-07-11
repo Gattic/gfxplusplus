@@ -256,7 +256,7 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 	fullRect.w = width;
 	fullRect.h = height;
 
-	//SDL_RenderFillRect(cGfx->getRenderer(), &fullRect);
+	SDL_RenderFillRect(cGfx->getRenderer(), &fullRect);
 
 	drawVerticalGradient(cGfx->getRenderer(), fullRect, getBGColor(), RUColors::COLOR_BLUE, 20);
 
