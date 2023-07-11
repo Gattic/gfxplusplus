@@ -265,7 +265,7 @@ void RUBackgroundComponent::updateBGBackground(gfxpp* cGfx)
 	{
 		SDL_SetRenderDrawColor(cGfx->getRenderer(), bgColor.r, bgColor.g, bgColor.b, bgColor.a);
 		//SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
-		drawVerticalGradient(cGfx->getRenderer(), bgRect, getBGColor(), getBGColor(), 10);
+		drawVerticalGradient(cGfx->getRenderer(), bgRect, getBGColor(), getBGColor(), 6);
 	}
 
 	// draw the background image

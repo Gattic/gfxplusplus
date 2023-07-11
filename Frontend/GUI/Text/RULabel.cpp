@@ -21,14 +21,14 @@
 RULabel::RULabel()
 {
 	//
-	toggleBG(false);
-	//setBGColor(RUColors::COLOR_TRANSPARENT);
+	//toggleBG(false);
+	setBGColor({54, 69, 79, 255});
 }
 
 RULabel::RULabel(shmea::GString newText)
 {
-	toggleBG(false);
-	//setBGColor(RUColors::COLOR_TRANSPARENT);
+	//toggleBG(false);
+	setBGColor(RUColors::COLOR_DARK_GRAY);
 	setText(newText);
 }
 
