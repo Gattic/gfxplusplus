@@ -169,6 +169,8 @@ void RUListbox::addOption(shmea::GString newItemText)
 	newLabel->setMarginX(0);
 	newLabel->setWidth(newLabelWidth);
 	newLabel->setCursor(SDL_SYSTEM_CURSOR_HAND);
+	newLabel->setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+	newLabel->toggleBG(true);
 	newLabel->toggleBorder(true);
 	if (optionsShown > 0)
 	{

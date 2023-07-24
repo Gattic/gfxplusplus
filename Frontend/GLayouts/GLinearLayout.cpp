@@ -60,6 +60,9 @@ void GLinearLayout::calculateSubItemPositions(std::pair<int, int> parentOffset)
 		cItem->setX(cItemOffset.first + cItem->getMarginX());
 		cItem->setY(cItemOffset.second + cItem->getMarginY());
 
+		if(!cItem->isVisible())
+		    continue;
+
 		// draw the item
 		cItem->calculateSubItemPositions(parentOffset);
 

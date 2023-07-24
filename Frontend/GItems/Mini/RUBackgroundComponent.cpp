@@ -27,7 +27,7 @@ RUBackgroundComponent::RUBackgroundComponent()
 	surfaceTheUSA = NULL;
 	bgImageLocation = DEFAULT_IMAGE_BG;
 	bgImageType = TYPE_NONE;
-	setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
+	setBGColor(RUColors::COLOR_TRANSPARENT);
 }
 
 RUBackgroundComponent::RUBackgroundComponent(SDL_Color newBGColor)
@@ -238,6 +238,7 @@ void RUBackgroundComponent::setBGImage(shmea::GPointer<shmea::Image> newBGImage)
 		return;
 
 	fromImage(newBGImage);
+	drawUpdate = true;
 }
 
 void RUBackgroundComponent::setBGColor(SDL_Color newBGColor)
@@ -263,7 +264,8 @@ void RUBackgroundComponent::updateBGBackground(gfxpp* cGfx)
 	if (bgColorEnabled)
 	{
 		SDL_SetRenderDrawColor(cGfx->getRenderer(), bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-		SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
+		//SDL_RenderFillRect(cGfx->getRenderer(), &bgRect);
+		drawVerticalGradient(cGfx->getRenderer(), bgRect, getBGColor(), getBGColor(), 6);
 	}
 
 	// draw the background image
@@ -299,4 +301,106 @@ void RUBackgroundComponent::updateBGBackground(gfxpp* cGfx)
 			}
 		}
 	}*/
+}
+
+void RUBackgroundComponent::drawVerticalGradient(SDL_Renderer* renderer, SDL_Rect rect, SDL_Color color1, SDL_Color color2, int cornerRadius)
+{
+    int startY = rect.y;
+    int endY = startY + rect.h;
+
+    // Calculate color deltas
+    float deltaR = static_cast<float>(color2.r - color1.r) / rect.h;
+    float deltaG = static_cast<float>(color2.g - color1.g) / rect.h;
+    float deltaB = static_cast<float>(color2.b - color1.b) / rect.h;
+    float deltaA = static_cast<float>(color2.a - color1.a) / rect.h;
+
+    // Precompute frequently used values
+    int rectX = rect.x;
+    int rectY = rect.y;
+    int rectW = rect.w;
+    int rectH = rect.h;
+    int rectXW = rectX + rectW - 1;
+    int rectYH = rectY + rectH - 1;
+
+    // Draw the vertical gradient with adjustable round corners
+    for (int y = startY; y < endY; ++y)
+    {
+        // Calculate current color
+        Uint8 r = static_cast<Uint8>(color1.r + static_cast<Uint8>(deltaR * (y - startY)));
+        Uint8 g = static_cast<Uint8>(color1.g + static_cast<Uint8>(deltaG * (y - startY)));
+        Uint8 b = static_cast<Uint8>(color1.b + static_cast<Uint8>(deltaB * (y - startY)));
+        Uint8 a = static_cast<Uint8>(color1.a + static_cast<Uint8>(deltaA * (y - startY)));
+
+        std::vector<SDL_Point> pixelsToDraw;
+
+        for (int x = rectX; x < rectXW + 1; ++x)
+        {
+            // Check if the pixel is within the rounded corner area
+            bool drawPixel = true;
+
+            int dx = 0, dy = 0;
+
+            if (x < rectX + cornerRadius)
+            {
+                // Calculate the left side of the rect
+                dx = x - (rectX + cornerRadius);
+                if (y < rectY + cornerRadius) // Top left corner
+                    dy = y - (rectY + cornerRadius);
+                else if (y >= rectYH - cornerRadius) // Bottom left corner
+                    dy = y - (rectYH - cornerRadius);
+                else
+                {
+                    if (y < rectY || y >= rectYH)
+                        drawPixel = false;
+                    else if (x < rectX)
+                    {
+                        drawPixel = false;
+                        dx = x - rectX;
+                    }
+                }
+            }
+            else if (x >= rectXW - cornerRadius)
+            {
+                // Calculate the right side of the rect
+                dx = x - (rectXW - cornerRadius);
+                if (y < rectY + cornerRadius) // Top right corner
+                    dy = y - (rectY + cornerRadius);
+                else if (y >= rectYH - cornerRadius) // Bottom right corner
+                    dy = y - (rectYH - cornerRadius);
+                else
+                {
+                    if (y < rectY || y >= rectYH)
+                        drawPixel = false;
+                    else if (x > rectXW)
+                    {
+                        drawPixel = false;
+                        dx = x - rectXW;
+                    }
+                }
+            }
+            else if (y < rectY + cornerRadius || y >= rectYH - cornerRadius)
+            {
+                if (x < rectX || x >= rectXW)
+                    drawPixel = false;
+            }
+
+            if (drawPixel)
+            {
+                int radiusSquared = cornerRadius * cornerRadius;
+                if ((dx * dx + dy * dy) <= radiusSquared)
+                {
+                    SDL_Point point;
+                    point.x = x;
+                    point.y = y;
+                    pixelsToDraw.push_back(point);
+                }
+            }
+        }
+
+        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+        if (!pixelsToDraw.empty())
+        {
+            SDL_RenderDrawPoints(renderer, &pixelsToDraw[0], pixelsToDraw.size());
+        }
+    }
 }

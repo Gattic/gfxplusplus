@@ -49,6 +49,8 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 	period = P_1Y;
 	agg = AGG_1m;
 	sourceAgg = AGG_1m;
+
+	setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
 }
 
 RUGraph::~RUGraph()
@@ -67,6 +69,8 @@ RUGraph::~RUGraph()
 	period = P_1Y;
 	agg = AGG_1m;
 	sourceAgg = AGG_1m;
+
+	setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
 }
 
 std::vector<shmea::GString> RUGraph::getNames() const
@@ -253,6 +257,8 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 	fullRect.h = height;
 
 	SDL_RenderFillRect(cGfx->getRenderer(), &fullRect);
+
+	drawVerticalGradient(cGfx->getRenderer(), fullRect, getBGColor(), RUColors::COLOR_BLUE, 20);
 
 	// draw the axes
 	if (axisWidth > 0)

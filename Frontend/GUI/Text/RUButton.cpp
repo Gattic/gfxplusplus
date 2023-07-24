@@ -22,8 +22,8 @@ RUButton::RUButton()
 {
 	buttonColor = "blue";
 	setBGColor(RUColors::DEFAULT_BUTTON_BLUE);
-	setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
-	toggleBorder(true);
+	//setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
+	//toggleBorder(true);
 	setCursor(SDL_SYSTEM_CURSOR_HAND);
 }
 
@@ -34,27 +34,27 @@ RUButton::RUButton(shmea::GString buttonColor_)
 	if (buttonColor == "red")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_RED);
-		setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_RED);
+		//setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_RED);
 	}
 	else if (buttonColor == "green")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_GREEN);
-		setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_GREEN);
+		//setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_GREEN);
 	}
 	else if (buttonColor == "blue")
 	{
 		setBGColor(RUColors::DEFAULT_BUTTON_BLUE);
-		setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
+		//setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
 	}
 	else
 	{
 		// Default to blue
 		setBGColor(RUColors::DEFAULT_BUTTON_BLUE);
-		setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
+		//setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
 		printf("Button color not recognized. Defaulting to blue.");
 	}
 
-	toggleBorder(true);
+	//toggleBorder(true);
 	setCursor(SDL_SYSTEM_CURSOR_HAND);
 }
 

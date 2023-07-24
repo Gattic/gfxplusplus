@@ -17,17 +17,19 @@
 #include "RUTabContainer.h"
 #include "../GItems/RUColors.h"
 #include "../Graphics/graphics.h"
-#include "Text/RULabel.h"
+#include "Text/RUButton.h"
 
 RUTabContainer::RUTabContainer()
 {
 	tabHeight = 20;
+	tabsVisible = true;
 	orientation = HORIZONTAL_TABS;
 	optionsShown = 0;
 	itemHovered = (unsigned int)-1;
 	prevTabSelected = (unsigned int)-1;
 	tabSelected = (unsigned int)-1;
-	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+
+	toggleBG(false);
 }
 
 RUTabContainer::~RUTabContainer()
@@ -41,6 +43,7 @@ RUTabContainer::~RUTabContainer()
 	}
 
 	tabHeight = 20;
+	tabsVisible = true;
 	orientation = HORIZONTAL_TABS;
 	optionsShown = 0;
 	prevTabSelected = -1;
@@ -60,6 +63,11 @@ int RUTabContainer::getHeight() const
 	}
 
 	return retHeight;
+}
+
+bool RUTabContainer::getTabsVisible() const
+{
+	return tabsVisible;
 }
 
 unsigned int RUTabContainer::getOptionsShown() const
@@ -119,6 +127,20 @@ void RUTabContainer::setTabHeight(int newHeight)
 	drawUpdate = true;
 }
 
+void RUTabContainer::setTabsVisible(bool newTabsVisible)
+{
+	tabsVisible = newTabsVisible;
+
+	for (unsigned int i = 0; i < items.size(); ++i)
+	{
+		RUButton* cLabel = items[i].first;
+		if (!cLabel)
+			continue;
+
+		cLabel->setVisible((items.size() < optionsShown) && tabsVisible);
+	}
+}
+
 void RUTabContainer::setOptionsShown(unsigned int newOptionsShown)
 {
 	optionsShown = newOptionsShown;
@@ -140,11 +162,11 @@ void RUTabContainer::addTab(shmea::GString newItemText, GItem* tabItem)
 	}
 
 	// create the new item label
-	RULabel* newLabel = new RULabel(newItemText);
+	RUButton* newLabel = new RUButton();
+	newLabel->setText(newItemText);
 	newLabel->setMarginX(0);
 	newLabel->setWidth(newLabelWidth);
 	newLabel->setCursor(SDL_SYSTEM_CURSOR_HAND);
-	newLabel->toggleBorder(true);
 	if (optionsShown > 0)
 	{
 		int labelWidth = (getWidth() - (getPaddingX() * optionsShown)) / optionsShown;
@@ -155,7 +177,7 @@ void RUTabContainer::addTab(shmea::GString newItemText, GItem* tabItem)
 		// newLabel->setMarginY(items.size() * labelHeight);
 		newLabel->setHeight(labelHeight);
 		// newLabel->setFontSize(labelHeight / 2);
-		newLabel->setVisible(items.size() < optionsShown);
+		newLabel->setVisible((items.size() < optionsShown) && tabsVisible);
 	}
 	else
 	{
@@ -202,7 +224,7 @@ void RUTabContainer::clearOptions()
 	subitems.clear();
 	for (unsigned int i = 0; i < items.size(); ++i)
 	{
-		RULabel* cLabel = items[i].first;
+		RUButton* cLabel = items[i].first;
 		if (!cLabel)
 			continue;
 
@@ -252,7 +274,7 @@ void RUTabContainer::setSelectedTab(shmea::GString tabName)
 	{
 		for (unsigned int i = 0; i < items.size(); ++i)
 		{
-			RULabel* tabItem = items[i].first;
+			RUButton* tabItem = items[i].first;
 			if (!tabItem)
 				continue;
 
@@ -357,7 +379,7 @@ void RUTabContainer::updateLabels()
 		int labelHeight = tabHeight;
 		items[i].first->setHeight(labelHeight);
 		// items[i].first->setFontSize(labelHeight / 2);
-		items[i].first->setVisible(i < optionsShown);
+		items[i].first->setVisible((i < optionsShown) && tabsVisible);
 
 		// Put the item below the tabs
 		items[i].second->setMarginY(labelHeight*1.5f);
