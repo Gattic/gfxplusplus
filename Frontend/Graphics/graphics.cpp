@@ -582,6 +582,7 @@ void gfxpp::display()
 			// Render the focused panel
 			if (focusedPanel)
 			{
+				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 				SDL_RenderClear(renderer);
 				focusedPanel->updateBackgroundHelper(this);
 			}
@@ -630,6 +631,9 @@ void gfxpp::display()
 		// global gui elements
 		if ((fpsLabel) && (running))
 			fpsLabel->updateBackgroundHelper(this);
+
+		//Scale the screen to the window size:
+		SDL_RenderSetLogicalSize(renderer, getWidth(), getHeight());
 
 		// Update the screen
 		if (renderer)
