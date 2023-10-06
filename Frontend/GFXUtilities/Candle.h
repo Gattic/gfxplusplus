@@ -23,8 +23,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include "Backend/Database/StandItem.h"
 
-class Candle
+class Candle : public shmea::StandItem
 {
 private:
 	float x, open, close, high, low;
@@ -49,6 +50,8 @@ public:
 	void setClose(float newClose);
 	void setHigh(float newHigh);
 	void setLow(float newLow);
+	virtual shmea::GPointer<const shmea::GList> toXVectorData() const;
+	virtual shmea::GPointer<const shmea::GList> toYVectorData() const;
 
 	// operators
 	inline Candle operator+(Candle c)

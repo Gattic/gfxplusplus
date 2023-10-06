@@ -19,7 +19,7 @@
 #include "../GFXUtilities/ActionBubble.h"
 
 template <>
-void Graphable<ActionBubble>::computeAxisRanges(bool additionOptimization)
+void Graphable<ActionBubble>::normalizePoints(bool additionOptimization)
 {
 	// We use the candle calculations
 	parent->requireDrawUpdate();

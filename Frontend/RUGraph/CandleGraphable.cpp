@@ -18,40 +18,13 @@
 #include "RUGraph.h"
 
 template <>
-void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
+void Graphable<Candle>::normalizePoints(bool additionOptimization)
 {
 	if (!parent)
 		return;
 
 	if (points.empty())
 		return;
-
-	redoRange = !additionOptimization;
-	if(additionOptimization)
-	{
-		// Is the latest y not within the current range?
-		float yHigh = points[points.size()-1]->getHigh();
-		float yLow = points[points.size()-1]->getLow();
-		if((yLow < getYMin()) || (yHigh > getYMax()))
-			redoRange = true;
-	}
-
-	//redoRange = true;
-	unsigned int i = 0;
-	//if(redoRange)
-		//i = points.size()-1;
-	for (; i < points.size(); ++i)
-	{
-		Candle* c = points[points.size()-1];
-		float x_pt = c->getX();
-		float y_high = c->getHigh();
-		float y_low = c->getLow();
-
-		setXMax(x_pt);
-		setXMin(x_pt);
-		setYMax(y_high);
-		setYMin(y_low);
-	}
 
 	// Set the parents
 	parent->setXMin(getXMin());
@@ -91,7 +64,7 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 	}
 
 	//Get a head start?
-	i = 0;
+	unsigned i = 0;
 	//if(!redoRange)
 		//i = points.size()-1;
 

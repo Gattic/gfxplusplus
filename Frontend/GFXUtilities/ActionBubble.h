@@ -25,11 +25,12 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include "Backend/Database/StandItem.h"
 
 class gfxpp;
 class Point2;
 
-class ActionBubble
+class ActionBubble : public shmea::StandItem
 {
 protected:
 
@@ -56,6 +57,8 @@ public:
 	void setCost(float);
 	void setQuantity(int);
 	void setActionType(int);
+	virtual shmea::GPointer<const shmea::GList> toXVectorData() const;
+	virtual shmea::GPointer<const shmea::GList> toYVectorData() const;
 
 	const Point2* getFocalPoint() const;
 	double getRadius() const;

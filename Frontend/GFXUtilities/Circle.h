@@ -25,11 +25,12 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include "Backend/Database/StandItem.h"
 
 class gfxpp;
 class Point2;
 
-class Circle
+class Circle : public shmea::StandItem
 {
 protected:
 
@@ -44,6 +45,8 @@ public:
 
 	void setCenter(const Point2*);
 	void setRadius(double);
+	virtual shmea::GPointer<const shmea::GList> toXVectorData() const;
+	virtual shmea::GPointer<const shmea::GList> toYVectorData() const;
 
 	const Point2* getCenter() const;
 	double getRadius() const;

@@ -111,3 +111,20 @@ void Candle::setLow(float newLow)
 {
 	low = newLow;
 }
+
+shmea::GPointer<const shmea::GList> Candle::toXVectorData() const
+{
+	shmea::GList* xData = new shmea::GList();
+	xData->addFloat(getX());
+	return shmea::GPointer<const shmea::GList>(xData);
+}
+
+shmea::GPointer<const shmea::GList> Candle::toYVectorData() const
+{
+	shmea::GList* yData = new shmea::GList();
+	yData->addFloat(getOpen());
+	yData->addFloat(getHigh());
+	yData->addFloat(getLow());
+	yData->addFloat(getClose());
+	return shmea::GPointer<const shmea::GList>(yData);
+}

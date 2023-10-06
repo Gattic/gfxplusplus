@@ -23,8 +23,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include "Backend/Database/StandItem.h"
 
-class Horizontal_Line
+class Horizontal_Line : public shmea::StandItem
 {
 private:
 	double y;
@@ -33,7 +34,7 @@ public:
 	Horizontal_Line();
 	Horizontal_Line(double);
 	Horizontal_Line(const Horizontal_Line&);
-	~Horizontal_Line();
+	virtual ~Horizontal_Line();
 
 	// get
 	double getY() const;
@@ -41,6 +42,8 @@ public:
 	// set
 	void set(double);
 	void setY(double);
+	virtual shmea::GPointer<const shmea::GList> toXVectorData() const;
+	virtual shmea::GPointer<const shmea::GList> toYVectorData() const;
 
 	// operators
 	inline Horizontal_Line operator+(Horizontal_Line v)

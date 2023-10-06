@@ -21,35 +21,13 @@
 //TODO: Separate Scalar1D from Point2D and implement this add fncality
 
 template <>
-void Graphable<Horizontal_Line>::computeAxisRanges(bool additionOptimization)
+void Graphable<Horizontal_Line>::normalizePoints(bool additionOptimization)
 {
 	if (!parent)
 		return;
 
 	if (points.empty())
 		return;
-
-	redoRange = !additionOptimization;
-	if(additionOptimization)
-	{
-		// Is the latest y not within the current range?
-		float cY = points[points.size()-1]->getY();
-		if((cY < getYMin()) || (cY > getYMax()))
-			redoRange = true;
-	}
-
-	//redoRange = true;
-	unsigned int i = 0;
-	//if(redoRange)
-		//i = points.size()-1;
-	for (; i < points.size(); ++i)
-	{
-		Horizontal_Line* pt = points[i];
-		float y_pt = pt->getY();
-
-		setYMax(y_pt);
-		setYMin(y_pt);
-	}
 
 	// Set the parents
 	parent->setYMin(getYMin());
@@ -78,7 +56,7 @@ void Graphable<Horizontal_Line>::computeAxisRanges(bool additionOptimization)
 		normalizedPoints.erase(normalizedPoints.begin()+normalizedPoints.size()-1);
 	}
 
-	i = 0;
+	unsigned i = 0;
 	//if(!redoRange)
 		//i = points.size()-1;
 

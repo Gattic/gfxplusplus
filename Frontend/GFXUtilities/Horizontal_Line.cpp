@@ -50,3 +50,17 @@ void Horizontal_Line::setY(double newY)
 {
 	y = newY;
 }
+
+shmea::GPointer<const shmea::GList> Horizontal_Line::toXVectorData() const
+{
+	shmea::GList* xData = new shmea::GList();
+	// No data
+	return shmea::GPointer<const shmea::GList>(xData);
+}
+
+shmea::GPointer<const shmea::GList> Horizontal_Line::toYVectorData() const
+{
+	shmea::GList* yData = new shmea::GList();
+	yData->addFloat(getY());
+	return shmea::GPointer<const shmea::GList>(yData);
+}

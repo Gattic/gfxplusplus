@@ -51,3 +51,17 @@ double Circle::getRadius() const
 {
 	return radius;
 }
+
+shmea::GPointer<const shmea::GList> Circle::toXVectorData() const
+{
+	shmea::GList* xData = new shmea::GList();
+	xData->addFloat(getCenter()->getX());
+	return shmea::GPointer<const shmea::GList>(xData);
+}
+
+shmea::GPointer<const shmea::GList> Circle::toYVectorData() const
+{
+	shmea::GList* yData = new shmea::GList();
+	yData->addFloat(getCenter()->getY());
+	return shmea::GPointer<const shmea::GList>(yData);
+}
