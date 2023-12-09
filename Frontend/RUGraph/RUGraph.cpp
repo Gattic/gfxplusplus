@@ -42,6 +42,7 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 
 	graphSize = DEFAULT_GRAPH_SIZE;
 	axisWidth = DEFAULT_AXIS_WIDTH;
+	dotMatrixEnabled = false;
 	gridEnabled = false;
 	gridLineWidth = DEFAULT_GRIDLINE_WIDTH;
 
@@ -118,6 +119,11 @@ int RUGraph::getAxisWidth() const
 	return axisWidth;
 }
 
+bool RUGraph::getDotMatrixEnabled() const
+{
+	return dotMatrixEnabled;
+}
+
 bool RUGraph::getGridEnabled() const
 {
 	return gridEnabled;
@@ -191,6 +197,12 @@ void RUGraph::setGraphSize(int newGraphSize)
 void RUGraph::setAxisWidth(int newAxisWidth)
 {
 	axisWidth = newAxisWidth;
+	drawUpdate = true;
+}
+
+void RUGraph::setDotMatrixEnabled(bool newDotMatrixEnabled)
+{
+	dotMatrixEnabled = newDotMatrixEnabled;
 	drawUpdate = true;
 }
 
@@ -329,6 +341,32 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 
 				SDL_RenderFillRect(cGfx->getRenderer(), &lineYRect);
 			}
+		} else if ((dotMatrixEnabled) && (gridLineWidth > 0)){
+		    SDL_SetRenderDrawColor(cGfx->getRenderer(), 0x61, 0x61, 0x61, 0xFF); // gray
+		    std::vector<std::vector<float> > graphPoints;
+		    int dotCount = graphSize * DEFAULT_NUM_ZONES; // 10 spaces per axis
+
+		    //build dot matrix
+		    SDL_Rect lineDotRect;
+
+		    int lineGapWidth = ((float)width) / ((float)dotCount);
+		    int lineGapHeight = ((float)height) / ((float)dotCount);
+		    int thick = 5;
+		    for(int i = 0; i < dotCount; i++)
+		    {
+			for(int j = 0; j < dotCount; j++)
+			{
+//			    xPoints.push_back(i);
+//			    yPoints.push_back(j);
+//
+			    lineDotRect.x = axisOriginX + (i * lineGapWidth) - (axisWidth / 2);
+			    lineDotRect.y = axisOriginY + (j * lineGapHeight) - (thick / 2);
+			    lineDotRect.w = thick;
+			    lineDotRect.h = thick;
+
+			    SDL_RenderFillRect(cGfx->getRenderer(), &lineDotRect);
+			}
+		    }
 		}
 
 		// x ticks
