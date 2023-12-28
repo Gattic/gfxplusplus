@@ -21,6 +21,12 @@
 template <>
 void Graphable<Circle>::computeAxisRanges(bool additionOptimization)
 {
+	
+	//TODO: Fix the normalization, currently this works when the graph is static and this will be need to be implementing for zooming; Hot-Fix
+	normalizedPoints = points;
+	parent->requireDrawUpdate();
+	return;
+
 	if (!parent)
 		return;
 
