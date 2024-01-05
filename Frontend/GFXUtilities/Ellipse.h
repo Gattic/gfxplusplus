@@ -38,7 +38,7 @@ protected:
 
 public:
 
-	std::map<int, std::map<int, int> > heatmap;
+	std::vector<std::pair<Point2*, int> > heatmap;
 	std::vector<const Point2*> foci;
 
 	// constructors & destructor

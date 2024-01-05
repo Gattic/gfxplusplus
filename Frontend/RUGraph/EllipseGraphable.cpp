@@ -32,7 +32,7 @@ void Graphable<Ellipse>::computeAxisRanges(bool additionOptimization)
 
 	parent->requireDrawUpdate();
 }
-
+//TODO: adjust for changes in Ellipse.cpp
 template <>
 void Graphable<Ellipse>::draw(gfxpp* cGfx)
 {
@@ -54,18 +54,19 @@ void Graphable<Ellipse>::draw(gfxpp* cGfx)
 		SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
 							   getColor().a);
 	
-		std::map<int, std::map<int, int> >::const_iterator itr = pt->heatmap.begin();
+//		std::map<int, std::map<int, int> >::const_iterator itr = pt->heatmap.begin();
 		unsigned int focalIndex = 0;
-		for (; itr != pt->heatmap.end(); ++itr)
+		for (unsigned int xIndex = 0; xIndex < pt->heatmap.size(); ++xIndex)
 		{
 			//const Point2* cFocalPoint = pt->foci[focalIndex];
 
-			int xIndex = itr->first;
-			std::map<int, int>::const_iterator itr2 = pt->heatmap[xIndex].begin();
-			for (; itr2 != pt->heatmap[xIndex].end(); ++itr2)
+			//int xIndex = itr->first;
+			//std::map<int, int>::const_iterator itr2 = pt->heatmap[xIndex].begin();
+			for (unsigned int yIndex; yIndex < pt->heatmap[xIndex].size(); ++yIndex)
 			{
-				int yIndex = itr2->first;
-				int cHeat = itr2->second;
+//				int yIndex = itr2->first;
+//				int cHeat = itr2->second;
+				int cHeat = pt->heatmap[xIndex][yIndex];
 				// printf("pt->heatmap[%d][%d]: %d\n", xIndex, yIndex, cHeat);
 	
 				// calculate the hue

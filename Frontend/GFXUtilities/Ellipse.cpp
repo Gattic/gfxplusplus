@@ -18,6 +18,7 @@
 #include "point2.h"
 //#include "../Graphics/graphics.h"
 
+//TODO: Fix heatmap from map to vector<pair<Point2*, int> >
 Ellipse::Ellipse()
 {
 	radius = 0.0f;
@@ -50,7 +51,8 @@ void Ellipse::setRadius(double newRadius)
 void Ellipse::createHeatmap()
 {
 	heatmap.clear();
-
+	
+	heatmap.reserve(radius * radius * radius* 3);
 	// Circle
 	if (foci.size() == 1)
 	{
@@ -61,36 +63,36 @@ void Ellipse::createHeatmap()
 			{
 				int xIndex = cFocalPoint->getX() + i;
 
-				std::map<int, int> newMap;
+//				std::map<int, int> newMap;
 				for (int j = -radius; j < radius; ++j)
 				{
 					int yIndex = cFocalPoint->getY() + j;
 
 					// calculate the distance
 					double distance = sqrt(pow(((double)i), 2.0f) + pow(((double)j), 2.0f));
-					double hue =
-						distance / sqrt(pow(((double)radius), 2.0f) + pow(((double)radius), 2.0f));
 					if (distance > radius)
 						continue;
-
 					// printf("i(%d,%d:%ld)\n", focalIndex, xIndex, heatmap.size());
-					if (heatmap.find(xIndex) == heatmap.end())
-						heatmap.insert(std::pair<int, std::map<int, int> >(xIndex, newMap));
+
+	//				if (heatmap[xIndex] == heatmap.end())
+	//					heatmap.insert(std::pair<int, std::map<int, int> >(xIndex, newMap));
+					heatmap.push_back(std::pair<Point2*, int>(new Point(xIndex, yIndex), 1));
 
 					// printf("j(%d:%d:%ld)\n", focalIndex, yIndex, heatmap[xIndex].size());
-					if (heatmap[xIndex].find(yIndex) == heatmap[xIndex].end())
-						heatmap[xIndex].insert(std::pair<int, int>(yIndex, 0));
+	//				if (heatmap[xIndex].find(yIndex) == heatmap[xIndex].end())
+	//					heatmap[xIndex].insert(std::pair<int, int>(yIndex, 0));
 
 					// tick
-					++heatmap[xIndex][yIndex];
+//					++heatmap[xIndex][yIndex];
 
-					if (heatmap[xIndex][yIndex] > maxHit)
-						maxHit = heatmap[xIndex][yIndex];
+//					if (heatmap[xIndex][yIndex] > maxHit)
+//						maxHit = heatmap[xIndex][yIndex];
 				}
 			}
 		}
 	}
 	// Ellipse
+	// Look up for x and y coordinate: suggestion maybe make a map or grouping things together
 	else if (foci.size() > 1)
 	{
 		// Keep ellipseDetail (0,1]
@@ -122,7 +124,8 @@ void Ellipse::createHeatmap()
 					for (int i = -radius; i < radius; ++i)
 					{
 						int xIndex = cp.getX() + i;
-						std::map<int, int> newMap;
+						//std::map<int, int> newMap;
+						std::vector<int> newMap;
 						for (int j = -radius; j < radius; ++j)
 						{
 							int yIndex = cp.getY() + j;
@@ -133,12 +136,15 @@ void Ellipse::createHeatmap()
 								continue;
 
 							// printf("i(%d,%d:%ld)\n", focalIndex, xIndex, heatmap.size());
-							if (heatmap.find(xIndex) == heatmap.end())
-								heatmap.insert(std::pair<int, std::map<int, int> >(xIndex, newMap));
+							heatmap[xIndex] = newMap;
+
+							//if (heatmap.find(xIndex) == heatmap.end())
+							//	heatmap.insert(std::pair<int, std::map<int, int> >(xIndex, newMap));
 
 							// printf("j(%d:%d:%ld)\n", focalIndex, yIndex, heatmap[xIndex].size());
-							if (heatmap[xIndex].find(yIndex) == heatmap[xIndex].end())
-								heatmap[xIndex].insert(std::pair<int, int>(yIndex, 0));
+							heatmap[xIndex][yIndex] = 0;
+//							if (heatmap[xIndex].find(yIndex) == heatmap[xIndex].end())
+//								heatmap[xIndex].insert(std::pair<int, int>(yIndex, 0));
 
 							// tick
 							++heatmap[xIndex][yIndex];
