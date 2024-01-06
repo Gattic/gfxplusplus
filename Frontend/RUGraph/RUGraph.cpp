@@ -341,7 +341,9 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 
 				SDL_RenderFillRect(cGfx->getRenderer(), &lineYRect);
 			}
-		} else if ((dotMatrixEnabled) && (gridLineWidth > 0)){
+		}
+		else if ((dotMatrixEnabled) && (gridLineWidth > 0))
+		{
 		    SDL_SetRenderDrawColor(cGfx->getRenderer(), 0x61, 0x61, 0x61, 0xFF); // gray
 		    std::vector<std::vector<float> > graphPoints;
 		    int dotCount = graphSize * DEFAULT_NUM_ZONES; // 10 spaces per axis
