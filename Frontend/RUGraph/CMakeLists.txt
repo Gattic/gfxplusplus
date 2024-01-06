@@ -3,6 +3,7 @@ set(GraphGUI_src_files
 	LineGraphable.cpp
 	CandleGraphable.cpp
 	CircleGraphable.cpp
+	EllipseGraphable.cpp
 	ActionBubbleGraphable.cpp
 	GraphableAttr.cpp
 	GraphableAttr.h
