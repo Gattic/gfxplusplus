@@ -48,6 +48,7 @@ public:
 	void addFocalPoint(const Point2*);
 	void setRadius(double);
 	void createHeatmap();
+	void updateHeatmap();
 
 	const Point2* getFocalPoint(unsigned int) const;
 	double getRadius() const;
