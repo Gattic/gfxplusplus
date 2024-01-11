@@ -248,7 +248,7 @@ void gfxpp::run()
 
 	// the display loop
 	display();
-	//finish();
+	finish();
 }
 
 void gfxpp::display()
