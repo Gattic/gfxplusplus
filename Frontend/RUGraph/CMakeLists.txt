@@ -8,6 +8,7 @@ set(GraphGUI_src_files
 	GraphableAttr.cpp
 	GraphableAttr.h
 	HLineGraphable.cpp
+	GNodeGraphable.cpp
 	Graphable.h
 	RUGraph.cpp
 	RUGraph.h
