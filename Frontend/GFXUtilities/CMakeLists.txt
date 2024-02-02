@@ -19,6 +19,12 @@ set(GU_src_files
 	EventTracker.h
 	Horizontal_Line.cpp
 	Horizontal_Line.h
+	neuron.cpp
+	neuron.h
+	NeuralNet.cpp
+	NeuralNet.h
+	RULayerInfo.cpp
+	RULayerInfo.h
 )
 add_library(GU ${GU_src_files})
 
