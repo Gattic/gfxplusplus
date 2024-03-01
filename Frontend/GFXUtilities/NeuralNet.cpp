@@ -73,15 +73,6 @@ void NeuralNet::setOutputLayer(int newNeurons)
 	layerInfoList[layers - 1]->setNeurons(newNeurons, layerInfoList[layers - 2]->getNeurons());
 }
 
-void NeuralNet::setInputLayerActivation()
-{
-    for(unsigned int i = 0; i < getLayerNeuronsCount(0); ++i)
-	{
-	    layerInfoList[0]->setActivation(i, 0.0f);
-	}
-
-}
-
 void NeuralNet::setActivation(shmea::GList activations)
 {
     int layer = 1;
