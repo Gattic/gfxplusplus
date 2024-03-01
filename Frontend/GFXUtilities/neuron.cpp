@@ -4,12 +4,6 @@
 #include <iostream>
 // Path: neuron.cpp
 
-double generateRandomNumber()
-{
-    double r = static_cast <double> (rand());
-    return r / RAND_MAX;
-}
-
 //generateRandomNumber is for testing only, when initializing it is likely a good idea to use 0.0f`
 Neuron::Neuron(int newEdges)
 {

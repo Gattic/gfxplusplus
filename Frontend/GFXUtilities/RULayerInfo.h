@@ -1,5 +1,5 @@
-#ifndef _RULAERINFO
-#define _RULAERINFO
+#ifndef _RULAYERINFO
+#define _RULAYERINFO
 
 #include <float.h>
 #include <stdio.h>
@@ -39,4 +39,4 @@ public:
 
 
 
-#endif // _RULAERINFO
+#endif // _RULAYERINFO
