@@ -5,6 +5,12 @@
 #include <ctime>
 #include <iostream>
 
+NeuralNet::NeuralNet()
+{
+	layers = 0;
+	
+}
+
 NeuralNet::NeuralNet(int newLayers)
 {
 	layers = newLayers;
@@ -67,11 +73,20 @@ void NeuralNet::setOutputLayer(int newNeurons)
 	layerInfoList[layers - 1]->setNeurons(newNeurons, layerInfoList[layers - 2]->getNeurons());
 }
 
+void NeuralNet::setInputLayerActivation()
+{
+    for(unsigned int i = 0; i < getLayerNeuronsCount(0); ++i)
+	{
+	    layerInfoList[0]->setActivation(i, 0.0f);
+	}
+
+}
+
 void NeuralNet::setActivation(shmea::GList activations)
 {
-    int layer = 0;
+    int layer = 1;
     int neuron = 0;
-    for(int i = 0; i < activations.size(); ++i)
+    for(unsigned int i = 0; i < activations.size(); ++i)
     {
 	if(activations[i].getType() == shmea::GType::FLOAT_TYPE)
 	{
@@ -111,6 +126,29 @@ void NeuralNet::setWeights(shmea::GList weights)
 	}
     }
 	
+}
+
+int NeuralNet::getLayersCount()
+{
+    return layers;
+}
+
+std::vector<shmea::GPointer<Neuron> > NeuralNet::getLayerNeurons(int layer)
+{
+        if (layer < 0 || layer >= layers)
+	{
+	    return std::vector<shmea::GPointer<Neuron> >();
+	}
+	return layerInfoList[layer]->getNeuronList();
+}
+
+int NeuralNet::getLayerNeuronsCount(int layer)
+{
+    if (layer < 0 || layer >= layers)
+	{
+	    return 0;
+	}
+	return layerInfoList[layer]->getNeurons();
 }
 
 void NeuralNet::displayNeuralNet()

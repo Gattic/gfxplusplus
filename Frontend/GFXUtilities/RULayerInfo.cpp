@@ -46,6 +46,10 @@ int RULayerInfo::getNeurons() const
 	return neuronQty;
 }
 
+std::vector<shmea::GPointer<Neuron> > RULayerInfo::getNeuronList() const{
+	return neuronList;
+}
+
 void RULayerInfo::displayLayer()
 {
 	printf("Neurons: %d\n", neuronQty);
