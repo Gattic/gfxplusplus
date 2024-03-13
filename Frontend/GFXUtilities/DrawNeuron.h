@@ -1,5 +1,5 @@
-#ifndef _NN_NEURON_H
-#define _NN_NEURON_H
+#ifndef _DRAWNEURON_H
+#define _DRAWNEURON_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +8,7 @@
 #include <vector>
 #include "Backend/Database/GPointer.h"
 
-class Neuron
+class DrawNeuron
 {
 
     protected:
@@ -17,8 +17,8 @@ class Neuron
 	float activation;
 
     public:
-	Neuron(int);
-	~Neuron();
+	DrawNeuron(int);
+	~DrawNeuron();
 
 	float getActivation() const;
 	std::vector<shmea::GPointer<float> > getWeights() const;

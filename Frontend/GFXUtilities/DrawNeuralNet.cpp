@@ -1,17 +1,17 @@
-#include "NeuralNet.h"
+#include "DrawNeuralNet.h"
 #include "RULayerInfo.h"
 #include "SDL2/SDL.h"
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
 
-NeuralNet::NeuralNet()
+DrawNeuralNet::DrawNeuralNet()
 {
 	layers = 0;
 	
 }
 
-NeuralNet::NeuralNet(int newLayers)
+DrawNeuralNet::DrawNeuralNet(int newLayers)
 {
 	layers = newLayers;
 	int layerType = RULayerInfo::INPUT;
@@ -37,7 +37,7 @@ NeuralNet::NeuralNet(int newLayers)
 	}
 }
 
-NeuralNet::~NeuralNet()
+DrawNeuralNet::~DrawNeuralNet()
 {
 //	delete layerInfoList;
 
@@ -46,15 +46,16 @@ NeuralNet::~NeuralNet()
 
 }
 
-void NeuralNet::setInputLayer(int newNeurons)
+void DrawNeuralNet::setInputLayer(int newNeurons)
 {
 	layerInfoList[0]->setNeurons(newNeurons);
+
 }
 
 
 //Does nothing if you give it index of 0 or the last index in the list
 //When a hidden layer gets updated, all the layers after it need to be updated as well
-void NeuralNet::setHiddenLayer(int index, int newNeurons)
+void DrawNeuralNet::setHiddenLayer(int index, int newNeurons)
 {
     if(index == 0 || index == layers - 1)
 	return;
@@ -68,12 +69,12 @@ void NeuralNet::setHiddenLayer(int index, int newNeurons)
     }
 }
 
-void NeuralNet::setOutputLayer(int newNeurons)
+void DrawNeuralNet::setOutputLayer(int newNeurons)
 {
 	layerInfoList[layers - 1]->setNeurons(newNeurons, layerInfoList[layers - 2]->getNeurons());
 }
 
-void NeuralNet::setActivation(shmea::GList activations)
+void DrawNeuralNet::setActivation(shmea::GList activations)
 {
     int layer = 1;
     int neuron = 0;
@@ -91,7 +92,7 @@ void NeuralNet::setActivation(shmea::GList activations)
     }
 }
 
-void NeuralNet::setWeights(shmea::GList weights)
+void DrawNeuralNet::setWeights(shmea::GList weights)
 {
     int layer = 1; //Start with Hidden Layer
     int neuron = 0;
@@ -119,21 +120,21 @@ void NeuralNet::setWeights(shmea::GList weights)
 	
 }
 
-int NeuralNet::getLayersCount()
+int DrawNeuralNet::getLayersCount()
 {
     return layers;
 }
 
-std::vector<shmea::GPointer<Neuron> > NeuralNet::getLayerNeurons(int layer)
+std::vector<shmea::GPointer<DrawNeuron> > DrawNeuralNet::getLayerNeurons(int layer)
 {
         if (layer < 0 || layer >= layers)
 	{
-	    return std::vector<shmea::GPointer<Neuron> >();
+	    return std::vector<shmea::GPointer<DrawNeuron> >();
 	}
 	return layerInfoList[layer]->getNeuronList();
 }
 
-int NeuralNet::getLayerNeuronsCount(int layer)
+int DrawNeuralNet::getLayerNeuronsCount(int layer)
 {
     if (layer < 0 || layer >= layers)
 	{
@@ -142,7 +143,7 @@ int NeuralNet::getLayerNeuronsCount(int layer)
 	return layerInfoList[layer]->getNeurons();
 }
 
-void NeuralNet::displayNeuralNet()
+void DrawNeuralNet::displayNeuralNet()
 {
 	for(int i = 0; i < layers; ++i)
 	{

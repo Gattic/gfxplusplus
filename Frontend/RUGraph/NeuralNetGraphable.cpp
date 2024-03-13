@@ -1,10 +1,10 @@
 #include "Graphable.h"
 #include "RUGraph.h"
-#include "../GFXUtilities/NeuralNet.h"
+#include "../GFXUtilities/DrawNeuralNet.h"
 #include <limits>
 
 template <>
-void Graphable<NeuralNet>::computeAxisRanges(bool additionOptimization)
+void Graphable<DrawNeuralNet>::computeAxisRanges(bool additionOptimization)
 {
 
 	
@@ -23,7 +23,7 @@ void Graphable<NeuralNet>::computeAxisRanges(bool additionOptimization)
 }
 
 template <>
-void Graphable<NeuralNet>::draw(gfxpp* cGfx)
+void Graphable<DrawNeuralNet>::draw(gfxpp* cGfx)
 {
     if (points.size() == 0)
 		return;
@@ -42,14 +42,14 @@ void Graphable<NeuralNet>::draw(gfxpp* cGfx)
     for (int layer = 0; layer < nnLayers; ++layer)
 	{
 	std::vector<Point2> curNodes;
-	std::vector<shmea::GPointer<Neuron> > neurons = points[0]->getLayerNeurons(layer);
+	std::vector<shmea::GPointer<DrawNeuron> > neurons = points[0]->getLayerNeurons(layer);
 	int lNeuronAmount = points[0]->getLayerNeuronsCount(layer);
 
 	float cWeightMax = std::numeric_limits<float>::min();
 	float cWeightMin = std::numeric_limits<float>::max();
 	for (int n = 0; n < lNeuronAmount; ++n)
 	{
-	    Neuron neuron = *neurons[n];
+	    DrawNeuron neuron = *neurons[n];
 	    std::vector<shmea::GPointer<float> > tWeights = neuron.getWeights();
 	    if (tWeights.size() > 0)
 	    {
@@ -66,7 +66,7 @@ void Graphable<NeuralNet>::draw(gfxpp* cGfx)
 
 	for (int n = 0; n < lNeuronAmount; ++n)
 	{
-	    Neuron neuron = *neurons[n];
+	    DrawNeuron neuron = *neurons[n];
 	    Point2 curNeuron;
 	    
 	    float cActivation = neuron.getActivation();

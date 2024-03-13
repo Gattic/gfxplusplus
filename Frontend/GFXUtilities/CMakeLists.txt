@@ -19,10 +19,10 @@ set(GU_src_files
 	EventTracker.h
 	Horizontal_Line.cpp
 	Horizontal_Line.h
-	neuron.cpp
-	neuron.h
-	NeuralNet.cpp
-	NeuralNet.h
+	DrawNeuron.cpp
+	DrawNeuron.h
+	DrawNeuralNet.cpp
+	DrawNeuralNet.h
 	RULayerInfo.cpp
 	RULayerInfo.h
 )

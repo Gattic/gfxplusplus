@@ -1,5 +1,5 @@
-#ifndef _RUNEURALNET
-#define _RUNEURALNET
+#ifndef _DRAWNEURALNET
+#define _DRAWNEURALNET
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -10,7 +10,7 @@
 #include "Backend/Database/GType.h"
 class gfxpp;
 
-class NeuralNet
+class DrawNeuralNet
 {
 
 protected:
@@ -22,9 +22,9 @@ protected:
     int neuronRadius;
 
 public:
-    NeuralNet();    
-    NeuralNet(int);
-    virtual ~NeuralNet();
+    DrawNeuralNet();    
+    DrawNeuralNet(int);
+    virtual ~DrawNeuralNet();
 
     void setInputLayer(int);
     void setHiddenLayer(int, int);
@@ -34,7 +34,7 @@ public:
     void setWeights(shmea::GList);
 
     int getLayersCount();
-    std::vector<shmea::GPointer<Neuron> > getLayerNeurons(int);
+    std::vector<shmea::GPointer<DrawNeuron> > getLayerNeurons(int);
     int getLayerNeuronsCount(int);
 
 

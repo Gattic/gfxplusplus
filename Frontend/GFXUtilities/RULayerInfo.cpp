@@ -8,7 +8,7 @@ RULayerInfo::RULayerInfo(int newLayerType, int newNeuronQty, int edges)
 
 	for(int n = 0; n < newNeuronQty; ++n)
 	{
-	    neuronList.push_back(shmea::GPointer<Neuron>(new Neuron(edges)));
+	    neuronList.push_back(shmea::GPointer<DrawNeuron>(new DrawNeuron(edges)));
 	}
 	
 }
@@ -27,7 +27,7 @@ void RULayerInfo::setNeurons(int newNeuronSize, int edges)
 
 	for(int n = 0; n < neuronQty; ++n)
 	{
-	   neuronList.push_back(shmea::GPointer<Neuron>(new Neuron(edges)));
+	   neuronList.push_back(shmea::GPointer<DrawNeuron>(new DrawNeuron(edges)));
 	}
 }
 
@@ -46,7 +46,7 @@ int RULayerInfo::getNeurons() const
 	return neuronQty;
 }
 
-std::vector<shmea::GPointer<Neuron> > RULayerInfo::getNeuronList() const{
+std::vector<shmea::GPointer<DrawNeuron> > RULayerInfo::getNeuronList() const{
 	return neuronList;
 }
 
