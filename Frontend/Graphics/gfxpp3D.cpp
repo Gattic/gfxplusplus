@@ -10,7 +10,6 @@
 
 gfxpp3D::gfxpp3D()
 {
-    systemCursor = NULL;
     width = 800;
     height = 600;
 
@@ -20,7 +19,6 @@ gfxpp3D::gfxpp3D()
 
 gfxpp3D::gfxpp3D(shmea::GString newTitle, bool fullScreenMode, bool compatMode, int newWidth, int newHeight)
 {
-	systemCursor = NULL;
 	width = newWidth;
 	height = newHeight;
 
@@ -63,11 +61,6 @@ int gfxpp3D::initHelper(bool fullscreenMode, shmea::GString title, bool compatMo
 	rightPressed = false;
 
 	window = NULL;
-	renderer = NULL;
-
-	focusedItem = NULL;
-
-	fpsLabel = NULL;
 
 	roll = Quaternion(0.0f, 1.0f, 0.0f, 0.0f);
 	pitch = Quaternion(0.0f, 0.0f, 1.0f, 0.0f);
@@ -122,9 +115,6 @@ int gfxpp3D::initHelper(bool fullscreenMode, shmea::GString title, bool compatMo
 	}
 	//Removed 2d vs 3d if else statement
 	init3D();
-
-	// Set the SDL system cursor
-	systemCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
 
 	// ALl good with initialization, return success
 	return 0;
@@ -467,54 +457,27 @@ void gfxpp3D::display()
 		}
 
 		//=================Render=================
-			// Set our viewport
-			glMatrixMode(GL_PROJECTION);
-			SDL_GL_MakeCurrent(window, context);
-			glViewport(0, 0, getWidth(), getHeight());
+		// Set our viewport
+		glMatrixMode(GL_PROJECTION);
+		SDL_GL_MakeCurrent(window, context);
+		glViewport(0, 0, getWidth(), getHeight());
 
-			// gray background color
-			glClearColor(0.38f, 0.38f, 0.38f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// gray background color
+		glClearColor(0.38f, 0.38f, 0.38f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// orientation
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-			glOrtho(-2.0f * hunterZolomon, 2.0f * hunterZolomon, -2.0f * hunterZolomon,
-					2.0f * hunterZolomon, -20.0f * hunterZolomon, 20.0f * hunterZolomon);
+		// orientation
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glOrtho(-2.0f * hunterZolomon, 2.0f * hunterZolomon, -2.0f * hunterZolomon, 2.0f * hunterZolomon, -20.0f * hunterZolomon, 20.0f * hunterZolomon);
 
-			// Render the objects
-			std::vector<Object*>::const_iterator itr = objects.begin();
-			for (; itr != objects.end(); ++itr)
-				(*itr)->Render();
+		// Render the objects
+		std::vector<Object*>::const_iterator itr = objects.begin();
+		for (; itr != objects.end(); ++itr)
+		    (*itr)->Render();
+		SDL_GL_SwapWindow(window);
+		glFlush();
 
-			SDL_GL_SwapWindow(window);
-			glFlush();
-
-		// fps
-		now = SDL_GetTicks();
-		float cFrames = ((float)frames * 1000.0f) / ((float)(now - then));
-		if ((fpsLabel) && (running))
-		{
-			char fpsBuffer[26];
-			bzero(&fpsBuffer, 26);
-			sprintf(fpsBuffer, "%2.1f fps", cFrames);
-			fpsLabel->setText(fpsBuffer);
-		}
-
-		// Cap the frame rate
-		if ((cFrames - MAX_FRAMES_PER_SECOND > 0) && (cFrames > MAX_FRAMES_PER_SECOND))
-			SDL_Delay((cFrames - MAX_FRAMES_PER_SECOND) * 10.0f);
-
-		// global gui elements
-		if ((fpsLabel) && (running))
-			fpsLabel->updateBackgroundHelper(this);
-
-		//Scale the screen to the window size:
-		SDL_RenderSetLogicalSize(renderer, getWidth(), getHeight());
-
-		// Update the screen
-		if (renderer)
-			SDL_RenderPresent(renderer);
 	}
 }
 
