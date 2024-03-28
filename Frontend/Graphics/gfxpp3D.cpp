@@ -1,20 +1,4 @@
-// Copyright 2020 Robert Carneiro, Derek Meer, Matthew Tabak, Eric Lujan
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
-// associated documentation files (the "Software"), to deal in the Software without restriction,
-// including without limitation the rights to use, copy, modify, merge, publish, distribute,
-// sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all copies or
-// substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
-// NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#include "graphics.h"
+#include "gfxpp3D.h"
 #include "../GFXUtilities/quaternion.h"
 #include "../GItems/GItem.h"
 #include "../GItems/GLayout.h"
@@ -24,48 +8,42 @@
 #include "../GUI/Text/RULabel.h"
 #include "object.h"
 
-gfxpp::gfxpp()
+gfxpp3D::gfxpp3D()
 {
-	systemCursor = NULL;
-	width = 800;
-	height = 600;
+    width = 800;
+    height = 600;
 
-	errorFlag = initHelper(false, "gfxplusplus", true);
+    errorFlag = initHelper(false, "gfxplusplus", true);
+
 }
 
-gfxpp::gfxpp(shmea::GString newTitle, int newRenderStatus, bool fullScreenMode, bool compatMode, int newWidth, int newHeight)
+gfxpp3D::gfxpp3D(shmea::GString newTitle, bool fullScreenMode, bool compatMode, int newWidth, int newHeight)
 {
-	systemCursor = NULL;
 	width = newWidth;
 	height = newHeight;
 
 	errorFlag = initHelper(fullScreenMode, newTitle, compatMode);
 }
 
-int gfxpp::getErrorFlag() const
+int gfxpp3D::getErrorFlag() const
 {
 	return errorFlag;
 }
 
-SDL_Renderer* gfxpp::getRenderer()
+int gfxpp3D::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode)
 {
-	return renderer;
-}
+    running = false;
+    hunterZolomon = 1.0f;
 
-int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode)
-{
-	running = false;
-	hunterZolomon = 1.0f;
+    frames = 0;
+    rotate = false;
+    move = false;
+    now = 0;
+    then = SDL_GetTicks();
 
-	frames = 0;
-	rotate = false;
-	move = false;
-	now = 0;
-	then = SDL_GetTicks();
-
-	// for mouse
-	mouseX = 0;
-	mouseY = 0;
+    //For Mouse
+    mouseX = 0;
+    mouseY = 0;
 
 	// for key presses
 	CTRLPressed = false;
@@ -83,12 +61,6 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode
 	rightPressed = false;
 
 	window = NULL;
-	renderer = NULL;
-
-	focusedItem = NULL;
-	focusedPanel = NULL;
-
-	fpsLabel = NULL;
 
 	roll = Quaternion(0.0f, 1.0f, 0.0f, 0.0f);
 	pitch = Quaternion(0.0f, 0.0f, 1.0f, 0.0f);
@@ -141,84 +113,42 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode
 		finish();
 		return -2;
 	}
-
-	int errorNo = init2D(compatMode);
-	if (errorNo < 0)
-	    return errorNo;
-
-	// Set the SDL system cursor
-	systemCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+	//Removed 2d vs 3d if else statement
+	init3D();
 
 	// ALl good with initialization, return success
 	return 0;
 }
 
-int gfxpp::init2D(bool compatMode)
+void gfxpp3D::init3D()
 {
-	// Create a new renderer; -1 loads the default video driver we need
-	if(compatMode)
-		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_TARGETTEXTURE);
-	else
-		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
-	if (!renderer)
-	{
-		printf("[GFX] Renderer error: %s\n", SDL_GetError());
-		finish();
-		return -3;
-	}
-	else
-		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	// Create a new context
+	context = SDL_GL_CreateContext(window);
+	SDL_GL_SetSwapInterval(1);
 
-	// Init ttf
-	if (TTF_Init() == -1)
-	{
-		printf("[GFX] TTF Init error: %s\n", SDL_GetError());
-		finish();
-		return -4;
-	}
-
-	cFont = new GFont(renderer);
-	graphicsFonts.insert(std::pair<int, GFont*>(0, cFont));
-
-	GFont* fontGreen = new GFont(renderer);
-	fontGreen->setTextColor(RUColors::TEXT_COLOR_GREEN);
-	graphicsFonts.insert(std::pair<int, GFont*>(1, fontGreen));
-
-	GFont* fontRed = new GFont(renderer);
-	fontRed->setTextColor(RUColors::TEXT_COLOR_RED);
-	graphicsFonts.insert(std::pair<int, GFont*>(2, fontRed));
-
-	// Load support for the PNG, TIF, and JPG image formats
-	int flags = IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_JPG;
-	int imgInitStatus = IMG_Init(flags);
-	if ((imgInitStatus & flags) != flags)
-	{
-		printf("[GFX] Image Init error: %s\n", IMG_GetError());
-		return -5;
-	}
-
-	return 0;
+	// Set 3D rendering settings
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glShadeModel(GL_SMOOTH);
 }
 
-void gfxpp::run()
+void gfxpp3D::run()
 {
-	// Set the FPS Component
-	fpsLabel = new RULabel();
-	fpsLabel->setWidth(60);
-	fpsLabel->setHeight(20);
-	fpsLabel->setX(10);
-	fpsLabel->setY(1050);
-	fpsLabel->setText("");
-	// fpsLabel->setFontSize(40);
-	// fpsLabel->toggleBG(false);
-	addItem(fpsLabel);
+    // Other testing
+    // SDL_Color textColor={0x00, 0x00, 0x00};
+    // Graphics::addText("Hello World!", textColor);
+    // Graphics::addBMP("graphics/xorgate.bmp");
+    // Graphics::addGradient(800/2, 600/2, 500);
+    // Graphics::addBasis();
+    addCube();
 
-	// the display loop
-	display();
-	finish();
+    display();
+    finish();
+
 }
 
-void gfxpp::display()
+
+void gfxpp3D::display()
 {
 	running = true;
 	frames = 0;
@@ -393,96 +323,183 @@ void gfxpp::display()
 					running = false;
 			}
 
-
-				if ((event.type == SDL_MOUSEBUTTONDOWN) || (event.type == SDL_MOUSEBUTTONUP) ||
-					(event.type == SDL_MOUSEMOTION))
+				// are we holding click?
+				if (event.type == SDL_MOUSEBUTTONDOWN)
 				{
-					mouseX = event.button.x;
-					mouseY = event.button.y;
+					if (CTRLPressed)
+					{
+						rotate = true;
+						move = false;
+					}
+					else
+					{
+						rotate = false;
+						move = true;
+					}
+				}
+				else if (event.type == SDL_MOUSEBUTTONUP)
+				{
+					rotate = false;
+					move = false;
 				}
 
-				// Events for the focused panel
-				if (focusedPanel)
-					focusedPanel->processSubItemEvents(this, NULL, NULL, event, mouseX, mouseY);
+				// Scrollwheel
+				if (event.type == SDL_MOUSEWHEEL)
+				{
+					if (rPressed)
+					{
+						// Move the Object (z)
+						if ((objects.size() > 0) && (cObjIndex != (unsigned int)-1))
+						{
+							Vec3 position = objects[cObjIndex]->getCenter();
+							Vec3 mouseVec(0.0f, 0.0f, event.wheel.y);
+							position = position + mouseVec;
+
+							// Set the center/position of the selected object
+							objects[cObjIndex]->setCenter(position);
+						}
+					}
+					else
+					{
+						// Camera Zoom
+						if (event.wheel.y > 0)
+						{
+							// Scroll down
+							if (hunterZolomon > 0.0f)
+								hunterZolomon -= 0.1;
+						}
+						else if (event.wheel.y < 0)
+						{
+							// Scroll up
+							hunterZolomon += 0.1;
+						}
+					}
+
+				// Interact with the object
+				if ((objects.size() > 0) && (cObjIndex != (unsigned int)-1))
+				{
+					if (event.type == SDL_MOUSEMOTION)
+					{
+						double a = event.motion.yrel;
+						double b = event.motion.xrel;
+
+						// Rotate the object
+						if (rotate)
+						{
+							Quaternion rotation = objects[cObjIndex]->getRotation();
+
+							// Normalize the rotation quat
+							rotation.normalize();
+
+							// Create the mouse movement quat
+							Quaternion mouseQuat(360, a, b, 0);
+							mouseQuat.normalize();
+
+							// Apply the change vector
+							rotation = rotation * mouseQuat;
+							rotation.normalize();
+
+							// Set the rotation of the selected object
+							objects[cObjIndex]->setRotation(rotation);
+						}
+
+						// Move the Object (x and y)
+						if (move)
+						{
+							Vec3 position = objects[cObjIndex]->getCenter();
+							Vec3 mouseVec(b / 40.0f, -a / 40.0f, 0.0f);
+							position = position + mouseVec;
+
+							// Set the center/position of the selected object
+							objects[cObjIndex]->setCenter(position);
+						}
+					}
+
+					// Edit the dimensions of the object
+					if (upPressed)
+					{
+						Vec3 cDimensions = objects[cObjIndex]->getDimensions();
+						Vec3 mouseVec(0.0f, 0.1f, 0.0f);
+						cDimensions = cDimensions + mouseVec;
+
+						// Set the center/cDimensions of the selected object
+						objects[cObjIndex]->setDimensions(cDimensions);
+					}
+					else if (downPressed)
+					{
+						Vec3 cDimensions = objects[cObjIndex]->getDimensions();
+						Vec3 mouseVec(0.0f, -0.1f, 0.0f);
+						cDimensions = cDimensions + mouseVec;
+
+						// Set the center/cDimensions of the selected object
+						objects[cObjIndex]->setDimensions(cDimensions);
+					}
+					else if (leftPressed)
+					{
+						Vec3 cDimensions = objects[cObjIndex]->getDimensions();
+						Vec3 mouseVec(0.1f, 0.0f, 0.0f);
+						cDimensions = cDimensions + mouseVec;
+
+						// Set the center/cDimensions of the selected object
+						objects[cObjIndex]->setDimensions(cDimensions);
+					}
+					else if (rightPressed)
+					{
+						Vec3 cDimensions = objects[cObjIndex]->getDimensions();
+						Vec3 mouseVec(-0.1f, 0.0f, 0.0f);
+						cDimensions = cDimensions + mouseVec;
+
+						// Set the center/cDimensions of the selected object
+						objects[cObjIndex]->setDimensions(cDimensions);
+					}
+				}
+			}
 		}
 
-		//=================Render 2D=================
-		// Render the focused panel
-		if (focusedPanel)
-		{
-		    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-		    SDL_RenderClear(renderer);
-		    focusedPanel->updateBackgroundHelper(this);
-		}
+		//=================Render=================
+		// Set our viewport
+		glMatrixMode(GL_PROJECTION);
+		SDL_GL_MakeCurrent(window, context);
+		glViewport(0, 0, getWidth(), getHeight());
 
-		// fps
-		now = SDL_GetTicks();
-		float cFrames = ((float)frames * 1000.0f) / ((float)(now - then));
-		if ((fpsLabel) && (running))
-		{
-			char fpsBuffer[26];
-			bzero(&fpsBuffer, 26);
-			sprintf(fpsBuffer, "%2.1f fps", cFrames);
-			fpsLabel->setText(fpsBuffer);
-		}
+		// gray background color
+		glClearColor(0.38f, 0.38f, 0.38f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Cap the frame rate
-		if ((cFrames - MAX_FRAMES_PER_SECOND > 0) && (cFrames > MAX_FRAMES_PER_SECOND))
-			SDL_Delay((cFrames - MAX_FRAMES_PER_SECOND) * 10.0f);
+		// orientation
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glOrtho(-2.0f * hunterZolomon, 2.0f * hunterZolomon, -2.0f * hunterZolomon, 2.0f * hunterZolomon, -20.0f * hunterZolomon, 20.0f * hunterZolomon);
 
-		// global gui elements
-		if ((fpsLabel) && (running))
-			fpsLabel->updateBackgroundHelper(this);
+		// Render the objects
+		std::vector<Object*>::const_iterator itr = objects.begin();
+		for (; itr != objects.end(); ++itr)
+		    (*itr)->Render();
+		SDL_GL_SwapWindow(window);
+		glFlush();
 
-		//Scale the screen to the window size:
-		SDL_RenderSetLogicalSize(renderer, getWidth(), getHeight());
-
-		// Update the screen
-		if (renderer)
-			SDL_RenderPresent(renderer);
 	}
 }
 
-// UPDATE FUNCTION
-void gfxpp::clean2D()
+void gfxpp3D::clean3D()
 {
-	// clean up the componenets
-	focusedItem = NULL;
-
 	// gui
-	for (unsigned int i = 0; i < guiElements.size(); ++i)
+	std::vector<Object*>::iterator itr = objects.begin();
+	for (; itr != objects.end(); ++itr)
 	{
-		GItem* cItem = guiElements[i];
-		if (cItem)
-			delete cItem;
+		Object* cObject = (*itr);
+		if (cObject)
+			delete cObject;
 	}
+	objects.clear();
 
-	guiElements.clear();
-
-	if (renderer)
-	{
-		//SDL_DestroyRenderer(renderer); // TODO: CRASHES
-		renderer = NULL;
-	}
-
-	if (cFont)
-		delete cFont;
-	cFont = NULL;
-
-	// Iterate GFonts in graphicsFonts
-	/*std::map<int, GFont*>::iterator itr = graphicsFonts.begin();
-	for (; itr != graphicsFonts.end(); ++itr)
-	{
-		if (itr->second)
-			delete itr->second;
-		itr->second = NULL;
-	}*/
+	SDL_GL_DeleteContext(context);
 }
 
-void gfxpp::finish()
+void gfxpp3D::finish()
 {
 	running = false;
-	clean2D();
+	clean3D();
 
 	if (window)
 	{
@@ -495,7 +512,7 @@ void gfxpp::finish()
 	IMG_Quit();
 }
 
-bool gfxpp::getRunning() const
+bool gfxpp3D::getRunning() const
 {
 	return running;
 }

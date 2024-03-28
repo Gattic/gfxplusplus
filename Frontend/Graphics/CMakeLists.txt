@@ -3,6 +3,8 @@ set(GFX_src_files
 	graphics3D.cpp
 	graphics.cpp
 	graphics.h
+	gfxpp3D.cpp
+	gfxpp3D.h
 	object.cpp
 	object.h
 )

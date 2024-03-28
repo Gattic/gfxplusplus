@@ -1,6 +1,5 @@
 // Copyright 2020 Robert Carneiro, Derek Meer, Matthew Tabak, Eric Lujan
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 // associated documentation files (the "Software"), to deal in the Software without restriction,
 // including without limitation the rights to use, copy, modify, merge, publish, distribute,
 // sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
@@ -61,7 +60,6 @@ private:
 	int width;
 	int height;
 	float hunterZolomon; // zoom
-	int renderStatus;
 
 	int32_t frames;
 	bool rotate;
@@ -110,19 +108,17 @@ private:
 	void display();
 	int initHelper(bool, shmea::GString, bool);
 	int init2D(bool);
-	void init3D();
 	void clean2D();
-	void clean3D();
 
 public:
 	static const float MAX_FRAMES_PER_SECOND = 30.0f;
 
-	static const int _2D = 0;
-	static const int _3D = 1;
-
 	static const int X_AXIS = 0;
 	static const int Y_AXIS = 1;
 	static const int Z_AXIS = 2;
+
+	//TODO: Remove this in future since we decoupled the 2D and 3D rendering
+	static const int _2D = 0;
 
 	gfxpp();
 	gfxpp(shmea::GString, int = _2D, bool = true, bool = true, int = 800, int = 600);
@@ -149,12 +145,11 @@ public:
 	int getHeight() const;
 
 	// 3D
-	void addBasis();
 	void addCube();
+	void addBasis();
 
 	// main
 	void run();
-	void changeRenderStatus(int, bool);
 	void finish();
 	bool getRunning() const;
 };
