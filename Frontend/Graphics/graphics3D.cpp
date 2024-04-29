@@ -14,10 +14,10 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#include "graphics.h"
 #include "object.h"
+#include "gfxpp3D.h"
 
-void gfxpp::addCube()
+void gfxpp3D::addCube()
 {
 	Object* newObject = (Object*)malloc(sizeof(Object));
 	*newObject = Object();
@@ -27,7 +27,7 @@ void gfxpp::addCube()
 		objects.push_back(newObject);
 }
 
-void gfxpp::addBasis()
+void gfxpp3D::addBasis()
 {
 	Object* newObject = (Object*)malloc(sizeof(Object));
 	*newObject = Object();
@@ -37,7 +37,7 @@ void gfxpp::addBasis()
 		objects.push_back(newObject);
 }
 
-bool gfxpp::contains(const Object* newObject) const
+bool gfxpp3D::contains(const Object* newObject) const
 {
 	// check if the other object is already in the vector
 	std::vector<Object*>::const_iterator itr = objects.begin();
@@ -50,7 +50,7 @@ bool gfxpp::contains(const Object* newObject) const
 	return false;
 }
 
-bool gfxpp::contains(const Object newObject) const
+bool gfxpp3D::contains(const Object newObject) const
 {
 	// check if the other object is already in the vector
 	std::vector<Object*>::const_iterator itr = objects.begin();
@@ -61,4 +61,15 @@ bool gfxpp::contains(const Object newObject) const
 	}
 
 	return false;
+}
+
+
+int gfxpp3D::getWidth() const
+{
+	return width;
+}
+
+int gfxpp3D::getHeight() const
+{
+	return height;
 }
