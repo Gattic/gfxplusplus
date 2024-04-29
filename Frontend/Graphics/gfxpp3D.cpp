@@ -1,11 +1,5 @@
 #include "gfxpp3D.h"
 #include "../GFXUtilities/quaternion.h"
-#include "../GItems/GItem.h"
-#include "../GItems/GLayout.h"
-#include "../GItems/RUColors.h"
-#include "../GItems/RUComponent.h"
-#include "../GUI/Text/GFont.h"
-#include "../GUI/Text/RULabel.h"
 #include "object.h"
 
 gfxpp3D::gfxpp3D()
@@ -508,11 +502,66 @@ void gfxpp3D::finish()
 	}
 
 	SDL_Quit();
-	TTF_Quit();
-	IMG_Quit();
 }
 
 bool gfxpp3D::getRunning() const
 {
 	return running;
+}
+
+void gfxpp3D::addCube()
+{
+	Object* newObject = (Object*)malloc(sizeof(Object));
+	*newObject = Object();
+	newObject->setType(Object::CUBE_TYPE);
+
+	if (!contains(newObject))
+		objects.push_back(newObject);
+}
+
+void gfxpp3D::addBasis()
+{
+	Object* newObject = (Object*)malloc(sizeof(Object));
+	*newObject = Object();
+	newObject->setType(Object::BASIS_TYPE);
+
+	if (!contains(newObject))
+		objects.push_back(newObject);
+}
+
+bool gfxpp3D::contains(const Object* newObject) const
+{
+	// check if the other object is already in the vector
+	std::vector<Object*>::const_iterator itr = objects.begin();
+	for (; itr != objects.end(); ++itr)
+	{
+		if ((*(*itr)) == (*newObject))
+			return true;
+	}
+
+	return false;
+}
+
+bool gfxpp3D::contains(const Object newObject) const
+{
+	// check if the other object is already in the vector
+	std::vector<Object*>::const_iterator itr = objects.begin();
+	for (; itr != objects.end(); ++itr)
+	{
+		if ((*(*itr)) == newObject)
+			return true;
+	}
+
+	return false;
+}
+
+
+int gfxpp3D::getWidth() const
+{
+	return width;
+}
+
+int gfxpp3D::getHeight() const
+{
+	return height;
 }

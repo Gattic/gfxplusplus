@@ -78,12 +78,10 @@ public:
 	int getErrorFlag() const;
 
 	// GFX Utils
-	static unsigned int RGBfromHue(double, int8_t*, int8_t*, int8_t*);
 	bool contains(const Object*) const;
 	bool contains(const Object) const;
 
 
-	void addGradient(int, int, int);
 	int getWidth() const;
 	int getHeight() const;
 

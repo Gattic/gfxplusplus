@@ -15,14 +15,13 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "graphics.h"
-#include "../GFXUtilities/quaternion.h"
 #include "../GItems/GItem.h"
 #include "../GItems/GLayout.h"
+#include "../GItems/GPanel.h"
 #include "../GItems/RUColors.h"
 #include "../GItems/RUComponent.h"
 #include "../GUI/Text/GFont.h"
-#include "../GUI/Text/RULabel.h"
-#include "object.h"
+//#include "../GUI/Text/RULabel.h"
 
 gfxpp::gfxpp()
 {
@@ -88,12 +87,7 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode
 	focusedItem = NULL;
 	focusedPanel = NULL;
 
-	fpsLabel = NULL;
-
-	roll = Quaternion(0.0f, 1.0f, 0.0f, 0.0f);
-	pitch = Quaternion(0.0f, 0.0f, 1.0f, 0.0f);
-	yaw = Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
-	cObjIndex = -1;
+	fps = 0;
 
 	// Initialize SDL
 	int sdlStatus = SDL_Init(SDL_INIT_VIDEO);
@@ -202,17 +196,6 @@ int gfxpp::init2D(bool compatMode)
 
 void gfxpp::run()
 {
-	// Set the FPS Component
-	fpsLabel = new RULabel();
-	fpsLabel->setWidth(60);
-	fpsLabel->setHeight(20);
-	fpsLabel->setX(10);
-	fpsLabel->setY(1050);
-	fpsLabel->setText("");
-	// fpsLabel->setFontSize(40);
-	// fpsLabel->toggleBG(false);
-	addItem(fpsLabel);
-
 	// the display loop
 	display();
 	finish();
@@ -222,6 +205,7 @@ void gfxpp::display()
 {
 	running = true;
 	frames = 0;
+	fps = 0;
 	rotate = false;
 	move = false;
 	now = 0;
@@ -377,17 +361,6 @@ void gfxpp::display()
 						system("clear");
 				}
 
-				// Cycle between objects
-				if (spacePressed)
-				{
-					if (objects.size() > 0)
-					{
-						++cObjIndex;
-						if (cObjIndex >= objects.size())
-							cObjIndex = 0;
-					}
-				}
-
 				// quit the gui window
 				if (keyPressed == SDLK_ESCAPE)
 					running = false;
@@ -418,21 +391,17 @@ void gfxpp::display()
 		// fps
 		now = SDL_GetTicks();
 		float cFrames = ((float)frames * 1000.0f) / ((float)(now - then));
-		if ((fpsLabel) && (running))
+		/*if (running)
 		{
 			char fpsBuffer[26];
 			bzero(&fpsBuffer, 26);
 			sprintf(fpsBuffer, "%2.1f fps", cFrames);
-			fpsLabel->setText(fpsBuffer);
-		}
+		}*/
 
 		// Cap the frame rate
+		fps = cFrames;
 		if ((cFrames - MAX_FRAMES_PER_SECOND > 0) && (cFrames > MAX_FRAMES_PER_SECOND))
 			SDL_Delay((cFrames - MAX_FRAMES_PER_SECOND) * 10.0f);
-
-		// global gui elements
-		if ((fpsLabel) && (running))
-			fpsLabel->updateBackgroundHelper(this);
 
 		//Scale the screen to the window size:
 		SDL_RenderSetLogicalSize(renderer, getWidth(), getHeight());
@@ -498,4 +467,159 @@ void gfxpp::finish()
 bool gfxpp::getRunning() const
 {
 	return running;
+}
+
+unsigned int gfxpp::RGBfromHue(double hue, int8_t* r, int8_t* g, int8_t* b)
+{
+	int h = int(hue * 256 * 6);
+	int x = h % 0x100;
+
+	(*r) = 0;
+	(*g) = 0;
+	(*b) = 0;
+	switch (h / 256)
+	{
+	case 0:
+		(*r) = 0xFF;
+		(*g) = x;
+		break;
+	case 1:
+		(*g) = 0xFF;
+		(*r) = 0xFF - x;
+		break;
+	case 2:
+		(*g) = 0xFF;
+		(*b) = x;
+		break;
+	case 3:
+		(*b) = 0xFF;
+		(*g) = 0xFF - x;
+		break;
+	case 4:
+		(*b) = 0xFF;
+		(*r) = x;
+		break;
+	case 5:
+		(*r) = 0xFF;
+		(*b) = 0xFF - x;
+		break;
+	}
+
+	return (*r) + ((*g) << 8) + ((*b) << 16);
+}
+
+SDL_Cursor* gfxpp::getSystemCursor()
+{
+	return systemCursor;
+}
+
+void gfxpp::addGradient(int x, int y, int size)
+{
+	// check the renderer
+	if (!renderer)
+	{
+		printf("[GFX] Renderer error: %s\n", SDL_GetError());
+		return;
+	}
+
+	/*for (int i = (-(size / 2)); i < size / 2; ++i)
+	{
+		for (int j = (-(size / 2)); j < size / 2; ++j)
+		{
+			// calculate the hue
+			double hue = ((double)((i * i) + (j * j))) / ((double)(size * size));
+
+			// get the color
+			int8_t redMask = 0;
+			int8_t greenMask = 0;
+			int8_t blueMask = 0;
+			unsigned int colorMask = RGBfromHue(hue, &redMask, &greenMask, &blueMask);
+
+			// set the color and draw the point
+			SDL_SetRenderDrawColor(renderer, redMask, greenMask, blueMask, SDL_ALPHA_OPAQUE);
+			SDL_RenderDrawPoint(renderer, x + i, y + j);
+		}
+	}*/
+}
+
+void gfxpp::addItem(GItem* newItem)
+{
+	if (!newItem)
+		return;
+
+	const shmea::GString options = "0123456789";
+	const int keyLength = 6;
+	shmea::GString newItemID = "";
+	int itemID = 0;
+
+	do
+	{
+		newItemID = "";
+		for (int i = 0; i < keyLength; ++i)
+		{
+			int newIndex = rand() % options.length();
+			char newChar = options[newIndex];
+			newItemID += newChar;
+		}
+
+		itemID = atoi(newItemID.c_str());
+
+	} while (getItemByID(itemID)); // Generate new item id if already used
+
+	// Assign same id to object of GItem and add it
+	newItem->setID(itemID);
+	guiElements.push_back(newItem);
+}
+
+// Unique ID for each item, but names may be the same.
+void gfxpp::removeItem(int itemID)
+{
+	if (!itemID)
+		return;
+
+	for (unsigned int i = 0; i < guiElements.size(); ++i)
+	{
+		if (guiElements[i]->getID() == itemID)
+		{
+			guiElements.erase(guiElements.begin() + i);
+			break;
+		}
+	}
+}
+
+// Unique ID for each item, but names may be the same.
+GItem* gfxpp::getItemByID(int itemID)
+{
+	for (unsigned int i = 0; i < guiElements.size(); ++i)
+	{
+		if (guiElements[i]->getID() == itemID)
+			return guiElements[i];
+	}
+	return NULL;
+}
+
+void gfxpp::setFocus(GItem* newFocusedItem)
+{
+	if (!newFocusedItem)
+		return;
+
+	if (focusedItem)
+	{
+		focusedItem->unsetFocus();
+		if (focusedPanel)
+			focusedItem->triggerLoseFocusEvent(focusedPanel);
+	}
+
+	focusedItem = newFocusedItem;
+	focusedItem->setFocus();
+}
+
+int gfxpp::getWidth() const
+{
+	return width;
+}
+
+int gfxpp::getHeight() const
+{
+	return height;
 }
