@@ -55,7 +55,7 @@ add_library(${PROJECT_NAME} SHARED ${MAIN_SRC_FILES})
 
 #Link libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
-	GFX GLayout GraphGUI GFXItem GUI GU GNet DB)#custom libs
+	GUI GFX GLayout GraphGUI GFXItem GU GNet DB)#custom libs
 
 #target_include_directories(gfxplusplus PUBLIC "include")
 #target_include_directories(gfxplusplus PUBLIC "Frontend")

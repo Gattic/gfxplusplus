@@ -304,14 +304,3 @@ shmea::GString GPanel::getType() const
 {
 	return "GPanel";
 }
-
-void GPanel::MsgBox(shmea::GString title, shmea::GString msg, int type, GeneralListener f)
-{
-	// Type = Message Box, ConfirmBox, or InputBox
-	RUMsgBox* newMsgBox = new RUMsgBox(this, title, msg, type, f);
-
-	newMsgBox->setX((getWidth() / 2.0f) - (newMsgBox->getWidth() / 2.0f));
-	newMsgBox->setY((getHeight() / 2.0f) - (newMsgBox->getHeight() / 2.0f));
-	newMsgBox->setName(title + ":" + msg);
-	addSubItem(newMsgBox, GItem::Z_BACK);
-}

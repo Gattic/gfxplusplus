@@ -280,3 +280,14 @@ shmea::GString RUMsgBox::getType() const
 {
 	return "RUMsgBox";
 }
+
+void RUMsgBox::MsgBox(GPanel* cPanel, shmea::GString title, shmea::GString msg, int type, GeneralListener f)
+{
+	// Type = Message Box, ConfirmBox, or InputBox
+	RUMsgBox* newMsgBox = new RUMsgBox(cPanel, title, msg, type, f);
+
+	newMsgBox->setX((cPanel->getWidth() / 2.0f) - (newMsgBox->getWidth() / 2.0f));
+	newMsgBox->setY((cPanel->getHeight() / 2.0f) - (newMsgBox->getHeight() / 2.0f));
+	newMsgBox->setName(title + ":" + msg);
+	cPanel->addSubItem(newMsgBox, GItem::Z_BACK);
+}
