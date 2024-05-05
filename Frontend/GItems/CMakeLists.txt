@@ -22,7 +22,7 @@ set(GFXItem_src_files
 )
 add_library(GFXItem ${GFXItem_src_files})
 
-target_link_libraries(GFXItem MiniC)
+target_link_libraries(GFXItem MiniC ${OPENGL_LIBRARIES})
 
 install(TARGETS GFXItem EXPORT gfxplusplusConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}

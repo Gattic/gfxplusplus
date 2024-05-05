@@ -26,14 +26,17 @@ shmea::GString RUMsgBox::YES_BUTTON = "YES_Button";
 shmea::GString RUMsgBox::NO_BUTTON = "NO_Button";
 shmea::GString RUMsgBox::SUBMIT_BUTTON = "SUBMIT_Button";
 
-RUMsgBox::RUMsgBox(GPanel* gPanel, shmea::GString newTitle, shmea::GString newMessage, int newType, GeneralListener f)
+RUMsgBox::RUMsgBox(GPanel* gPanel, int newType, GeneralListener f)
 {
 	panel = gPanel;
-	title = newTitle;
-	message = newMessage;
 	type = newType;
 	MouseDownListener = f;
 	confirmButtonClicked = -1;
+	msgButtonOK = NULL;
+	confirmButtonYES = NULL;
+	confirmButtonNO = NULL;
+	inputText = NULL;
+	inputButtonSubmit = NULL;
 
 	setWidth(DEFAULT_WIDTH);
 	setHeight(DEFAULT_HEIGHT);
@@ -42,95 +45,6 @@ RUMsgBox::RUMsgBox(GPanel* gPanel, shmea::GString newTitle, shmea::GString newMe
 	setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
 	setBorderWidth(2);
 	toggleBorder(true);
-
-	// title
-	lbltitle = new RULabel();
-	lbltitle->setWidth(DEFAULT_WIDTH / 2);
-	lbltitle->setHeight(30);
-	lbltitle->setMarginX(6);
-	lbltitle->setMarginY(6);
-	lbltitle->setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
-	lbltitle->setText(title);
-	lbltitle->setName("Title");
-	addSubItem(lbltitle);
-
-	// message
-	lblmsg = new RULabel();
-	lblmsg->setWidth(DEFAULT_WIDTH - 12);
-	lblmsg->setHeight(30);
-	lblmsg->setMarginX(6);
-	lblmsg->setMarginY((DEFAULT_HEIGHT / 2.0f) - lblmsg->getHeight());
-	lblmsg->setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
-	lblmsg->setText(message);
-	lblmsg->setName("Message");
-	addSubItem(lblmsg);
-
-	switch (type)
-	{
-	case MESSAGEBOX:
-
-		msgButtonOK = new RUButton();
-		msgButtonOK->setWidth(60);
-		msgButtonOK->setHeight(25);
-		msgButtonOK->setMarginX(DEFAULT_WIDTH - msgButtonOK->getWidth() - 6);	// -6 = padding
-		msgButtonOK->setMarginY(DEFAULT_HEIGHT - msgButtonOK->getHeight() - 6); // -6 = padding
-		msgButtonOK->setText(" OK ");
-		msgButtonOK->setName(OK_BUTTON);
-		addSubItem(msgButtonOK);
-
-		break;
-
-	case CONFIRMBOX:
-
-		confirmButtonNO = new RUButton();
-		confirmButtonNO->setWidth(60);
-		confirmButtonNO->setHeight(25);
-		confirmButtonNO->setMarginX(DEFAULT_WIDTH - confirmButtonNO->getWidth() -
-									6); // -6 = padding
-		confirmButtonNO->setMarginY(DEFAULT_HEIGHT - confirmButtonNO->getHeight() -
-									6); // -6 = padding
-		confirmButtonNO->setText(" NO ");
-		confirmButtonNO->setName(NO_BUTTON);
-		addSubItem(confirmButtonNO);
-
-		confirmButtonYES = new RUButton();
-		confirmButtonYES->setWidth(60);
-		confirmButtonYES->setHeight(25);
-		confirmButtonYES->setMarginX(confirmButtonNO->getMarginX() - confirmButtonYES->getWidth() -
-									 6); // -6 = padding
-		confirmButtonYES->setMarginY(DEFAULT_HEIGHT - confirmButtonNO->getHeight() -
-									 6); // -6 = padding
-		confirmButtonYES->setText(" YES ");
-		confirmButtonYES->setName(YES_BUTTON);
-		addSubItem(confirmButtonYES);
-
-		break;
-
-	case INPUTBOX:
-
-		inputButtonSubmit = new RUButton();
-		inputButtonSubmit->setWidth(60);
-		inputButtonSubmit->setHeight(20);
-		inputButtonSubmit->setMarginX(DEFAULT_WIDTH - inputButtonSubmit->getWidth());
-		inputButtonSubmit->setMarginY(DEFAULT_HEIGHT - inputButtonSubmit->getHeight() - 6);
-		inputButtonSubmit->setText("Submit");
-		inputButtonSubmit->setName(SUBMIT_BUTTON);
-		addSubItem(inputButtonSubmit);
-
-		inputText = new RUTextbox();
-		inputText->setWidth(this->getWidth() - inputButtonSubmit->getWidth() - 6); // -6 = padding
-		inputText->setHeight(20);
-		inputText->setMarginX(DEFAULT_WIDTH - inputText->getWidth() -
-							  inputButtonSubmit->getWidth() - 6);			// -6 = padding
-		inputText->setMarginY(DEFAULT_HEIGHT - inputText->getHeight() - 6); // 6 = padding
-		inputText->setStaticBorder(true);
-		inputText->setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
-		inputText->setBorderWidth(2);
-		inputText->toggleBorder(true);
-		addSubItem(inputText);
-
-		break;
-	}
 }
 
 RUMsgBox::~RUMsgBox()
@@ -279,4 +193,124 @@ void RUMsgBox::inputButtonSUBMITClicked(gfxpp* cGfx)
 shmea::GString RUMsgBox::getType() const
 {
 	return "RUMsgBox";
+}
+
+void RUMsgBox::MsgBox(GPanel* cPanel, const char* newTitle, const char* newMsg, int type, GeneralListener f)
+{
+    shmea::GString title(newTitle);
+    shmea::GString msg(newMsg);
+    MsgBox(cPanel, title, msg, type, f);
+}
+
+void RUMsgBox::MsgBox(GPanel* cPanel, shmea::GString newTitle, const char* newMsg, int type, GeneralListener f)
+{
+    shmea::GString msg(newMsg);
+    MsgBox(cPanel, newTitle, msg, type, f);
+}
+
+void RUMsgBox::MsgBox(GPanel* cPanel, const char* newTitle, shmea::GString newMsg, int type, GeneralListener f)
+{
+    shmea::GString title(newTitle);
+    MsgBox(cPanel, title, newMsg, type, f);
+}
+
+void RUMsgBox::MsgBox(GPanel* cPanel, shmea::GString title, shmea::GString msg, int type, GeneralListener f)
+{
+	// Type = Message Box, ConfirmBox, or InputBox
+	RUMsgBox* newMsgBox = new RUMsgBox(cPanel, type, f);
+
+	// title
+	newMsgBox->lbltitle = new RULabel();
+	newMsgBox->lbltitle->setWidth(DEFAULT_WIDTH / 2);
+	newMsgBox->lbltitle->setHeight(30);
+	newMsgBox->lbltitle->setMarginX(6);
+	newMsgBox->lbltitle->setMarginY(6);
+	newMsgBox->lbltitle->setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
+	newMsgBox->lbltitle->setText(title);
+	newMsgBox->lbltitle->setName("MsgBoxTitle");
+	newMsgBox->addSubItem(newMsgBox->lbltitle);
+
+	// message
+	newMsgBox->lblmsg = new RULabel();
+	newMsgBox->lblmsg->setWidth(DEFAULT_WIDTH - 12);
+	newMsgBox->lblmsg->setHeight(30);
+	newMsgBox->lblmsg->setMarginX(6);
+	newMsgBox->lblmsg->setMarginY((DEFAULT_HEIGHT / 2.0f) - newMsgBox->lblmsg->getHeight());
+	newMsgBox->lblmsg->setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
+	newMsgBox->lblmsg->setText(msg);
+	newMsgBox->lblmsg->setName("MsgBoxMessage");
+	newMsgBox->addSubItem(newMsgBox->lblmsg);
+
+	switch (type)
+	{
+	case MESSAGEBOX:
+
+		newMsgBox->msgButtonOK = new RUButton();
+		newMsgBox->msgButtonOK->setWidth(60);
+		newMsgBox->msgButtonOK->setHeight(25);
+		newMsgBox->msgButtonOK->setMarginX(DEFAULT_WIDTH - newMsgBox->msgButtonOK->getWidth() - 6);	// -6 = padding
+		newMsgBox->msgButtonOK->setMarginY(DEFAULT_HEIGHT - newMsgBox->msgButtonOK->getHeight() - 6); // -6 = padding
+		newMsgBox->msgButtonOK->setText(" OK ");
+		newMsgBox->msgButtonOK->setName(OK_BUTTON);
+		newMsgBox->addSubItem(newMsgBox->msgButtonOK);
+
+		break;
+
+	case CONFIRMBOX:
+
+		newMsgBox->confirmButtonNO = new RUButton();
+		newMsgBox->confirmButtonNO->setWidth(60);
+		newMsgBox->confirmButtonNO->setHeight(25);
+		newMsgBox->confirmButtonNO->setMarginX(DEFAULT_WIDTH - newMsgBox->confirmButtonNO->getWidth() -
+									6); // -6 = padding
+		newMsgBox->confirmButtonNO->setMarginY(DEFAULT_HEIGHT - newMsgBox->confirmButtonNO->getHeight() -
+									6); // -6 = padding
+		newMsgBox->confirmButtonNO->setText(" NO ");
+		newMsgBox->confirmButtonNO->setName(NO_BUTTON);
+		newMsgBox->addSubItem(newMsgBox->confirmButtonNO);
+
+		newMsgBox->confirmButtonYES = new RUButton();
+		newMsgBox->confirmButtonYES->setWidth(60);
+		newMsgBox->confirmButtonYES->setHeight(25);
+		newMsgBox->confirmButtonYES->setMarginX(newMsgBox->confirmButtonNO->getMarginX() - newMsgBox->confirmButtonYES->getWidth() -
+									 6); // -6 = padding
+		newMsgBox->confirmButtonYES->setMarginY(DEFAULT_HEIGHT - newMsgBox->confirmButtonNO->getHeight() -
+									 6); // -6 = padding
+		newMsgBox->confirmButtonYES->setText(" YES ");
+		newMsgBox->confirmButtonYES->setName(YES_BUTTON);
+		newMsgBox->addSubItem(newMsgBox->confirmButtonYES);
+
+		break;
+
+	case INPUTBOX:
+
+		newMsgBox->inputButtonSubmit = new RUButton();
+		newMsgBox->inputButtonSubmit->setWidth(60);
+		newMsgBox->inputButtonSubmit->setHeight(20);
+		newMsgBox->inputButtonSubmit->setMarginX(DEFAULT_WIDTH - newMsgBox->inputButtonSubmit->getWidth());
+		newMsgBox->inputButtonSubmit->setMarginY(DEFAULT_HEIGHT - newMsgBox->inputButtonSubmit->getHeight() - 6);
+		newMsgBox->inputButtonSubmit->setText("Submit");
+		newMsgBox->inputButtonSubmit->setName(SUBMIT_BUTTON);
+		newMsgBox->addSubItem(newMsgBox->inputButtonSubmit);
+
+		newMsgBox->inputText = new RUTextbox();
+		newMsgBox->inputText->setWidth(cPanel->getWidth() - newMsgBox->inputButtonSubmit->getWidth() - 6); // -6 = padding
+		newMsgBox->inputText->setHeight(20);
+		newMsgBox->inputText->setMarginX(DEFAULT_WIDTH - newMsgBox->inputText->getWidth() -
+							  newMsgBox->inputButtonSubmit->getWidth() - 6);			// -6 = padding
+		newMsgBox->inputText->setMarginY(DEFAULT_HEIGHT - newMsgBox->inputText->getHeight() - 6); // 6 = padding
+		newMsgBox->inputText->setStaticBorder(true);
+		newMsgBox->inputText->setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
+		newMsgBox->inputText->setBorderWidth(2);
+		newMsgBox->inputText->toggleBorder(true);
+		newMsgBox->addSubItem(newMsgBox->inputText);
+
+		break;
+	}
+
+
+	newMsgBox->setX((cPanel->getWidth() / 2.0f) - (newMsgBox->getWidth() / 2.0f));
+	newMsgBox->setY((cPanel->getHeight() / 2.0f) - (newMsgBox->getHeight() / 2.0f));
+	newMsgBox->setName(title + ":" + msg);
+	cPanel->addSubItem(newMsgBox, GItem::Z_BACK);
 }
