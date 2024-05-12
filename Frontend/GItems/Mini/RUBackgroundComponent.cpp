@@ -75,7 +75,6 @@ bool RUBackgroundComponent::resetSurface()
 	else
 	{
 		// Replace with the bgCache instead of this color
-		//SDL_FillRect(surfaceTheUSA, NULL, SDL_MapRGB(surfaceTheUSA->format, bgColor.r, bgColor.g, bgColor.b));
 		/*for (int cx = 0; cx < getWidth(); ++cx)
 		{
 			for (int cy = 0; cy < getHeight(); ++cy)
@@ -98,7 +97,7 @@ bool RUBackgroundComponent::resetSurface()
 	}
 
 	// Success
-	// SDL_BLENDMODE_ADD instead?
+	SDL_FillRect(surfaceTheUSA, NULL, SDL_MapRGB(surfaceTheUSA->format, bgColor.r, bgColor.g, bgColor.b));
 	SDL_SetSurfaceBlendMode(surfaceTheUSA, SDL_BLENDMODE_BLEND);
 
 
