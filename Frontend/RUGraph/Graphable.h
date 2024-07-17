@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include "GraphableAttr.h"
+#include "../GItems/RUColors.h"
 
 class RUGraph;
 
@@ -34,6 +35,7 @@ class Graphable : public GraphableAttr
 private:
 	std::vector<T*> points;
 	bool visible;
+	SDL_Color lineColor;
 
 public:
 
@@ -43,13 +45,15 @@ public:
 
 	// constructors & destructor
 	Graphable();
-	Graphable(RUGraph*, SDL_Color);
+	Graphable(RUGraph*);
 	virtual ~Graphable();
 
 	unsigned int size() const;
 	unsigned int normalizedSize() const;
 	bool isVisible() const;
+	SDL_Color getColor() const;
 	void setVisible(bool);
+	void setColor(SDL_Color);
 	void add(const T*, bool = true);
 	void set(const std::vector<T*>&);
 	virtual void clear();
@@ -60,7 +64,7 @@ public:
 };
 
 template <class T>
-Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor) : GraphableAttr(newParent, newColor)
+Graphable<T>::Graphable(RUGraph* newParent) : GraphableAttr(newParent)
 {
 	visible = true;
 }
@@ -96,9 +100,21 @@ bool Graphable<T>::isVisible() const
 }
 
 template <class T>
+SDL_Color Graphable<T>::getColor() const
+{
+	return lineColor;
+}
+
+template <class T>
 void Graphable<T>::setVisible(bool newVisible)
 {
 	visible = newVisible;
+}
+
+template <class T>
+void Graphable<T>::setColor(SDL_Color newColor)
+{
+	lineColor = newColor;
 }
 
 template <class T>
@@ -156,6 +172,7 @@ void Graphable<T>::clear()
 	points.clear();
 	normalizedPoints.clear();
 	visible = false;
+	lineColor = RUColors::DEFAULT_COLOR_LINE;
 }
 
 #endif

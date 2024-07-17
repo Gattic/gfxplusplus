@@ -38,7 +38,6 @@ protected:
 	RUGraph* parent;
 	bool xMode;
 	bool yMode;
-	SDL_Color lineColor;
 
 public:
 
@@ -46,7 +45,7 @@ public:
 
 	// constructors & destructor
 	GraphableAttr();
-	GraphableAttr(RUGraph*, SDL_Color);
+	GraphableAttr(RUGraph*);
 	virtual ~GraphableAttr();
 
 	// gets
@@ -56,12 +55,10 @@ public:
 	float getYMaxModed() const;
 	bool getXMode() const;
 	bool getYMode() const;
-	SDL_Color getColor() const;
 
 	// sets
 	void setXMode(bool);
 	void setYMode(bool);
-	void setColor(SDL_Color);
 	virtual void clear();
 
 	// render

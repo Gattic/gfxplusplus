@@ -185,9 +185,10 @@ void RUGraph::set(const shmea::GString& label, const std::vector<T*>& graphPoint
 	}
 	else
 	{
-		newPlotter = new GeneralGraphable(this, lineColor, T());
+		newPlotter = new GeneralGraphable(this, T());
 		if (!newPlotter)
 			return;
+		newPlotter->setColor(lineColor);
 		graphables[label] = newPlotter;
 		if (!graphables[label])
 			return;
