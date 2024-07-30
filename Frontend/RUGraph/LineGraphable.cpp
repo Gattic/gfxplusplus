@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
 #include "RUGraph.h"
+#include "../GFXUtilities/point2.h"
 
 //TODO: Separate Scalar1D from Point2D and implement this add fncality
 

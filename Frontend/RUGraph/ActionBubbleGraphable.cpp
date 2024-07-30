@@ -17,6 +17,8 @@
 #include "Graphable.h"
 #include "RUGraph.h"
 #include "../GFXUtilities/ActionBubble.h"
+#include "../GFXUtilities/point2.h"
+#include "../GFXUtilities/Candle.h"
 
 template <>
 void Graphable<ActionBubble>::computeAxisRanges(bool additionOptimization)

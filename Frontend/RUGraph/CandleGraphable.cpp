@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
 #include "RUGraph.h"
+#include "../GFXUtilities/Candle.h"
 
 template <>
 void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
