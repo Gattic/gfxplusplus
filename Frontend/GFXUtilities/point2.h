@@ -17,6 +17,7 @@
 #ifndef _GPOINT2
 #define _GPOINT2
 
+#include "GraphablePoint.h"
 #include <float.h>
 #include <iostream>
 #include <math.h>
@@ -24,7 +25,7 @@
 #include <stdlib.h>
 #include <vector>
 
-class Point2
+class Point2 : public GraphablePoint
 {
 private:
 	double x, y;
@@ -102,6 +103,16 @@ public:
 	bool operator>(const Point2& c2) const // ONLY COMPARES X
 	{
 		return (getX() > c2.getX());
+	}
+
+	virtual double getMinY() const
+	{
+	    return getY();
+	}
+
+	virtual double getMaxY() const
+	{
+	    return getY();
 	}
 };
 

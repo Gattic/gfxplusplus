@@ -18,7 +18,7 @@ void Graphable<T>::computeAxisRanges(bool additionOptimization)
     {
         // Check if the latest y is not within the current range
         float yMax = points.back()->getMaxY();
-        float yMin = points.back()->getMinY;
+        float yMin = points.back()->getMinY();
         if ((yMin < getYMin()) || (yMax > getYMax()))
             redoRange = true;
     }
@@ -81,7 +81,7 @@ void Graphable<T>::computeAxisRanges(bool additionOptimization)
 
     for (; i < points.size(); ++i)
     {
-        float newYValue = (points[i] - getYMin()) * pointYGap;
+        float newYValue = (points[i]->getMaxY() - getYMin()) * pointYGap;
 
         ++aggCounter;
         aggValue = newYValue;
@@ -103,4 +103,3 @@ void Graphable<T>::computeAxisRanges(bool additionOptimization)
 
     parent->requireDrawUpdate();
 }
-

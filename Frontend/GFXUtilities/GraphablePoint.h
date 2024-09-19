@@ -26,6 +26,12 @@
 class GraphablePoint
 {
 public:
+	virtual double getX() const = 0;
+	virtual double getY() const = 0;
+
+	virtual void setX(double) = 0;
+	virtual void setY(double) = 0;
+
 	virtual double getMinY() const = 0;
 	virtual double getMaxY() const = 0;
 };
