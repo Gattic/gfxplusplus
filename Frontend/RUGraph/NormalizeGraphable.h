@@ -1,52 +1,8 @@
+#include "../GFXUtilities/GraphablePoint.h"
+#include "RUGraph.h"
 #include <vector>
 #include <limits>
 #include <cmath>
-
-// Forward declaration of traits
-template<typename T>
-struct GraphableTraits;
-
-// Define traits for Point2
-template<>
-struct GraphableTraits<Point2>
-{
-    static float getY(const Point2* point) { return point->getY(); }
-    static float getYMin(const Point2* point) { return point->getY(); }
-    static float getYMax(const Point2* point) { return point->getY(); }
-};
-
-// Define traits for Candle
-template<>
-struct GraphableTraits<Candle>
-{
-    static float getYMin(const Candle* candle) { return candle->getLow(); }
-    static float getYMax(const Candle* candle) { return candle->getHigh(); }
-    static float getYOpen(const Candle* candle) { return candle->getOpen(); }
-    static float getYClose(const Candle* candle) { return candle->getClose(); }
-};
-
-template<typename T>
-class Graphable
-{
-public:
-    void computeAxisRanges(bool additionOptimization);
-
-private:
-    std::vector<T*> points;
-    std::vector<T*> normalizedPoints;
-    bool redoRange;
-    Parent* parent;
-
-    float getXMin() const;
-    float getXMax() const;
-    float getYMin() const;
-    float getYMax() const;
-    void setXMin(float value);
-    void setXMax(float value);
-    void setYMin(float value);
-    void setYMax(float value);
-};
-
 
 template<typename T>
 void Graphable<T>::computeAxisRanges(bool additionOptimization)
@@ -61,8 +17,8 @@ void Graphable<T>::computeAxisRanges(bool additionOptimization)
     if (additionOptimization)
     {
         // Check if the latest y is not within the current range
-        float yMax = GraphableTraits<T>::getYMax(points.back());
-        float yMin = GraphableTraits<T>::getYMin(points.back());
+        float yMax = points.back()->getMaxY();
+        float yMin = points.back()->getMinY;
         if ((yMin < getYMin()) || (yMax > getYMax()))
             redoRange = true;
     }
@@ -74,8 +30,8 @@ void Graphable<T>::computeAxisRanges(bool additionOptimization)
         {
             T* pt = points[i];
             float x_pt = pt->getX();
-            float y_max = GraphableTraits<T>::getYMax(pt);
-            float y_min = GraphableTraits<T>::getYMin(pt);
+            float y_max = pt->getMaxY();
+            float y_min = pt->getMinY();
 
             setXMax(x_pt);
             setXMin(x_pt);
@@ -125,7 +81,7 @@ void Graphable<T>::computeAxisRanges(bool additionOptimization)
 
     for (; i < points.size(); ++i)
     {
-        float newYValue = (GraphableTraits<T>::getYMax(points[i]) - getYMin()) * pointYGap;
+        float newYValue = (points[i] - getYMin()) * pointYGap;
 
         ++aggCounter;
         aggValue = newYValue;
@@ -135,7 +91,8 @@ void Graphable<T>::computeAxisRanges(bool additionOptimization)
             continue;
         }
 
-        float newXValue = normalCounter * pointXGap;
+        //float newXValue = normalCounter * pointXGap;
+	float newXValue = ((i/agg) * pointXGap)+ (pointXGap / 2);
         normalizedPoints[normalCounter]->setX(parent->getAxisOriginX() + newXValue);
         normalizedPoints[normalCounter]->setY(parent->getAxisOriginY() + static_cast<float>(parent->getHeight()) - aggValue);
 
