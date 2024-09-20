@@ -17,6 +17,7 @@
 #include "Graphable.h"
 #include "RUGraph.h"
 #include "../GFXUtilities/Circle.h"
+#include "../GFXUtilities/point2.h"
 
 template <>
 void Graphable<Circle>::computeAxisRanges(bool additionOptimization)

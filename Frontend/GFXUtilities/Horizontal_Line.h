@@ -17,6 +17,7 @@
 #ifndef _GHORIZONTALLINE
 #define _GHORIZONTALLINE
 
+#include "GraphablePoint.h"
 #include <float.h>
 #include <iostream>
 #include <math.h>
@@ -24,7 +25,7 @@
 #include <stdlib.h>
 #include <vector>
 
-class Horizontal_Line
+class Horizontal_Line : public GraphablePoint
 {
 private:
 	double y;
@@ -92,6 +93,26 @@ public:
 	bool operator>(const Horizontal_Line& c2) const // ONLY COMPARES X
 	{
 		return (getY() > c2.getY());
+	}
+
+	virtual double getX() const
+	{
+	    return 0;
+	}
+
+	virtual void setX(double newX)
+	{
+	    //
+	}
+
+	virtual double getMinY() const
+	{
+	    return getY();
+	}
+
+	virtual double getMaxY() const
+	{
+	    return getY();
 	}
 };
 

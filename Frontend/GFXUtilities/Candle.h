@@ -17,6 +17,7 @@
 #ifndef _GCANDLE
 #define _GCANDLE
 
+#include "GraphablePoint.h"
 #include <float.h>
 #include <iostream>
 #include <math.h>
@@ -119,6 +120,26 @@ public:
 	bool operator>(const Candle& c2) const // ONLY COMPARES X
 	{
 		return (getX() > c2.getX());
+	}
+
+	virtual double getY() const
+	{
+	    return getClose();
+	}
+
+	virtual void setY(double newY)
+	{
+	    //
+	}
+
+	virtual double getMinY() const
+	{
+	    return getLow();
+	}
+
+	virtual double getMaxY() const
+	{
+	    return getHigh();
 	}
 };
 

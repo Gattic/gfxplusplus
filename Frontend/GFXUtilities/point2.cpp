@@ -80,17 +80,3 @@ void Point2::normalize()
 	x /= len;
 	y /= len;
 }
-
-shmea::GList Point2::toXVectorData() const
-{
-	shmea::GList xData;
-	xData.addFloat(getX());
-	return xData;
-}
-
-shmea::GList Point2::toYVectorData() const
-{
-	shmea::GList yData;
-	yData.addFloat(getY());
-	return yData;
-}

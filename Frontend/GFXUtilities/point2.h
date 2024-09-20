@@ -17,15 +17,15 @@
 #ifndef _GPOINT2
 #define _GPOINT2
 
+#include "GraphablePoint.h"
 #include <float.h>
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
-#include "Backend/Database/StandItem.h"
 
-class Point2 : public shmea::StandItem
+class Point2 : public GraphablePoint
 {
 private:
 	double x, y;
@@ -46,8 +46,6 @@ public:
 	void setX(double);
 	void setY(double);
 	void normalize();
-	virtual shmea::GList toXVectorData() const;
-	virtual shmea::GList toYVectorData() const;
 
 	// operators
 	inline Point2 operator+(Point2 v)
@@ -105,6 +103,16 @@ public:
 	bool operator>(const Point2& c2) const // ONLY COMPARES X
 	{
 		return (getX() > c2.getX());
+	}
+
+	virtual double getMinY() const
+	{
+	    return getY();
+	}
+
+	virtual double getMaxY() const
+	{
+	    return getY();
 	}
 };
 
