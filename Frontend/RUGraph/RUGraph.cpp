@@ -42,17 +42,16 @@ RUGraph::RUGraph(int newWidth, int newHeight, int newQuadrants)
 
 	graphSize = DEFAULT_GRAPH_SIZE;
 	axisWidth = DEFAULT_AXIS_WIDTH;
+	dotMatrixEnabled = false;
 	gridEnabled = false;
 	gridLineWidth = DEFAULT_GRIDLINE_WIDTH;
 
-	xMin = FLT_MAX;
-	xMax = FLT_MIN;
-	yMin = FLT_MAX;
-	yMax = FLT_MIN;
 	vscale = 1.0;
 	period = P_1Y;
 	agg = AGG_1m;
 	sourceAgg = AGG_1m;
+
+	setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
 }
 
 RUGraph::~RUGraph()
@@ -67,14 +66,12 @@ RUGraph::~RUGraph()
 	gridLineWidth = 0;
 	quadrants = QUADRANTS_ONE;
 
-	xMin = FLT_MAX;
-	xMax = FLT_MIN;
-	yMin = FLT_MAX;
-	yMax = FLT_MIN;
 	vscale = 1.0;
 	period = P_1Y;
 	agg = AGG_1m;
 	sourceAgg = AGG_1m;
+
+	setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
 }
 
 std::vector<shmea::GString> RUGraph::getNames() const
@@ -122,6 +119,11 @@ int RUGraph::getAxisWidth() const
 	return axisWidth;
 }
 
+bool RUGraph::getDotMatrixEnabled() const
+{
+	return dotMatrixEnabled;
+}
+
 bool RUGraph::getGridEnabled() const
 {
 	return gridEnabled;
@@ -161,26 +163,6 @@ float RUGraph::getQuadrantOffsetY() const
 	return quadrantOffsetY;
 }
 
-float RUGraph::getXMin() const
-{
-	return xMin;
-}
-
-float RUGraph::getXMax() const
-{
-	return xMax;
-}
-
-float RUGraph::getYMin() const
-{
-	return yMin;
-}
-
-float RUGraph::getYMax() const
-{
-	return yMax;
-}
-
 float RUGraph::getVScale() const
 {
 	return vscale;
@@ -218,6 +200,12 @@ void RUGraph::setAxisWidth(int newAxisWidth)
 	drawUpdate = true;
 }
 
+void RUGraph::setDotMatrixEnabled(bool newDotMatrixEnabled)
+{
+	dotMatrixEnabled = newDotMatrixEnabled;
+	drawUpdate = true;
+}
+
 void RUGraph::setGridEnabled(bool newGridEnabled)
 {
 	gridEnabled = newGridEnabled;
@@ -234,26 +222,6 @@ void RUGraph::setQuadrants(int newQuadrants)
 {
 	quadrants = newQuadrants;
 	drawUpdate = true;
-}
-
-void RUGraph::setXMin(float newXMin)
-{
-	xMin = newXMin;
-}
-
-void RUGraph::setXMax(float newXMax)
-{
-	xMax = newXMax;
-}
-
-void RUGraph::setYMin(float newYMin)
-{
-	yMin = newYMin;
-}
-
-void RUGraph::setYMax(float newYMax)
-{
-	yMax = newYMax;
 }
 
 void RUGraph::setVScale(float newVScale)
@@ -301,6 +269,8 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 	fullRect.h = height;
 
 	SDL_RenderFillRect(cGfx->getRenderer(), &fullRect);
+
+	drawVerticalGradient(cGfx->getRenderer(), fullRect, getBGColor(), RUColors::COLOR_BLUE, 20);
 
 	// draw the axes
 	if (axisWidth > 0)
@@ -371,6 +341,33 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 
 				SDL_RenderFillRect(cGfx->getRenderer(), &lineYRect);
 			}
+		}
+		else if ((dotMatrixEnabled) && (gridLineWidth > 0))
+		{
+		    SDL_SetRenderDrawColor(cGfx->getRenderer(), 0x61, 0x61, 0x61, 0xFF); // gray
+		    int dotCount = graphSize * DEFAULT_NUM_ZONES; // 10 spaces per axis
+
+		    //build dot matrix
+		    SDL_Rect lineDotRect;
+
+		    int lineGapWidth = ((float)width) / ((float)dotCount);
+		    int lineGapHeight = ((float)height) / ((float)dotCount);
+		    int thick = 5;
+		    for(int i = 0; i < dotCount; i++)
+		    {
+			for(int j = 0; j < dotCount; j++)
+			{
+//			    xPoints.push_back(i);
+//			    yPoints.push_back(j);
+//
+			    lineDotRect.x = axisOriginX + (i * lineGapWidth) - (axisWidth / 2);
+			    lineDotRect.y = axisOriginY + (j * lineGapHeight) - (thick / 2);
+			    lineDotRect.w = thick;
+			    lineDotRect.h = thick;
+
+			    SDL_RenderFillRect(cGfx->getRenderer(), &lineDotRect);
+			}
+		    }
 		}
 
 		// x ticks
@@ -462,11 +459,6 @@ void RUGraph::clear(bool toggleDraw)
 	for (it = graphables.begin(); it != graphables.end(); ++it)
 		delete it->second;
 	graphables.clear();
-
-	xMin = FLT_MAX;
-	xMax = FLT_MIN;
-	yMin = FLT_MAX;
-	yMax = FLT_MIN;
 
 	if (toggleDraw)
 		drawUpdate = true;

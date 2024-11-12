@@ -60,6 +60,9 @@ void GLinearLayout::calculateSubItemPositions(std::pair<int, int> parentOffset)
 		cItem->setX(cItemOffset.first + cItem->getMarginX());
 		cItem->setY(cItemOffset.second + cItem->getMarginY());
 
+		if(!cItem->isVisible())
+		    continue;
+
 		// draw the item
 		cItem->calculateSubItemPositions(parentOffset);
 
@@ -144,6 +147,13 @@ void GLinearLayout::updateBackgroundHelper(gfxpp* cGfx)
 		// draw the item
 		cItem->updateBackgroundHelper(cGfx);
 	}
+}
+
+void GLinearLayout::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
+{
+	std::pair<int, int> parentOffset(0, 0);
+	calculateSubItemPositions(parentOffset);
+	drawUpdate = true;
 }
 
 shmea::GString GLinearLayout::getType() const

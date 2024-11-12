@@ -15,21 +15,19 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "graphics.h"
-#include "../GFXUtilities/quaternion.h"
 #include "../GItems/GItem.h"
 #include "../GItems/GLayout.h"
+#include "../GItems/GPanel.h"
 #include "../GItems/RUColors.h"
 #include "../GItems/RUComponent.h"
 #include "../GUI/Text/GFont.h"
-#include "../GUI/Text/RULabel.h"
-#include "object.h"
+//#include "../GUI/Text/RULabel.h"
 
 gfxpp::gfxpp()
 {
 	systemCursor = NULL;
 	width = 800;
 	height = 600;
-	renderStatus = _2D;
 
 	errorFlag = initHelper(false, "gfxplusplus", true);
 }
@@ -37,7 +35,6 @@ gfxpp::gfxpp()
 gfxpp::gfxpp(shmea::GString newTitle, int newRenderStatus, bool fullScreenMode, bool compatMode, int newWidth, int newHeight)
 {
 	systemCursor = NULL;
-	renderStatus = newRenderStatus;
 	width = newWidth;
 	height = newHeight;
 
@@ -58,7 +55,6 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode
 {
 	running = false;
 	hunterZolomon = 1.0f;
-	renderStatus = _2D;
 
 	frames = 0;
 	rotate = false;
@@ -91,12 +87,7 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode
 	focusedItem = NULL;
 	focusedPanel = NULL;
 
-	fpsLabel = NULL;
-
-	roll = Quaternion(0.0f, 1.0f, 0.0f, 0.0f);
-	pitch = Quaternion(0.0f, 0.0f, 1.0f, 0.0f);
-	yaw = Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
-	cObjIndex = -1;
+	fps = 0;
 
 	// Initialize SDL
 	int sdlStatus = SDL_Init(SDL_INIT_VIDEO);
@@ -145,14 +136,9 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode
 		return -2;
 	}
 
-	if (renderStatus == _2D)
-	{
-		int errorNo = init2D(compatMode);
-		if (errorNo < 0)
-			return errorNo;
-	}
-	else if (renderStatus == _3D)
-		init3D();
+	int errorNo = init2D(compatMode);
+	if (errorNo < 0)
+	    return errorNo;
 
 	// Set the SDL system cursor
 	systemCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
@@ -167,7 +153,7 @@ int gfxpp::init2D(bool compatMode)
 	if(compatMode)
 		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_TARGETTEXTURE);
 	else
-		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 	if (!renderer)
 	{
 		printf("[GFX] Renderer error: %s\n", SDL_GetError());
@@ -208,53 +194,18 @@ int gfxpp::init2D(bool compatMode)
 	return 0;
 }
 
-void gfxpp::init3D()
-{
-	// Create a new context
-	context = SDL_GL_CreateContext(window);
-	SDL_GL_SetSwapInterval(1);
-
-	// Set 3D rendering settings
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glShadeModel(GL_SMOOTH);
-}
-
 void gfxpp::run()
 {
-	if (renderStatus == _2D)
-	{
-		// Set the FPS Component
-		fpsLabel = new RULabel();
-		fpsLabel->setWidth(60);
-		fpsLabel->setHeight(20);
-		fpsLabel->setX(10);
-		fpsLabel->setY(1050);
-		fpsLabel->setText("");
-		// fpsLabel->setFontSize(40);
-		// fpsLabel->toggleBG(false);
-		addItem(fpsLabel);
-	}
-	else if (renderStatus == _3D)
-	{
-		// Other testing
-		// SDL_Color textColor={0x00, 0x00, 0x00};
-		// Graphics::addText("Hello World!", textColor);
-		// Graphics::addBMP("graphics/xorgate.bmp");
-		// Graphics::addGradient(800/2, 600/2, 500);
-		// Graphics::addBasis();
-		addCube();
-	}
-
 	// the display loop
 	display();
-	//finish();
+	finish();
 }
 
 void gfxpp::display()
 {
 	running = true;
 	frames = 0;
+	fps = 0;
 	rotate = false;
 	move = false;
 	now = 0;
@@ -410,24 +361,11 @@ void gfxpp::display()
 						system("clear");
 				}
 
-				// Cycle between objects
-				if (spacePressed)
-				{
-					if (objects.size() > 0)
-					{
-						++cObjIndex;
-						if (cObjIndex >= objects.size())
-							cObjIndex = 0;
-					}
-				}
-
 				// quit the gui window
 				if (keyPressed == SDLK_ESCAPE)
 					running = false;
 			}
 
-			if (renderStatus == _2D)
-			{
 
 				if ((event.type == SDL_MOUSEBUTTONDOWN) || (event.type == SDL_MOUSEBUTTONUP) ||
 					(event.type == SDL_MOUSEMOTION))
@@ -439,243 +377,38 @@ void gfxpp::display()
 				// Events for the focused panel
 				if (focusedPanel)
 					focusedPanel->processSubItemEvents(this, NULL, NULL, event, mouseX, mouseY);
-			}
-			else if (renderStatus == _3D)
-			{
-				// are we holding click?
-				if (event.type == SDL_MOUSEBUTTONDOWN)
-				{
-					if (CTRLPressed)
-					{
-						rotate = true;
-						move = false;
-					}
-					else
-					{
-						rotate = false;
-						move = true;
-					}
-				}
-				else if (event.type == SDL_MOUSEBUTTONUP)
-				{
-					rotate = false;
-					move = false;
-				}
-
-				// Scrollwheel
-				if (event.type == SDL_MOUSEWHEEL)
-				{
-					if (rPressed)
-					{
-						// Move the Object (z)
-						if ((objects.size() > 0) && (cObjIndex != (unsigned int)-1))
-						{
-							Vec3 position = objects[cObjIndex]->getCenter();
-							Vec3 mouseVec(0.0f, 0.0f, event.wheel.y);
-							position = position + mouseVec;
-
-							// Set the center/position of the selected object
-							objects[cObjIndex]->setCenter(position);
-						}
-					}
-					else
-					{
-						// Camera Zoom
-						if (event.wheel.y > 0)
-						{
-							// Scroll down
-							if (hunterZolomon > 0.0f)
-								hunterZolomon -= 0.1;
-						}
-						else if (event.wheel.y < 0)
-						{
-							// Scroll up
-							hunterZolomon += 0.1;
-						}
-					}
-				}
-
-				// Interact with the object
-				if ((objects.size() > 0) && (cObjIndex != (unsigned int)-1))
-				{
-					if (event.type == SDL_MOUSEMOTION)
-					{
-						double a = event.motion.yrel;
-						double b = event.motion.xrel;
-
-						// Rotate the object
-						if (rotate)
-						{
-							Quaternion rotation = objects[cObjIndex]->getRotation();
-
-							// Normalize the rotation quat
-							rotation.normalize();
-
-							// Create the mouse movement quat
-							Quaternion mouseQuat(360, a, b, 0);
-							mouseQuat.normalize();
-
-							// Apply the change vector
-							rotation = rotation * mouseQuat;
-							rotation.normalize();
-
-							// Set the rotation of the selected object
-							objects[cObjIndex]->setRotation(rotation);
-						}
-
-						// Move the Object (x and y)
-						if (move)
-						{
-							Vec3 position = objects[cObjIndex]->getCenter();
-							Vec3 mouseVec(b / 40.0f, -a / 40.0f, 0.0f);
-							position = position + mouseVec;
-
-							// Set the center/position of the selected object
-							objects[cObjIndex]->setCenter(position);
-						}
-					}
-
-					// Edit the dimensions of the object
-					if (upPressed)
-					{
-						Vec3 cDimensions = objects[cObjIndex]->getDimensions();
-						Vec3 mouseVec(0.0f, 0.1f, 0.0f);
-						cDimensions = cDimensions + mouseVec;
-
-						// Set the center/cDimensions of the selected object
-						objects[cObjIndex]->setDimensions(cDimensions);
-					}
-					else if (downPressed)
-					{
-						Vec3 cDimensions = objects[cObjIndex]->getDimensions();
-						Vec3 mouseVec(0.0f, -0.1f, 0.0f);
-						cDimensions = cDimensions + mouseVec;
-
-						// Set the center/cDimensions of the selected object
-						objects[cObjIndex]->setDimensions(cDimensions);
-					}
-					else if (leftPressed)
-					{
-						Vec3 cDimensions = objects[cObjIndex]->getDimensions();
-						Vec3 mouseVec(0.1f, 0.0f, 0.0f);
-						cDimensions = cDimensions + mouseVec;
-
-						// Set the center/cDimensions of the selected object
-						objects[cObjIndex]->setDimensions(cDimensions);
-					}
-					else if (rightPressed)
-					{
-						Vec3 cDimensions = objects[cObjIndex]->getDimensions();
-						Vec3 mouseVec(-0.1f, 0.0f, 0.0f);
-						cDimensions = cDimensions + mouseVec;
-
-						// Set the center/cDimensions of the selected object
-						objects[cObjIndex]->setDimensions(cDimensions);
-					}
-				}
-			}
 		}
 
-		//=================Render=================
-		if (renderStatus == _2D)
+		//=================Render 2D=================
+		// Render the focused panel
+		if (focusedPanel)
 		{
-			// Render the focused panel
-			if (focusedPanel)
-			{
-				SDL_RenderClear(renderer);
-				focusedPanel->updateBackgroundHelper(this);
-			}
-		}
-		else if (renderStatus == _3D)
-		{
-			// Set our viewport
-			glMatrixMode(GL_PROJECTION);
-			SDL_GL_MakeCurrent(window, context);
-			glViewport(0, 0, getWidth(), getHeight());
-
-			// gray background color
-			glClearColor(0.38f, 0.38f, 0.38f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			// orientation
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-			glOrtho(-2.0f * hunterZolomon, 2.0f * hunterZolomon, -2.0f * hunterZolomon,
-					2.0f * hunterZolomon, -20.0f * hunterZolomon, 20.0f * hunterZolomon);
-
-			// Render the objects
-			std::vector<Object*>::const_iterator itr = objects.begin();
-			for (; itr != objects.end(); ++itr)
-				(*itr)->Render();
-
-			SDL_GL_SwapWindow(window);
-			glFlush();
+		    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+		    SDL_RenderClear(renderer);
+		    focusedPanel->updateBackgroundHelper(this);
 		}
 
 		// fps
 		now = SDL_GetTicks();
 		float cFrames = ((float)frames * 1000.0f) / ((float)(now - then));
-		if ((fpsLabel) && (running))
+		/*if (running)
 		{
 			char fpsBuffer[26];
 			bzero(&fpsBuffer, 26);
 			sprintf(fpsBuffer, "%2.1f fps", cFrames);
-			fpsLabel->setText(fpsBuffer);
-		}
+		}*/
 
 		// Cap the frame rate
+		fps = cFrames;
 		if ((cFrames - MAX_FRAMES_PER_SECOND > 0) && (cFrames > MAX_FRAMES_PER_SECOND))
 			SDL_Delay((cFrames - MAX_FRAMES_PER_SECOND) * 10.0f);
 
-		// global gui elements
-		if ((fpsLabel) && (running))
-			fpsLabel->updateBackgroundHelper(this);
+		//Scale the screen to the window size:
+		SDL_RenderSetLogicalSize(renderer, getWidth(), getHeight());
 
 		// Update the screen
 		if (renderer)
 			SDL_RenderPresent(renderer);
-	}
-}
-
-void gfxpp::changeRenderStatus(int newRenderStatus, bool compatMode)
-{
-	if (renderStatus != newRenderStatus)
-	{
-		// New SDL instance
-		int errorNo = 0;
-		renderStatus = newRenderStatus;
-		if (renderStatus == _2D)
-		{
-			errorNo = init2D(compatMode);
-
-			// Set the FPS Component
-			fpsLabel = new RULabel();
-			fpsLabel->setWidth(200);
-			fpsLabel->setHeight(40);
-			fpsLabel->setX(width - fpsLabel->getWidth() - 6);
-			fpsLabel->setY(0);
-			fpsLabel->setText("");
-			// fpsLabel->setFontSize(40);
-			// fpsLabel->toggleBG(false);
-			addItem(fpsLabel);
-		}
-		else if (renderStatus == _3D)
-		{
-			init3D();
-			addBasis();
-			addCube();
-		}
-
-		// switch the type
-		if (errorNo != 0)
-			running = false;
-		else
-		{
-			/*if(renderStatus == _2D)
-				clean3D();
-			else if(renderStatus == _3D)
-				clean2D();*/
-		}
 	}
 }
 
@@ -715,28 +448,10 @@ void gfxpp::clean2D()
 	}*/
 }
 
-void gfxpp::clean3D()
-{
-	// gui
-	std::vector<Object*>::iterator itr = objects.begin();
-	for (; itr != objects.end(); ++itr)
-	{
-		Object* cObject = (*itr);
-		if (cObject)
-			delete cObject;
-	}
-	objects.clear();
-
-	SDL_GL_DeleteContext(context);
-}
-
 void gfxpp::finish()
 {
 	running = false;
-	if (renderStatus == _2D)
-		clean2D();
-	else if (renderStatus == _3D)
-		clean3D();
+	clean2D();
 
 	if (window)
 	{
@@ -752,4 +467,159 @@ void gfxpp::finish()
 bool gfxpp::getRunning() const
 {
 	return running;
+}
+
+unsigned int gfxpp::RGBfromHue(double hue, int8_t* r, int8_t* g, int8_t* b)
+{
+	int h = int(hue * 256 * 6);
+	int x = h % 0x100;
+
+	(*r) = 0;
+	(*g) = 0;
+	(*b) = 0;
+	switch (h / 256)
+	{
+	case 0:
+		(*r) = 0xFF;
+		(*g) = x;
+		break;
+	case 1:
+		(*g) = 0xFF;
+		(*r) = 0xFF - x;
+		break;
+	case 2:
+		(*g) = 0xFF;
+		(*b) = x;
+		break;
+	case 3:
+		(*b) = 0xFF;
+		(*g) = 0xFF - x;
+		break;
+	case 4:
+		(*b) = 0xFF;
+		(*r) = x;
+		break;
+	case 5:
+		(*r) = 0xFF;
+		(*b) = 0xFF - x;
+		break;
+	}
+
+	return (*r) + ((*g) << 8) + ((*b) << 16);
+}
+
+SDL_Cursor* gfxpp::getSystemCursor()
+{
+	return systemCursor;
+}
+
+void gfxpp::addGradient(int x, int y, int size)
+{
+	// check the renderer
+	if (!renderer)
+	{
+		printf("[GFX] Renderer error: %s\n", SDL_GetError());
+		return;
+	}
+
+	/*for (int i = (-(size / 2)); i < size / 2; ++i)
+	{
+		for (int j = (-(size / 2)); j < size / 2; ++j)
+		{
+			// calculate the hue
+			double hue = ((double)((i * i) + (j * j))) / ((double)(size * size));
+
+			// get the color
+			int8_t redMask = 0;
+			int8_t greenMask = 0;
+			int8_t blueMask = 0;
+			unsigned int colorMask = RGBfromHue(hue, &redMask, &greenMask, &blueMask);
+
+			// set the color and draw the point
+			SDL_SetRenderDrawColor(renderer, redMask, greenMask, blueMask, SDL_ALPHA_OPAQUE);
+			SDL_RenderDrawPoint(renderer, x + i, y + j);
+		}
+	}*/
+}
+
+void gfxpp::addItem(GItem* newItem)
+{
+	if (!newItem)
+		return;
+
+	const shmea::GString options = "0123456789";
+	const int keyLength = 6;
+	shmea::GString newItemID = "";
+	int itemID = 0;
+
+	do
+	{
+		newItemID = "";
+		for (int i = 0; i < keyLength; ++i)
+		{
+			int newIndex = rand() % options.length();
+			char newChar = options[newIndex];
+			newItemID += newChar;
+		}
+
+		itemID = atoi(newItemID.c_str());
+
+	} while (getItemByID(itemID)); // Generate new item id if already used
+
+	// Assign same id to object of GItem and add it
+	newItem->setID(itemID);
+	guiElements.push_back(newItem);
+}
+
+// Unique ID for each item, but names may be the same.
+void gfxpp::removeItem(int itemID)
+{
+	if (!itemID)
+		return;
+
+	for (unsigned int i = 0; i < guiElements.size(); ++i)
+	{
+		if (guiElements[i]->getID() == itemID)
+		{
+			guiElements.erase(guiElements.begin() + i);
+			break;
+		}
+	}
+}
+
+// Unique ID for each item, but names may be the same.
+GItem* gfxpp::getItemByID(int itemID)
+{
+	for (unsigned int i = 0; i < guiElements.size(); ++i)
+	{
+		if (guiElements[i]->getID() == itemID)
+			return guiElements[i];
+	}
+	return NULL;
+}
+
+void gfxpp::setFocus(GItem* newFocusedItem)
+{
+	if (!newFocusedItem)
+		return;
+
+	if (focusedItem)
+	{
+		focusedItem->unsetFocus();
+		if (focusedPanel)
+			focusedItem->triggerLoseFocusEvent(focusedPanel);
+	}
+
+	focusedItem = newFocusedItem;
+	focusedItem->setFocus();
+}
+
+int gfxpp::getWidth() const
+{
+	return width;
+}
+
+int gfxpp::getHeight() const
+{
+	return height;
 }

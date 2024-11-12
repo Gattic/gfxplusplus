@@ -21,26 +21,16 @@ GraphableAttr::GraphableAttr()
 {
 	parent = NULL;
 	setColor(RUColors::DEFAULT_COLOR_LINE);
-	localXMode = false;
-	localYMode = false;
-	localXMin = FLT_MAX;
-	localXMax = FLT_MIN;
-	localYMin = FLT_MAX;
-	localYMax = FLT_MIN;
-	redoRange = true;
+	xMode = false; // is local
+	yMode = false; // is local
 }
 
 GraphableAttr::GraphableAttr(RUGraph* newParent, SDL_Color newColor)
 {
 	parent = newParent;
 	setColor(newColor);
-	localXMode = false;
-	localYMode = false;
-	localXMin = FLT_MAX;
-	localXMax = FLT_MIN;
-	localYMin = FLT_MAX;
-	localYMax = FLT_MIN;
-	redoRange = true;
+	xMode = false; // is local
+	yMode = false; // is local
 }
 
 GraphableAttr::~GraphableAttr()
@@ -48,78 +38,58 @@ GraphableAttr::~GraphableAttr()
 	clear();
 }
 
-float GraphableAttr::getXMin() const
+float GraphableAttr::getXMinModed() const
 {
 	if(!parent)
 		return 0.0f;
 
-	if(localXMode)
-		return localXMin;
+	if(xMode)
+		return getXMin();
 
 	return parent->getXMin();
 }
 
-float GraphableAttr::getXMax() const
+float GraphableAttr::getXMaxModed() const
 {
 	if(!parent)
 		return 0.0f;
 
-	if(localXMode)
-		return localXMax;
+	if(xMode)
+		return getXMax();
 
 	return parent->getXMax();
 }
 
-float GraphableAttr::getYMin() const
+float GraphableAttr::getYMinModed() const
 {
 	if(!parent)
 		return 0.0f;
 
-	if(localYMode)
-		return localYMin;
+	if(yMode)
+		return getYMin();
 
 	return parent->getYMin();
 }
 
-float GraphableAttr::getYMax() const
+float GraphableAttr::getYMaxModed() const
 {
 	if(!parent)
 		return 0.0f;
 
-	if(localYMode)
-		return localYMax;
+	if(yMode)
+		return getYMax();
 
 	return parent->getYMax();
 }
 
-bool GraphableAttr::getLocalXMode() const
+bool GraphableAttr::getXMode() const
 {
-	return localXMode;
+	return xMode;
 }
 
-float GraphableAttr::getLocalXMin() const
+bool GraphableAttr::getYMode() const
 {
-	return localXMin;
-}
-
-float GraphableAttr::getLocalXMax() const
-{
-	return localXMax;
-}
-
-bool GraphableAttr::getLocalYMode() const
-{
-	return localYMode;
-}
-
-float GraphableAttr::getLocalYMin() const
-{
-	return localYMin;
-}
-
-float GraphableAttr::getLocalYMax() const
-{
-	return localYMax;
+	return yMode;
 }
 
 SDL_Color GraphableAttr::getColor() const
@@ -127,34 +97,14 @@ SDL_Color GraphableAttr::getColor() const
 	return lineColor;
 }
 
-void GraphableAttr::setLocalXMode(bool newLocalXMode)
+void GraphableAttr::setXMode(bool newLocalXMode)
 {
-	localXMode = newLocalXMode;
+	xMode = newLocalXMode;
 }
 
-void GraphableAttr::setLocalXMin(float newXMin)
+void GraphableAttr::setYMode(bool newLocalYMode)
 {
-	localXMin = newXMin;
-}
-
-void GraphableAttr::setLocalXMax(float newXMax)
-{
-	localXMax = newXMax;
-}
-
-void GraphableAttr::setLocalYMode(bool newLocalYMode)
-{
-	localYMode = newLocalYMode;
-}
-
-void GraphableAttr::setLocalYMin(float newYMin)
-{
-	localYMin = newYMin;
-}
-
-void GraphableAttr::setLocalYMax(float newYMax)
-{
-	localYMax = newYMax;
+	yMode = newLocalYMode;
 }
 
 void GraphableAttr::setColor(SDL_Color newColor)
@@ -165,13 +115,8 @@ void GraphableAttr::setColor(SDL_Color newColor)
 void GraphableAttr::clear()
 {
 	parent = NULL;
-	localXMode = false;
-	localYMode = false;
-	localXMin = FLT_MAX;
-	localXMax = FLT_MIN;
-	localYMin = FLT_MAX;
-	localYMax = FLT_MIN;
-	redoRange = true;
+	xMode = false;
+	yMode = false;
 }
 
 void GraphableAttr::updateBackground(gfxpp* cGfx)

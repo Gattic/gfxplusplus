@@ -19,15 +19,23 @@
 #include "../Graphics/graphics.h"
 #include "Backend/Database/image.h"
 
+RUImageComponent::RUImageComponent()
+{
+	//setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+	toggleBGColor(false);
+}
+
 RUImageComponent::RUImageComponent(const shmea::GString& newBGImageLocation)
 {
-	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+	//setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+	toggleBGColor(false);
 	setBGImageFromLocation(newBGImageLocation);
 }
 
-RUImageComponent::RUImageComponent(shmea::Image* newBGImage)
+RUImageComponent::RUImageComponent(shmea::GPointer<shmea::Image> newBGImage)
 {
-	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+	//setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+	toggleBGColor(false);
 	setBGImage(newBGImage);
 }
 

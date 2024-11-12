@@ -14,62 +14,43 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _LOGOUT_SERVER
-#define _LOGOUT_SERVER
+#ifndef _PNG_HELPER
+#define _PNG_HELPER
 
-#include "../Backend/Database/GString.h"
-#include "../Backend/Database/ServiceData.h"
-#include "../Backend/Networking/main.h"
-#include "../Backend/Networking/service.h"
+#include <iostream>
+#include <sstream>
+#include <errno.h>
+#include <sys/stat.h>
+#include <cstring>
+#include <string>
+#include <cmath>
+//#include <png.h>
+#include "GTable.h"
 
-class Logout_Server : public GNet::Service
+namespace shmea
 {
-private:
-	GNet::GServer* serverInstance;
+
+class Image;
+
+class PNGHelper
+{
 
 public:
-	Logout_Server()
-	{
-		serverInstance = NULL;
-	}
+    /*static void applyRainbowFilter(png_bytep, png_bytep, png_uint_32, png_byte);
 
-	Logout_Server(GNet::GServer* newInstance)
-	{
-		serverInstance = newInstance;
-	}
+    static void readImage(const char* inputPath, png_structp& png, png_infop& info, png_bytep*& rowPointers, png_uint_32& width, png_uint_32& height, png_byte& bitDepth, png_byte& colorType);
+    static void writeImage(const char* outputPath, png_structp png, png_infop info, png_bytep* rowPointers, png_uint_32 width, png_uint_32 height, png_byte bitDepth, png_byte colorType);*/
+    static void createPNGFromData(const GTable&, const char*);
+    static void createTestPNG(const char*);
+    static void applyRainbowFilter(Image&, unsigned int);
 
-	~Logout_Server()
-	{
-		serverInstance = NULL; // Not ours to delete
-	}
+    static void pngTest(const char*, const char*);    
+    static void SavePNG(const Image&, const char*);
+    static void LoadPNG(Image&, const char*);
+    static void LoadPNG(Image&, const unsigned char*, unsigned int, unsigned int);
 
-	shmea::ServiceData* execute(const shmea::ServiceData* data)
-	{
-		class GNet::Connection* destination = data->getConnection();
+};
 
-		if (!serverInstance)
-			return NULL;
-
-		printf("[SLOGOUT] %s\n", destination->getIP().c_str());
-
-		// delete it from the data structure
-		serverInstance->removeServerConnection(destination);
-
-		// Clean up the Connection
-		destination->finish();
-
-		return NULL;
-	}
-
-	GNet::Service* MakeService(GNet::GServer* newInstance) const
-	{
-		return new Logout_Server(newInstance);
-	}
-
-	shmea::GString getName() const
-	{
-		return "Logout_Server";
-	}
 };
 
 #endif

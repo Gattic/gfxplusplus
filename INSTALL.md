@@ -4,72 +4,46 @@
 
 ## Dependencies
 
-Linux/Cygwin:
-
 `cmake`
 
 `make`
 
-`gcc`
-
 `g++`
 
-libgl1-mesa-dev
+`libpng-dev`
 
-`libGL-devel`
+SDL2 graphics library
+`libsdl2-dev`
 
-`libGL1`
+SDL2 TTF for GUI
+`libsdl2-ttf-dev`
 
-`xorg-server`
-
-`SDL2 graphics library: libsdl2-dev`
-
-`SDL2 TTF for GUI: libsdl2-ttf-dev`
-
-`SDL2 Image for GUI: libsdl2-image-dev`
-
-`OpenSSL: libssl-dev`
-
-Cygwin:
-
-`xinit`
-
-MacOS:
-
-Install homebrew, a macOS package manager.
-
-`/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
- 
-`brew install cmake`
-
-Install Xcode command line tools.
-
-`$ xcode-select --install`
-
-`$ brew install pkgconfig`
-
-`brew install openssl`
-
-`brew link --force openssl` (Follow instructions to set environment paths)
-
-`brew install sdl2`
-
-`brew install sdl_ttf`
-
----
-
-## Installation
-
-sudo make install
+SDL2 Image for GUI
+`libsdl2-image-dev`
 
 ---
 
 ## Compilation
 
-Linux/MacOS/Windows/Cygwin:
+```
+sh .configure.sh
+```
+or
 ```
 mkdir build
 cd build
 cmake ..
 make
 ```
+
+---
+
+## Installation
+
+make install
+
+---
+
+## Uninstall
+
+make uninstall
