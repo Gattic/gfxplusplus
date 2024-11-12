@@ -28,6 +28,7 @@ RUBackgroundComponent::RUBackgroundComponent()
 	bgImageLocation = DEFAULT_IMAGE_BG;
 	bgImageType = TYPE_NONE;
 	setBGColor(RUColors::COLOR_TRANSPARENT);
+	//bgCache = shmea::GPointer<shmea::Image>(new shmea::Image());
 }
 
 RUBackgroundComponent::RUBackgroundComponent(SDL_Color newBGColor)
@@ -38,6 +39,7 @@ RUBackgroundComponent::RUBackgroundComponent(SDL_Color newBGColor)
 	bgImageLocation = DEFAULT_IMAGE_BG;
 	bgImageType = TYPE_NONE;
 	setBGColor(newBGColor);
+	//bgCache = shmea::GPointer<shmea::Image>(new shmea::Image());
 }
 
 RUBackgroundComponent::~RUBackgroundComponent()
@@ -51,6 +53,7 @@ RUBackgroundComponent::~RUBackgroundComponent()
 
 	bgImageLocation = DEFAULT_IMAGE_BG;
 	bgImageType = TYPE_NONE;
+	//bgCache = shmea::GPointer<shmea::Image>(new shmea::Image());
 }
 
 bool RUBackgroundComponent::resetSurface()
@@ -65,12 +68,27 @@ bool RUBackgroundComponent::resetSurface()
 		return false;
 
 	if (!surfaceTheUSA)
-		surfaceTheUSA = SDL_CreateRGBSurface(0, getWidth(), getHeight(),
-											 32, // 32 bits (depth)
-											 rmask, gmask, bmask, amask);
+	{
+		surfaceTheUSA = SDL_CreateRGBSurface(0, getWidth(), getHeight(), 32, rmask, gmask, bmask, amask);// 32 bits (depth)
+		//bgCache->Allocate(getWidth(), getHeight());
+	}
 	else
-		SDL_FillRect(surfaceTheUSA, NULL,
-					 SDL_MapRGB(surfaceTheUSA->format, bgColor.r, bgColor.g, bgColor.b));
+	{
+		// Replace with the bgCache instead of this color
+		/*for (int cx = 0; cx < getWidth(); ++cx)
+		{
+			for (int cy = 0; cy < getHeight(); ++cy)
+			{
+				shmea::RGBA c = bgCache->GetPixel(cx, cy);
+				uint32_t cPixel = SDL_MapRGBA(surfaceTheUSA->format, c.r, c.g, c.b, c.a);
+
+				// Copy it to the surface
+				// printf("(cx,cy): %d:%d\n", cx, cy);
+				uint8_t* surfacePixelData = (uint8_t*)surfaceTheUSA->pixels;
+				*((unsigned int*)(surfacePixelData + (cy * surfaceTheUSA->pitch) + (cx * surfaceTheUSA->format->BytesPerPixel))) = cPixel;
+			}
+		}*/
+	}
 
 	if (!surfaceTheUSA)
 	{
@@ -79,8 +97,10 @@ bool RUBackgroundComponent::resetSurface()
 	}
 
 	// Success
-	// SDL_BLENDMODE_ADD instead?
-	SDL_SetSurfaceBlendMode(surfaceTheUSA, SDL_BLENDMODE_NONE);
+	SDL_FillRect(surfaceTheUSA, NULL, SDL_MapRGB(surfaceTheUSA->format, bgColor.r, bgColor.g, bgColor.b));
+	SDL_SetSurfaceBlendMode(surfaceTheUSA, SDL_BLENDMODE_BLEND);
+
+
 	return true;
 }
 
@@ -135,14 +155,14 @@ void RUBackgroundComponent::fromImage(shmea::GPointer<shmea::Image> newBGImage)
 
 	// Success
 	// SDL_BLENDMODE_ADD instead?
-	SDL_SetSurfaceBlendMode(newImageSurface, SDL_BLENDMODE_NONE);
+	SDL_SetSurfaceBlendMode(newImageSurface, SDL_BLENDMODE_BLEND);
 
 	//printf("fromImage(%d, %d)\n", getWidth(), getHeight());
 	//printf("fromGImage(%d, %d)\n", bgImage->getWidth(), bgImage->getHeight());
 	//printf("img-info(%d, %d)\n", newImageSurface->pitch, newImageSurface->format->BytesPerPixel);
-	for (int cy = 0; cy < bgImage->getHeight(); ++cy)
+	for (unsigned int cy = 0; cy < bgImage->getHeight(); ++cy)
 	{
-		for (int cx = 0; cx < bgImage->getWidth(); ++cx)
+		for (unsigned int cx = 0; cx < bgImage->getWidth(); ++cx)
 		{
 			// Current image pixel
 			/*unsigned int cPixel = 0x00000000;
@@ -286,6 +306,19 @@ void RUBackgroundComponent::updateBGBackground(gfxpp* cGfx)
 		return;
 	}
 
+	// Copy the old background into a cache
+	// WAIT SHOULD THE BG CACHE HOLD THE PIXELS BEFORE THE IMAGE OR OF THE IMAGE?
+	for (int cx = 0; cx < bgRect.w; ++cx)
+	{
+		for (int cy = 0; cy < bgRect.h; ++cy)
+		{
+			shmea::RGBA c;
+			SDL_GetRGBA(*((Uint32*)surfaceTheUSA->pixels + cx + cy * bgRect.w), surfaceTheUSA->format, &c.r, &c.g, &c.b, &c.a);
+			//bgCache->SetPixel(cx, cy, c);
+		}
+	}
+
+	// Draw the texture
 	SDL_RenderCopy(cGfx->getRenderer(), bgImageTex, &bgRect, NULL);
 
 	/*if(bgImage)
