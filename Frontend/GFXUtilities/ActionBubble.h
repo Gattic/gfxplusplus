@@ -17,6 +17,7 @@
 #ifndef _RUACTIONBUBBLE
 #define _RUACTIONBUBBLE
 
+#include "GraphablePoint.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <map>
@@ -29,7 +30,7 @@
 class gfxpp;
 class Point2;
 
-class ActionBubble
+class ActionBubble : public GraphablePoint
 {
 protected:
 
@@ -62,6 +63,36 @@ public:
 	float getCost() const;
 	int getQuantity() const;
 	int getActionType() const;
+
+	virtual double getX() const
+	{
+	    return 0;
+	}
+
+	virtual double getY() const
+	{
+	    return 0;
+	}
+
+	virtual void setX(double newX)
+	{
+	    //
+	}
+
+	virtual void setY(double newY)
+	{
+	    //
+	}
+
+	virtual double getMinY() const
+	{
+	    return 0;
+	}
+
+	virtual double getMaxY() const
+	{
+	    return 0;
+	}
 };
 
 #endif

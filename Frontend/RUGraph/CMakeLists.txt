@@ -6,8 +6,6 @@ set(GraphGUI_src_files
 	EllipseGraphable.cpp
 	ActionBubbleGraphable.cpp
 	NeuralNetGraphable.cpp
-	GraphableAttr.cpp
-	GraphableAttr.h
 	HLineGraphable.cpp
 	Graphable.h
 	RUGraph.cpp

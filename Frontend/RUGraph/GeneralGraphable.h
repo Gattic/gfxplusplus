@@ -60,9 +60,9 @@ class GeneralGraphable
 			//
 		}
 
-		GraphableModel(RUGraph* newGraph, SDL_Color newColor)
+		GraphableModel(RUGraph* newGraph)
 		{
-			g = new Graphable<T>(newGraph, newColor);
+			g = new Graphable<T>(newGraph);
 		}
 
 		void set(const std::vector<T*>& newPoints)
@@ -132,9 +132,9 @@ public:
 	}
 
 	template< typename T>
-	GeneralGraphable(RUGraph* newGraph, SDL_Color newColor, T t) // Explicit templates on consctuctors do not work
+	GeneralGraphable(RUGraph* newGraph, T t) // Explicit templates on consctuctors do not work
 	{
-		object = new GraphableModel<T>(newGraph, newColor);
+		object = new GraphableModel<T>(newGraph);
 	}
 
 	template< typename T>
