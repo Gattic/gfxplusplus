@@ -49,112 +49,108 @@ void Ellipse::setRadius(double newRadius)
 
 void Ellipse::createHeatmap()
 {
-	heatmap.clear();
+    heatmap.clear();
 
-	// Circle
-	if (foci.size() == 1)
-	{
-		for (unsigned int focalIndex = 0; focalIndex < foci.size(); ++focalIndex)
-		{
-			const Point2* cFocalPoint = foci[focalIndex];
-			for (int i = -radius; i < radius; ++i)
-			{
-				int xIndex = cFocalPoint->getX() + i;
+    // Circle
+    if (foci.size() == 1)
+    {
+        const Point2* cFocalPoint = foci[0];
+        for (int i = -radius; i < radius; ++i)
+        {
+            int xIndex = cFocalPoint->getX() + i;
+            std::map<int, int>& row = heatmap[xIndex]; // Reference to reduce repeated lookups
 
-				std::map<int, int> newMap;
-				for (int j = -radius; j < radius; ++j)
-				{
-					int yIndex = cFocalPoint->getY() + j;
+            for (int j = -radius; j < radius; ++j)
+            {
+                int yIndex = cFocalPoint->getY() + j;
 
-					// calculate the distance
-					double distance = sqrt(pow(((double)i), 2.0f) + pow(((double)j), 2.0f));
-					double hue =
-						distance / sqrt(pow(((double)radius), 2.0f) + pow(((double)radius), 2.0f));
-					if (distance > radius)
-						continue;
+                // Calculate the distance
+                double distance = sqrt(static_cast<double>(i * i + j * j));
+                if (distance > radius)
+                {
+                    continue;
+                }
 
-					// printf("i(%d,%d:%ld)\n", focalIndex, xIndex, heatmap.size());
-					if (heatmap.find(xIndex) == heatmap.end())
-						heatmap.insert(std::pair<int, std::map<int, int> >(xIndex, newMap));
+                // Update the heatmap
+                int& hitCount = row[yIndex]; // Reference to directly access the value
+                ++hitCount;
 
-					// printf("j(%d:%d:%ld)\n", focalIndex, yIndex, heatmap[xIndex].size());
-					if (heatmap[xIndex].find(yIndex) == heatmap[xIndex].end())
-						heatmap[xIndex].insert(std::pair<int, int>(yIndex, 0));
+                if (hitCount > maxHit)
+                {
+                    maxHit = hitCount;
+                }
+            }
+        }
+    }
+    // Ellipse
+    else if (foci.size() > 1)
+    {
+        // Keep ellipseDetail in range (0, 1]
+        double ellipseDetail = 0.25f;
 
-					// tick
-					++heatmap[xIndex][yIndex];
+        for (unsigned int focalIndex1 = 0; focalIndex1 < foci.size(); ++focalIndex1)
+        {
+            const Point2* fp1 = foci[focalIndex1];
+            for (unsigned int focalIndex2 = 0; focalIndex2 < foci.size(); ++focalIndex2)
+            {
+                if (focalIndex1 == focalIndex2)
+                {
+                    continue;
+                }
 
-					if (heatmap[xIndex][yIndex] > maxHit)
-						maxHit = heatmap[xIndex][yIndex];
-				}
-			}
-		}
-	}
-	// Ellipse
-	else if (foci.size() > 1)
-	{
-		// Keep ellipseDetail (0,1]
-		double ellipseDetail = 0.25f;
-		for (unsigned int focalIndex1 = 0; focalIndex1 < foci.size(); ++focalIndex1)
-		{
-			const Point2* fp1 = foci[focalIndex1];
-			for (unsigned int focalIndex2 = 0; focalIndex2 < foci.size(); ++focalIndex2)
-			{
-				const Point2* fp2 = foci[focalIndex2];
+                const Point2* fp2 = foci[focalIndex2];
 
-				if (focalIndex1 == focalIndex2)
-					continue;
+                // Slope of the line
+                double deltaX = fp2->getX() - fp1->getX();
+                double deltaY = fp2->getY() - fp1->getY();
 
-				// slope of a line
-				double deltaX = fp2->getX() - fp1->getX();
-				double deltaY = fp2->getY() - fp1->getY();
-				double slope = deltaY / deltaX;
+                double stepX = ellipseDetail * fabs(deltaX);
+                double stepY = ellipseDetail * fabs(deltaY);
 
-				double stepX = abs(deltaX * ellipseDetail);
-				double stepY = abs(deltaY * ellipseDetail);
+                Point2 cp((deltaX >= 0) ? fp1->getX() : fp2->getX(),
+                          (deltaY >= 0) ? fp1->getY() : fp2->getY());
 
-				Point2 cp((deltaX >= 0) ? fp1->getX() : fp2->getX(),
-						  (deltaY >= 0) ? fp1->getY() : fp2->getY());
-				while (((deltaX >= 0) ? cp.getX() <= fp2->getX() : cp.getX() <= fp1->getX()) &&
-					   ((deltaY >= 0) ? cp.getY() <= fp2->getY() : cp.getY() <= fp1->getY()))
-				{
-					// draw a Ellipse around a point
-					for (int i = -radius; i < radius; ++i)
-					{
-						int xIndex = cp.getX() + i;
-						std::map<int, int> newMap;
-						for (int j = -radius; j < radius; ++j)
-						{
-							int yIndex = cp.getY() + j;
+                while (((deltaX >= 0) ? cp.getX() <= fp2->getX() : cp.getX() <= fp1->getX()) &&
+                       ((deltaY >= 0) ? cp.getY() <= fp2->getY() : cp.getY() <= fp1->getY()))
+                {
+                    int baseX = cp.getX();
+                    int baseY = cp.getY();
 
-							// calculate the distance
-							double distance = sqrt(pow(((double)i), 2.0f) + pow(((double)j), 2.0f));
-							if (distance > radius)
-								continue;
+                    for (int i = -radius; i < radius; ++i)
+                    {
+                        int xIndex = baseX + i;
+                        std::map<int, int>& row = heatmap[xIndex]; // Reference to reduce repeated lookups
 
-							// printf("i(%d,%d:%ld)\n", focalIndex, xIndex, heatmap.size());
-							if (heatmap.find(xIndex) == heatmap.end())
-								heatmap.insert(std::pair<int, std::map<int, int> >(xIndex, newMap));
+                        for (int j = -radius; j < radius; ++j)
+                        {
+                            int yIndex = baseY + j;
 
-							// printf("j(%d:%d:%ld)\n", focalIndex, yIndex, heatmap[xIndex].size());
-							if (heatmap[xIndex].find(yIndex) == heatmap[xIndex].end())
-								heatmap[xIndex].insert(std::pair<int, int>(yIndex, 0));
+                            // Calculate the distance
+                            double distance = sqrt(static_cast<double>(i * i + j * j));
+                            if (distance > radius)
+                            {
+                                continue;
+                            }
 
-							// tick
-							++heatmap[xIndex][yIndex];
+                            // Update the heatmap
+                            int& hitCount = row[yIndex]; // Reference to directly access the value
+                            ++hitCount;
 
-							if (heatmap[xIndex][yIndex] > maxHit)
-								maxHit = heatmap[xIndex][yIndex];
-						}
-					}
+                            if (hitCount > maxHit)
+                            {
+                                maxHit = hitCount;
+                            }
+                        }
+                    }
 
-					cp.setX(cp.getX() + stepX);
-					cp.setY(cp.getY() + stepY);
-				}
-			}
-		}
-	}
+                    cp.setX(cp.getX() + stepX);
+                    cp.setY(cp.getY() + stepY);
+                }
+            }
+        }
+    }
 }
+
 
 const Point2* Ellipse::getFocalPoint(unsigned int index) const
 {
