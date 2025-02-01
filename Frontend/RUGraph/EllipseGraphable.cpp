@@ -36,20 +36,16 @@ void Graphable<Ellipse>::computeAxisRanges(bool additionOptimization)
 template <>
 void Graphable<Ellipse>::draw(gfxpp* cGfx)
 {
-	printf("TEST-Ellipse: %ld\n", points.size());
 	for (unsigned int i = 0; i < points.size(); ++i)
 	{
 		Ellipse* pt = points[i];
 
-		printf("TEST-DERP\n");
 		if (pt->getRadius() <= 0)
 			return;
 	
-		printf("TEST-HERP\n");
 		if (pt->foci.size() == 0)
 			return;
 
-		printf("TEST-LERP\n");
 	
 		SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
 							   getColor().a);
