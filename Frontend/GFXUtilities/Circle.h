@@ -17,6 +17,8 @@
 #ifndef _RUCIRCLE
 #define _RUCIRCLE
 
+#include "GraphablePoint.h"
+#include "point2.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <map>
@@ -29,7 +31,7 @@
 class gfxpp;
 class Point2;
 
-class Circle
+class Circle : public GraphablePoint
 {
 protected:
 
@@ -47,6 +49,37 @@ public:
 
 	const Point2* getCenter() const;
 	double getRadius() const;
+
+	virtual double getX() const
+	{
+	    return 0;
+	}
+
+	virtual double getY() const
+	{
+	    return 0;
+	}
+
+	virtual void setX(double newX)
+	{
+	    center->setX(newX);
+	}
+
+	virtual void setY(double newY)
+	{
+	    center->setY(newY);
+	}
+
+	virtual double getMinY() const
+	{
+	    return center->getY();
+	}
+
+	virtual double getMaxY() const
+	{
+	    return center->getY();
+	}
+
 };
 
 #endif

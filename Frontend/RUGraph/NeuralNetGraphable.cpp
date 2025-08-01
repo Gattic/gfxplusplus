@@ -2,6 +2,7 @@
 #include "RUGraph.h"
 #include "../GFXUtilities/DrawNeuralNet.h"
 #include <limits>
+#include "../GFXUtilities/point2.h"
 
 template <>
 void Graphable<DrawNeuralNet>::computeAxisRanges(bool additionOptimization)

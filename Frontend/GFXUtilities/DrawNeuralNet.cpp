@@ -98,7 +98,7 @@ void DrawNeuralNet::setWeights(shmea::GList weights)
     int neuron = 0;
 
     std::vector<shmea::GPointer<float> > newWeights;
-    for(int i = 0; i < weights.size(); ++i)
+    for(unsigned int i = 0; i < weights.size(); ++i)
     {
 	if(weights[i].getType() == shmea::GType::FLOAT_TYPE)
 	{
