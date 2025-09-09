@@ -15,6 +15,7 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUItemArea.h"
+#include "../Graphics/GfxTypes.h"
 
 RUItemArea::RUItemArea()
 {
@@ -89,9 +90,9 @@ int RUItemArea::getMarginY() const
 	return marginY;
 }
 
-SDL_Rect RUItemArea::getLocationRect() const
+GfxRect RUItemArea::getLocationRect() const
 {
-	SDL_Rect location;
+	GfxRect location;
 	location.x = x;
 	location.y = y;
 	location.w = width;

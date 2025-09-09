@@ -17,6 +17,7 @@
 #include "Graphable.h"
 #include "RUGraph.h"
 #include "../GFXUtilities/Horizontal_Line.h"
+#include "../Graphics/GfxRenderer.h"
 
 //TODO: Separate Scalar1D from Point2D and implement this add fncality
 
@@ -113,12 +114,14 @@ void Graphable<Horizontal_Line>::computeAxisRanges(bool additionOptimization)
 	parent->requireDrawUpdate();
 }
 
+
 template <>
 void Graphable<Horizontal_Line>::draw(gfxpp* cGfx)
 {
 	float vscale = parent->getVScale();
-	SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
-						   getColor().a);
+	if (cGfx->getDraw())
+		cGfx->getDraw()->setDrawColor(getColor().r, getColor().g, getColor().b,
+					   getColor().a);
 
 	float yRange = getYMax() - getYMin();
 
@@ -128,11 +131,14 @@ void Graphable<Horizontal_Line>::draw(gfxpp* cGfx)
 		// add it to the background
 		Horizontal_Line* cPoint = normalizedPoints[i];
 
-		SDL_RenderDrawLine(cGfx->getRenderer(), parent->getAxisOriginX(), cPoint->getY() - 1,
-								   parent->getAxisOriginX() + parent->getWidth(), cPoint->getY() - 1);
-		SDL_RenderDrawLine(cGfx->getRenderer(), parent->getAxisOriginX(), cPoint->getY(),
-								   parent->getAxisOriginX() + parent->getWidth(), cPoint->getY());
-		SDL_RenderDrawLine(cGfx->getRenderer(), parent->getAxisOriginX(), cPoint->getY() + 1,
-								   parent->getAxisOriginX() + parent->getWidth(), cPoint->getY() + 1);
+		if (cGfx->getDraw())
+		{
+			cGfx->getDraw()->drawLine(parent->getAxisOriginX(), cPoint->getY() - 1,
+						   parent->getAxisOriginX() + parent->getWidth(), cPoint->getY() - 1);
+			cGfx->getDraw()->drawLine(parent->getAxisOriginX(), cPoint->getY(),
+						   parent->getAxisOriginX() + parent->getWidth(), cPoint->getY());
+			cGfx->getDraw()->drawLine(parent->getAxisOriginX(), cPoint->getY() + 1,
+						   parent->getAxisOriginX() + parent->getWidth(), cPoint->getY() + 1);
+		}
 	}
 }

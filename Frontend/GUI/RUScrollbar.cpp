@@ -38,17 +38,17 @@ RUScrollbar::RUScrollbar()
 	arrowUp = new RUImageComponent(arrowUpLocation);
 	arrowUp->setBorderColor(RUColors::DEFAULT_DROPDOWN_ARROW);
 	arrowUp->toggleBorder(true);
-	arrowUp->setCursor(SDL_SYSTEM_CURSOR_HAND);
+	arrowUp->setCursor(GFX_SYSTEM_CURSOR_HAND);
 	addSubItem(arrowUp);
 
 	arrowDown = new RUImageComponent(arrowDownLocation);
 	arrowDown->setBorderColor(RUColors::DEFAULT_DROPDOWN_ARROW);
 	arrowDown->toggleBorder(true);
-	arrowDown->setCursor(SDL_SYSTEM_CURSOR_HAND);
+	arrowDown->setCursor(GFX_SYSTEM_CURSOR_HAND);
 	addSubItem(arrowDown);
 
 	scrollBar = new RUImageComponent(scrollBarLocation);
-	scrollBar->setCursor(SDL_SYSTEM_CURSOR_HAND);
+	scrollBar->setCursor(GFX_SYSTEM_CURSOR_HAND);
 	addSubItem(scrollBar);
 }
 
@@ -72,7 +72,7 @@ RUScrollbar::RUScrollbar(int newMaxValue)
 	addSubItem(arrowDown);
 
 	scrollBar = new RUImageComponent(scrollBarLocation);
-	scrollBar->setCursor(SDL_SYSTEM_CURSOR_HAND);
+	scrollBar->setCursor(GFX_SYSTEM_CURSOR_HAND);
 	addSubItem(scrollBar);
 }
 

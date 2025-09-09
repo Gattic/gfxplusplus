@@ -18,9 +18,13 @@
 #include "RUComponent.h"
 #include "../GFXUtilities/EventTracker.h"
 #include "../Graphics/graphics.h"
+#ifdef GFX_HAVE_OPENGL
+#include <GLFW/glfw3.h>
+#endif
 #include "Mini/RUBackgroundComponent.h"
 #include "Mini/RUBorderComponent.h"
 #include "RUColors.h"
+#include "../Graphics/GfxRenderer.h"
 
 RUComponent::RUComponent()
 {
@@ -46,7 +50,7 @@ void RUComponent::calculateSubItemPositions(std::pair<int, int> parentOffset)
 }
 
 void RUComponent::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* parentPanel,
-									   SDL_Event event, int mouseX, int mouseY)
+                           GfxEvent event, int mouseX, int mouseY)
 {
 	if (!eventsStatus)
 		return;
@@ -79,7 +83,7 @@ void RUComponent::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, 
 
 void RUComponent::updateBackgroundHelper(gfxpp* cGfx)
 {
-	if (!cGfx->getRenderer())
+	if (!cGfx->getDraw())
 		return;
 
 	if (!visible)
@@ -92,54 +96,79 @@ void RUComponent::updateBackgroundHelper(gfxpp* cGfx)
 	{
 		drawUpdate = false;
 
-		// draw the new background
+		// draw the new background (SDL path only)
+#ifdef GFX_HAVE_SDL2
 		if (!background)
-			background = SDL_CreateTexture(cGfx->getRenderer(), SDL_PIXELFORMAT_RGBA8888,
-										   SDL_TEXTUREACCESS_TARGET, width, height);
+			background = cGfx->getDraw()->createRenderTargetTexture(width, height);
 
-		// still?
-		if (!background)
+		if (background)
 		{
-			background = NULL;
-			return;
+			// Assign the background as the render target and reset the background
+			cGfx->getDraw()->setTargetTexture(background);
+			cGfx->getDraw()->setTextureBlendMode(background, GFX_BLENDMODE_BLEND);
+
+			// draw the background
+			cGfx->getDraw()->setTargetTexture(background);
+			updateBGBackground(cGfx);
+
+			// Call the component draw call
+			cGfx->getDraw()->setTargetTexture(background);
+			updateBackground(cGfx);
+
+			// draw the border
+			cGfx->getDraw()->setTargetTexture(background);
+			updateBorderBackground(cGfx);
+
+			// Reset the render target to default
+			cGfx->getDraw()->resetTarget();
 		}
-
-		// Assign the background as the render target and reset the background
-		SDL_SetRenderTarget(cGfx->getRenderer(), background);
-		SDL_SetTextureBlendMode(background, SDL_BLENDMODE_BLEND);
-
-		// draw the background
-		SDL_SetRenderTarget(cGfx->getRenderer(), background);
-		updateBGBackground(cGfx);
-
-		// Call the component draw call
-		SDL_SetRenderTarget(cGfx->getRenderer(), background);
-		updateBackground(cGfx);
-
-		// draw the border
-		SDL_SetRenderTarget(cGfx->getRenderer(), background);
-		updateBorderBackground(cGfx);
-
-		// Reset the render target to default
-		SDL_SetRenderTarget(cGfx->getRenderer(), NULL);
+		else
+#endif
+		{
+			// Fallback: draw directly for GL backend. Parent is responsible for positioning.
+			if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
+			{
+#ifdef GFX_HAVE_OPENGL
+				glPushMatrix();
+				glTranslatef((float)getX(), (float)getY(), 0.0f);
+				updateBGBackground(cGfx);
+				updateBackground(cGfx);
+				updateBorderBackground(cGfx);
+				glPopMatrix();
+#endif
+			}
+		}
 	}
 
 	// set the background rect
-	SDL_Rect fullRect;
+	GfxRect fullRect;
 	fullRect.x = 0;
 	fullRect.y = 0;
 	fullRect.w = width;
 	fullRect.h = height;
 
-	//drawVerticalGradient(cGfx->getRenderer(), fullRect, getBGColor(), getBGColor(), 20);
-
 	// draw the background
-	SDL_Rect dRect = getLocationRect();
+	GfxRect dRect = getLocationRect();
 	dRect.x = getX();
 	dRect.y = getY();
-	SDL_Texture* geBackground = getBackground();
-	if (geBackground)
-		SDL_RenderCopy(cGfx->getRenderer(), geBackground, NULL, &dRect);
+	GfxTexture* geBackground = getBackground();
+#ifdef GFX_HAVE_SDL2
+	if (geBackground && cGfx->getDraw())
+		cGfx->getDraw()->copyTexture(geBackground, NULL, &dRect);
+	else
+#endif
+	if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
+	{
+#ifdef GFX_HAVE_OPENGL
+		// Translate to this component's position and draw at local origin
+		glPushMatrix();
+		glTranslatef((float)getX(), (float)getY(), 0.0f);
+		updateBGBackground(cGfx);
+		updateBackground(cGfx);
+		updateBorderBackground(cGfx);
+		glPopMatrix();
+#endif
+	}
 
 	for (unsigned int i = 0; i < subitems.size(); ++i)
 		subitems[i]->updateBackgroundHelper(cGfx);

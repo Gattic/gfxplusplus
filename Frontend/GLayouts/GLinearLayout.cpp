@@ -20,6 +20,7 @@
 #include "../GItems/Mini/RUBackgroundComponent.h"
 #include "../GItems/Mini/RUBorderComponent.h"
 #include "../Graphics/graphics.h"
+#include <stdio.h>
 
 GLinearLayout::GLinearLayout(shmea::GString layoutName, int newOrientation)
 {
@@ -96,8 +97,8 @@ void GLinearLayout::calculateSubItemPositions(std::pair<int, int> parentOffset)
 }
 
 void GLinearLayout::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus,
-										 GPanel* parentPanel, SDL_Event event, int mouseX,
-										 int mouseY)
+							 GPanel* parentPanel, GfxEvent event, int mouseX,
+							 int mouseY)
 {
 	if (!eventsStatus)
 		return;
@@ -131,7 +132,8 @@ void GLinearLayout::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus
 
 void GLinearLayout::updateBackgroundHelper(gfxpp* cGfx)
 {
-	if (!cGfx->getRenderer())
+	// In OpenGL mode there is no SDL_Renderer; use draw abstraction instead
+	if (!cGfx->getDraw())
 		return;
 
 	if (!visible)

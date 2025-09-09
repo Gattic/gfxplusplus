@@ -18,6 +18,7 @@
 #include "../GFXUtilities/point2.h"
 #include "../GUI/Text/RULabel.h"
 #include "../Graphics/graphics.h"
+#include "../Graphics/GfxRenderer.h"
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/GType.h"
@@ -258,47 +259,52 @@ void RUGraph::onMouseUp(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 void RUGraph::updateBackground(gfxpp* cGfx)
 {
 	// set the background color
-	SDL_SetRenderDrawColor(cGfx->getRenderer(), getBGColor().r, getBGColor().g,
-						   getBGColor().b, 0xFF);
+	if (cGfx->getDraw())
+		cGfx->getDraw()->setDrawColor(getBGColor().r, getBGColor().g,
+					   getBGColor().b, 0xFF);
 
 	// set the background rect
-	SDL_Rect fullRect;
+	GfxRect fullRect;
 	fullRect.x = 0;
 	fullRect.y = 0;
 	fullRect.w = width;
 	fullRect.h = height;
 
-	SDL_RenderFillRect(cGfx->getRenderer(), &fullRect);
-
-	drawVerticalGradient(cGfx->getRenderer(), fullRect, getBGColor(), RUColors::COLOR_BLUE, 20);
+	if (cGfx->getDraw())
+		cGfx->getDraw()->fillRect(&fullRect);
 
 	// draw the axes
 	if (axisWidth > 0)
 	{
 		// x axis
-		SDL_SetRenderDrawColor(cGfx->getRenderer(), getBorderColor().r, getBorderColor().g,
-							   getBorderColor().b, 0xFF);
+		if (cGfx->getDraw())
+			cGfx->getDraw()->setDrawColor(getBorderColor().r, getBorderColor().g,
+						   getBorderColor().b, 0xFF);
 
 		// set the x rect
-		SDL_Rect axisX;
+		GfxRect axisX;
 		axisX.x = 0;
 		axisX.y = getQuadrantOffsetY() + axisOriginY - (axisWidth / 2);
 		axisX.w = width;
 		axisX.h = axisWidth;
 
 		// set the y rect
-		SDL_Rect axisY;
+		GfxRect axisY;
 		axisY.x = getQuadrantOffsetX() + axisOriginX - (axisWidth / 2);
 		axisY.y = 0;
 		axisY.w = axisWidth;
 		axisY.h = height;
 
-		SDL_RenderFillRect(cGfx->getRenderer(), &axisX);
-		SDL_RenderFillRect(cGfx->getRenderer(), &axisY);
+		if (cGfx->getDraw())
+		{
+			cGfx->getDraw()->fillRect(&axisX);
+			cGfx->getDraw()->fillRect(&axisY);
+		}
 
 		if ((gridEnabled) && (gridLineWidth > 0))
 		{
-			SDL_SetRenderDrawColor(cGfx->getRenderer(), 0x61, 0x61, 0x61, 0xFF); // gray
+			if (cGfx->getDraw())
+				cGfx->getDraw()->setDrawColor(0x61, 0x61, 0x61, 0xFF); // gray
 
 			// x grid
 			int lineCount = graphSize * DEFAULT_NUM_ZONES; // 10 spaces per axis
@@ -309,7 +315,7 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 			for (int i = (quadrants == QUADRANTS_FOUR) ? -lineCount : 0; i < lineCount; ++i)
 			{
 				// add it to the background
-				SDL_Rect lineXRect;
+				GfxRect lineXRect;
 				lineXRect.x = axisOriginX + (i * lineGap) - (lineWidth / 2);
 				if (quadrants == QUADRANTS_ONE)
 					lineXRect.y = getQuadrantOffsetY() + axisOriginY - (lineHeight);
@@ -318,7 +324,8 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 				lineXRect.w = lineWidth;
 				lineXRect.h = lineHeight;
 
-				SDL_RenderFillRect(cGfx->getRenderer(), &lineXRect);
+				if (cGfx->getDraw())
+					cGfx->getDraw()->fillRect(&lineXRect);
 			}
 
 			// y grid
@@ -330,7 +337,7 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 			for (int i = (quadrants == QUADRANTS_FOUR) ? -lineCount : 0; i < lineCount; ++i)
 			{
 				// add it to the background
-				SDL_Rect lineYRect;
+				GfxRect lineYRect;
 				if (quadrants == QUADRANTS_ONE)
 					lineYRect.x = getQuadrantOffsetY() + axisOriginX - (lineWidth);
 				else if (quadrants == QUADRANTS_FOUR)
@@ -339,35 +346,35 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 				lineYRect.w = lineWidth;
 				lineYRect.h = lineHeight;
 
-				SDL_RenderFillRect(cGfx->getRenderer(), &lineYRect);
+				if (cGfx->getDraw())
+					cGfx->getDraw()->fillRect(&lineYRect);
 			}
 		}
 		else if ((dotMatrixEnabled) && (gridLineWidth > 0))
 		{
-		    SDL_SetRenderDrawColor(cGfx->getRenderer(), 0x61, 0x61, 0x61, 0xFF); // gray
-		    int dotCount = graphSize * DEFAULT_NUM_ZONES; // 10 spaces per axis
+			if (cGfx->getDraw())
+				cGfx->getDraw()->setDrawColor(0x61, 0x61, 0x61, 0xFF); // gray
+			int dotCount = graphSize * DEFAULT_NUM_ZONES; // 10 spaces per axis
 
-		    //build dot matrix
-		    SDL_Rect lineDotRect;
+			//build dot matrix
+			GfxRect lineDotRect;
 
-		    int lineGapWidth = ((float)width) / ((float)dotCount);
-		    int lineGapHeight = ((float)height) / ((float)dotCount);
-		    int thick = 5;
-		    for(int i = 0; i < dotCount; i++)
-		    {
-			for(int j = 0; j < dotCount; j++)
+			int lineGapWidth = ((float)width) / ((float)dotCount);
+			int lineGapHeight = ((float)height) / ((float)dotCount);
+			int thick = 5;
+			for(int i = 0; i < dotCount; i++)
 			{
-//			    xPoints.push_back(i);
-//			    yPoints.push_back(j);
-//
-			    lineDotRect.x = axisOriginX + (i * lineGapWidth) - (axisWidth / 2);
-			    lineDotRect.y = axisOriginY + (j * lineGapHeight) - (thick / 2);
-			    lineDotRect.w = thick;
-			    lineDotRect.h = thick;
+				for(int j = 0; j < dotCount; j++)
+				{
+					lineDotRect.x = axisOriginX + (i * lineGapWidth) - (axisWidth / 2);
+					lineDotRect.y = axisOriginY + (j * lineGapHeight) - (thick / 2);
+					lineDotRect.w = thick;
+					lineDotRect.h = thick;
 
-			    SDL_RenderFillRect(cGfx->getRenderer(), &lineDotRect);
+					if (cGfx->getDraw())
+						cGfx->getDraw()->fillRect(&lineDotRect);
+				}
 			}
-		    }
 		}
 
 		// x ticks
@@ -377,19 +384,21 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 		int tickHeight = axisWidth * 5;
 		if (quadrants == QUADRANTS_FOUR)
 			tickWidth = axisWidth / DEFAULT_AXIS_WIDTH;
-		SDL_SetRenderDrawColor(cGfx->getRenderer(), getBorderColor().r, getBorderColor().g,
-							   getBorderColor().b, getBorderColor().a);
+			if (cGfx->getDraw())
+				cGfx->getDraw()->setDrawColor(getBorderColor().r, getBorderColor().g,
+						   getBorderColor().b, getBorderColor().a);
 
 		for (int i = (quadrants == QUADRANTS_FOUR) ? -tickCount : 0; i < tickCount; ++i)
 		{
 			// add it to the background
-			SDL_Rect tickXRect;
+			GfxRect tickXRect;
 			tickXRect.x = axisOriginX + (i * tickGap) - (tickWidth / 2);
 			tickXRect.y = getQuadrantOffsetY() + axisOriginY - (tickHeight / 2);
 			tickXRect.w = tickWidth;
 			tickXRect.h = tickHeight;
 
-			SDL_RenderFillRect(cGfx->getRenderer(), &tickXRect);
+			if (cGfx->getDraw())
+				cGfx->getDraw()->fillRect(&tickXRect);
 		}
 
 		// y ticks
@@ -403,13 +412,14 @@ void RUGraph::updateBackground(gfxpp* cGfx)
 		for (int i = (quadrants == QUADRANTS_FOUR) ? -tickCount : 0; i < tickCount; ++i)
 		{
 			// add it to the background
-			SDL_Rect tickYRect;
+			GfxRect tickYRect;
 			tickYRect.x = getQuadrantOffsetX() + axisOriginX - (tickWidth / 2);
 			tickYRect.y = axisOriginY + (i * tickGap) - (tickHeight / 2);
 			tickYRect.w = tickWidth;
 			tickYRect.h = tickHeight;
 
-			SDL_RenderFillRect(cGfx->getRenderer(), &tickYRect);
+			if (cGfx->getDraw())
+				cGfx->getDraw()->fillRect(&tickYRect);
 		}
 	}
 

@@ -25,7 +25,7 @@ GraphableAttr::GraphableAttr()
 	yMode = false; // is local
 }
 
-GraphableAttr::GraphableAttr(RUGraph* newParent, SDL_Color newColor)
+GraphableAttr::GraphableAttr(RUGraph* newParent, GfxColor newColor)
 {
 	parent = newParent;
 	setColor(newColor);
@@ -92,7 +92,7 @@ bool GraphableAttr::getYMode() const
 	return yMode;
 }
 
-SDL_Color GraphableAttr::getColor() const
+GfxColor GraphableAttr::getColor() const
 {
 	return lineColor;
 }
@@ -107,7 +107,7 @@ void GraphableAttr::setYMode(bool newLocalYMode)
 	yMode = newLocalYMode;
 }
 
-void GraphableAttr::setColor(SDL_Color newColor)
+void GraphableAttr::setColor(GfxColor newColor)
 {
 	lineColor = newColor;
 }

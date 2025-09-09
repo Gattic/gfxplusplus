@@ -16,40 +16,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "RUBorderComponent.h"
 #include "../../Graphics/graphics.h"
+#include "../../Graphics/GfxRenderer.h"
 #include "../GItem.h"
 #include "../RUColors.h"
 
 RUBorderComponent::RUBorderComponent()
 {
+	borderWidth = DEFAULT_BORDER_WIDTH;
 	borderEnabled = false;
-	borderWidth = 1;
 	setBorderColor(RUColors::DEFAULT_COLOR_BORDER);
 }
 
-RUBorderComponent::RUBorderComponent(int newWidth)
+RUBorderComponent::RUBorderComponent(GfxColor newBorderColor)
 {
-	borderEnabled = true;
-	borderWidth = newWidth;
-	setBorderColor(RUColors::DEFAULT_COLOR_BORDER);
-}
-
-RUBorderComponent::RUBorderComponent(SDL_Color newBorderColor)
-{
-	borderEnabled = true;
-	borderWidth = 1;
+	borderWidth = DEFAULT_BORDER_WIDTH;
+	borderEnabled = false;
 	setBorderColor(newBorderColor);
 }
 
-RUBorderComponent::RUBorderComponent(int newWidth, SDL_Color newBorderColor)
+RUBorderComponent::RUBorderComponent(int newWidth, GfxColor newBorderColor)
 {
-	borderEnabled = true;
 	borderWidth = newWidth;
+	borderEnabled = false;
 	setBorderColor(newBorderColor);
 }
 
 RUBorderComponent::~RUBorderComponent()
 {
+	borderWidth = 0;
 	borderEnabled = false;
+	setBorderColor(RUColors::DEFAULT_COLOR_BORDER);
 }
 
 bool RUBorderComponent::getBorderEnabled() const
@@ -57,7 +53,7 @@ bool RUBorderComponent::getBorderEnabled() const
 	return borderEnabled;
 }
 
-SDL_Color RUBorderComponent::getBorderColor() const
+GfxColor RUBorderComponent::getBorderColor() const
 {
 	return borderColor;
 }
@@ -67,20 +63,19 @@ int RUBorderComponent::getBorderWidth() const
 	return borderWidth;
 }
 
-void RUBorderComponent::toggleBorder(bool newBorder)
+void RUBorderComponent::toggleBorder(bool newEnabled)
 {
-	borderEnabled = newBorder;
-	drawUpdate = true;
+	borderEnabled = newEnabled;
 }
 
-void RUBorderComponent::setBorderColor(SDL_Color newBorderColor)
+void RUBorderComponent::setBorderColor(GfxColor newBorderColor)
 {
 	borderColor = newBorderColor;
 }
 
-void RUBorderComponent::setBorderWidth(int newBorderWidth)
+void RUBorderComponent::setBorderWidth(int newWidth)
 {
-	borderWidth = newBorderWidth;
+	borderWidth = newWidth;
 }
 
 void RUBorderComponent::updateBorderBackground(gfxpp* cGfx)
@@ -88,20 +83,22 @@ void RUBorderComponent::updateBorderBackground(gfxpp* cGfx)
 	if (!borderEnabled)
 		return;
 
+	if (borderWidth <= 0)
+		return;
+
 	if (!((getWidth() > 0) && (getHeight() > 0)))
 		return;
 
-	for (int i = 0; i < borderWidth; ++i)
-	{
-		// draw the border
-		SDL_Rect borderRect;
-		borderRect.x = i;
-		borderRect.y = i;
-		borderRect.w = getWidth() - (borderWidth - 1);
-		borderRect.h = getHeight() - (borderWidth - 1);
+	GfxRect borderRect;
+	borderRect.x = 0;
+	borderRect.y = 0;
+	borderRect.w = getWidth();
+	borderRect.h = getHeight();
 
-		SDL_SetRenderDrawColor(cGfx->getRenderer(), borderColor.r, borderColor.g, borderColor.b,
-							   borderColor.a);
-		SDL_RenderDrawRect(cGfx->getRenderer(), &borderRect);
+	if (cGfx->getDraw())
+	{
+		cGfx->getDraw()->setDrawColor(borderColor.r, borderColor.g, borderColor.b,
+					   borderColor.a);
+		cGfx->getDraw()->drawRect(&borderRect);
 	}
 }

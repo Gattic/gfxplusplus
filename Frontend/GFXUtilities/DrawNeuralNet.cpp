@@ -1,6 +1,6 @@
 #include "DrawNeuralNet.h"
 #include "RULayerInfo.h"
-#include "SDL2/SDL.h"
+// removed SDL include
 #include <cstdlib>
 #include <ctime>
 #include <iostream>

@@ -20,7 +20,6 @@
 
 #include "GItem.h"
 #include "Backend/Database/GString.h"
-#include <SDL2/SDL.h>
 #include <map>
 #include <stdio.h>
 #include <stdlib.h>

@@ -16,6 +16,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
 #include "RUGraph.h"
+#include "../Graphics/GfxRenderer.h"
+
+//TODO: Separate Scalar1D from Point2D and implement this add fncality
 
 template <>
 void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
@@ -133,8 +136,6 @@ void Graphable<Candle>::computeAxisRanges(bool additionOptimization)
 			continue;
 
 		// Our aggregated candle
-		//float newXValue = ((i/agg) * pointXGap);
-		//float newXValue = i * pointXGap + (pointXGap / 2);
 		float newXValue = ((i/agg) * pointXGap)+ (pointXGap / 2);
 		normalizedPoints[normalCounter]->setX(parent->getAxisOriginX() + newXValue);
 		normalizedPoints[normalCounter]->setOpen(parent->getAxisOriginY() + (float)parent->getHeight() - aggOpenValue);
@@ -184,8 +185,8 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 	unsigned int candleGreenColor = 0x00D100FF; // Green color for the candle
 	unsigned int candleRedColor = 0xFF0000FF; // Red color for the candle
 
-	std::vector<SDL_Point> pointsToDraw;  // Store the points to be drawn
-	std::vector<SDL_Rect> rectsToFill;   // Store the rectangles to be filled
+	std::vector<GfxPoint> pointsToDraw;  // Store the points to be drawn
+	std::vector<GfxRect> rectsToFill;   // Store the rectangles to be filled
 	std::vector<unsigned int> colors;     // Store the colors for the rectangles
 	std::vector<unsigned int> outlineColors; // Store the outline colors for the rectangles
 
@@ -198,13 +199,13 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 			continue;
 
 		// Wick / Shadow
-		SDL_Point highPoint = { static_cast<int>(parent->getAxisOriginX() + cX), static_cast<int>(cCandle->getHigh()) };
-		SDL_Point lowPoint = { static_cast<int>(parent->getAxisOriginX() + cX), static_cast<int>(cCandle->getLow()) };
+		GfxPoint highPoint = { static_cast<int>(parent->getAxisOriginX() + cX), static_cast<int>(cCandle->getHigh()) };
+		GfxPoint lowPoint = { static_cast<int>(parent->getAxisOriginX() + cX), static_cast<int>(cCandle->getLow()) };
 		pointsToDraw.push_back(highPoint);
 		pointsToDraw.push_back(lowPoint);
 
 		// Draw a rectangle for the real body representing the price range between open and close
-		SDL_Rect bgRect;
+		GfxRect bgRect;
 		bgRect.x = static_cast<int>(parent->getAxisOriginX() + cX - (pointXGap / 2));
 		bgRect.w = static_cast<int>(pointXGap);
 
@@ -216,7 +217,7 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 
 			rectsToFill.push_back(bgRect);
 			colors.push_back(candleGreenColor);
-			outlineColors.push_back(0x00FF00FF | (static_cast<unsigned int>(cCandle->getHigh()) << 24)); // Green outline with dynamic alpha based on high value
+			outlineColors.push_back(0x00FF00FF | (static_cast<unsigned int>(cCandle->getHigh()) << 24));
 		}
 		else if (cCandle->getClose() < cCandle->getOpen())
 		{
@@ -226,11 +227,10 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 
 			rectsToFill.push_back(bgRect);
 			colors.push_back(candleRedColor);
-			outlineColors.push_back(0xFF0000FF | (static_cast<unsigned int>(cCandle->getLow()) << 24)); // Red outline with dynamic alpha based on low value
+			outlineColors.push_back(0xFF0000FF | (static_cast<unsigned int>(cCandle->getLow()) << 24));
 		}
 		else
 		{
-			// When open and close are the same, show no real body.
 			bgRect.y = static_cast<int>(cCandle->getOpen());
 			bgRect.h = 0;
 		}
@@ -238,8 +238,8 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 		if (i == normalizedPoints.size() - 1)
 		{
 			// Draw horizontal line in candle graph for the last close price.
-			SDL_Point startPoint = { parent->getAxisOriginX(), static_cast<int>(cCandle->getClose()) };
-			SDL_Point endPoint = { static_cast<int>(parent->getAxisOriginX() + cX), static_cast<int>(cCandle->getClose()) };
+			GfxPoint startPoint = { parent->getAxisOriginX(), static_cast<int>(cCandle->getClose()) };
+			GfxPoint endPoint = { static_cast<int>(parent->getAxisOriginX() + cX), static_cast<int>(cCandle->getClose()) };
 
 			pointsToDraw.push_back(startPoint);
 			pointsToDraw.push_back(endPoint);
@@ -247,27 +247,32 @@ void Graphable<Candle>::draw(gfxpp* cGfx)
 	}
 
 	// Set the render color for the wick
-	SDL_SetRenderDrawColor(cGfx->getRenderer(), (wickColor >> 24) & 0xFF, (wickColor >> 16) & 0xFF,
-		(wickColor >> 8) & 0xFF, wickColor & 0xFF);
+	if (cGfx->getDraw())
+		cGfx->getDraw()->setDrawColor((wickColor >> 24) & 0xFF, (wickColor >> 16) & 0xFF,
+						(wickColor >> 8) & 0xFF, wickColor & 0xFF);
 
 	// Render all the points at once
-	SDL_RenderDrawPoints(cGfx->getRenderer(), &pointsToDraw[0], pointsToDraw.size());
+	if (cGfx->getDraw())
+		cGfx->getDraw()->drawPoints(pointsToDraw);
 
 	// Render the filled rectangles with outlines
 	for (size_t i = 0; i < rectsToFill.size(); ++i)
 	{
 		unsigned int color = colors[i];
 		unsigned int outlineColor = outlineColors[i];
-		SDL_SetRenderDrawColor(cGfx->getRenderer(), (color >> 24) & 0xFF, (color >> 16) & 0xFF,
-			(color >> 8) & 0xFF, color & 0xFF);
+		if (cGfx->getDraw())
+		{
+			cGfx->getDraw()->setDrawColor((color >> 24) & 0xFF, (color >> 16) & 0xFF,
+				(color >> 8) & 0xFF, color & 0xFF);
 
-		SDL_RenderFillRect(cGfx->getRenderer(), &rectsToFill[i]);
+			cGfx->getDraw()->fillRect(&rectsToFill[i]);
 
-		// Render the outline
-		SDL_SetRenderDrawColor(cGfx->getRenderer(), (outlineColor >> 24) & 0xFF, (outlineColor >> 16) & 0xFF,
-			(outlineColor >> 8) & 0xFF, outlineColor & 0xFF);
+			// Render the outline
+			cGfx->getDraw()->setDrawColor((outlineColor >> 24) & 0xFF, (outlineColor >> 16) & 0xFF,
+				(outlineColor >> 8) & 0xFF, outlineColor & 0xFF);
 
-		SDL_RenderDrawRect(cGfx->getRenderer(), &rectsToFill[i]);
+			cGfx->getDraw()->drawRect(&rectsToFill[i]);
+		}
 	}
 }
 

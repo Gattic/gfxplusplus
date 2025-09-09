@@ -1,4 +1,4 @@
-// Copyright 2020 Robert Carneiro, Derek Meer, Matthew Tabak, Eric Lujan
+// Copyright 2025 Robert Carneiro
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 // associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -14,41 +14,39 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#ifndef _RUFORM
+#define _RUFORM
 
-#include "GRelativeLayout.h"
-#include "../GFXUtilities/EventTracker.h"
-#include "../GItems/Mini/RUBackgroundComponent.h"
-#include "../GItems/Mini/RUBorderComponent.h"
+#include "../GItems/RUComponent.h"
 
-GRelativeLayout::GRelativeLayout(shmea::GString layoutName)
+class RUForm : public RUComponent
 {
-	name = layoutName;
-	layoutType = 0; // 0 = Relative; 1 = Linear
-}
+protected:
+    // render
+    virtual void updateBackground(gfxpp*);
 
-void GRelativeLayout::calculateSubItemPositions(std::pair<int, int> parentOffset)
-{
-	//
-}
+    // events
+    virtual void onKeyDown(gfxpp*, GPanel*, GfxKeycode, Uint16);
 
-void GRelativeLayout::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus,
-							   GPanel* parentPanel, GfxEvent event, int mouseX,
-							   int mouseY)
-{
-	//
-}
+    // helpers
+    int findFocusedIndex() const;
+    bool isFocusable(GItem*) const;
+    void focusByIndex(gfxpp*, int);
+    void focusNext(gfxpp*);
+    void focusPrev(gfxpp*);
 
-void GRelativeLayout::updateBackground(gfxpp* cGfx)
-{
-	//
-}
+public:
+    RUForm(shmea::GString);
+    virtual ~RUForm();
 
-void GRelativeLayout::updateBackgroundHelper(gfxpp* cGfx)
-{
-	//
-}
+    virtual void calculateSubItemPositions(std::pair<int, int>);
+    virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, GfxEvent, int, int);
+    virtual void updateBackgroundHelper(gfxpp*);
 
-shmea::GString GRelativeLayout::getType() const
-{
-	return "GRelativeLayout";
-}
+    virtual shmea::GString getType() const;
+};
+
+#endif
+
+
+

@@ -24,7 +24,7 @@ RUTextbox::RUTextbox()
 	staticBorder = false;
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 	// Draw a bg image instead of color?
-	setCursor(SDL_SYSTEM_CURSOR_IBEAM);
+	setCursor(GFX_SYSTEM_CURSOR_IBEAM);
 }
 
 RUTextbox::~RUTextbox()
@@ -44,13 +44,14 @@ shmea::GString RUTextbox::getType() const
 
 void RUTextbox::hover(gfxpp* cGfx)
 {
-	// setBorderColor(RUColors::DEFAULT_COMPONENT_HIGHLIGHT);
-	toggleBorder(true);
+	// Do not toggle border on hover for textboxes; caret could be confused with left border
+	if (staticBorder)
+		toggleBorder(true);
 }
 
 void RUTextbox::unhover(gfxpp* cGfx)
 {
-	if (!isFocused() && !staticBorder)
+	if (!staticBorder)
 	{
 		toggleBorder(false);
 	}

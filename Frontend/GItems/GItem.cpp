@@ -54,7 +54,7 @@ GItem::~GItem()
 	eventsStatus = NULL;
 
 	if(background)
-		SDL_DestroyTexture(background);
+		GFX_DestroyTexture(background);
 	background = NULL;
 	//Do more here?
 }
@@ -98,7 +98,7 @@ unsigned int GItem::getZIndex() const
 	return zindex;
 }
 
-SDL_Texture* GItem::getBackground()
+GfxTexture* GItem::getBackground()
 {
 	return background;
 }
@@ -187,7 +187,7 @@ void GItem::removeItem(gfxpp* cGfx, int itemID)
 		if (subitems[i]->getID() == itemID)
 		{
 			subitems.erase(subitems.begin() + i); // Remove item from this layout
-			cGfx->removeItem(itemID);			  // Remove from master vector of GUI items
+			cGfx->removeItem(itemID);              // Remove from master vector of GUI items
 			break;
 		}
 	}
@@ -202,7 +202,7 @@ void GItem::removeItem(gfxpp* cGfx, const shmea::GString& itemName)
 	{
 		if (subitems[i]->getName() == itemName)
 		{
-			subitems.erase(subitems.begin() + i);	// Remove item from this layout
+			subitems.erase(subitems.begin() + i);    // Remove item from this layout
 			cGfx->removeItem(subitems[i]->getID()); // Remove from master vector of GUI items
 			break;
 		}
@@ -223,8 +223,8 @@ void GItem::clearItems(unsigned int numToSave)
 	drawUpdate = true;
 }
 
-EventTracker* GItem::processEvents(gfxpp* cGfx, GPanel* parentPanel, SDL_Event event, int mouseX,
-								   int mouseY)
+EventTracker* GItem::processEvents(gfxpp* cGfx, GPanel* parentPanel, GfxEvent event, int mouseX,
+						   int mouseY)
 {
 	eventsStatus->reset();
 
@@ -249,11 +249,11 @@ EventTracker* GItem::processEvents(gfxpp* cGfx, GPanel* parentPanel, SDL_Event e
 	}
 
 	//
-	if (event.type == SDL_MOUSEBUTTONDOWN)
+	if (event.type == GFX_MOUSEBUTTONDOWN)
 		onMouseDownHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, dropdownToggle);
-	else if (event.type == SDL_MOUSEBUTTONUP)
+	else if (event.type == GFX_MOUSEBUTTONUP)
 		onMouseUpHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, dropdownToggle);
-	else if (event.type == SDL_MOUSEMOTION)
+	else if (event.type == GFX_MOUSEMOTION)
 	{
 		onMouseMotionHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, dropdownToggle);
 
@@ -268,8 +268,8 @@ EventTracker* GItem::processEvents(gfxpp* cGfx, GPanel* parentPanel, SDL_Event e
 				if (customCursor)
 				{
 					// Set the cursor
-					SDL_Cursor* renderCursor = cGfx->getSystemCursor();
-					SDL_SetCursor(renderCursor);
+					GfxCursor* renderCursor = cGfx->getSystemCursor();
+					GFX_SetCursor(renderCursor);
 				}
 
 				unhover(cGfx);
@@ -277,44 +277,44 @@ EventTracker* GItem::processEvents(gfxpp* cGfx, GPanel* parentPanel, SDL_Event e
 			}
 		}
 	}
-	else if (event.type == SDL_MOUSEWHEEL)
+	else if (event.type == GFX_MOUSEWHEEL)
 	{
 		if (event.wheel.y > 0)
 		{
 			// Scroll down
 			onMouseWheelHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, SCROLL_DOWN,
-							   dropdownToggle);
+						   dropdownToggle);
 		}
 		else if (event.wheel.y < 0)
 		{
 			// Scroll up
 			onMouseWheelHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, SCROLL_UP,
-							   dropdownToggle);
+						   dropdownToggle);
 		}
 
 		if (event.wheel.x > 0)
 		{
 			// Scroll right
 			onMouseWheelHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, SCROLL_RIGHT,
-							   dropdownToggle);
+						   dropdownToggle);
 		}
 		else if (event.wheel.x < 0)
 		{
 			// Scroll left
 			onMouseWheelHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, SCROLL_LEFT,
-							   dropdownToggle);
+						   dropdownToggle);
 		}
 	}
-	else if (event.type == SDL_KEYDOWN)
+	else if (event.type == GFX_KEYDOWN)
 	{
-		SDL_Keycode keyPressed = event.key.keysym.sym;
+		GfxKeycode keyPressed = event.key.keysym.sym;
 		Uint16 keyModPressed = event.key.keysym.mod;
 		// Send a key press to the focused ui element
 		onKeyDownHelper(cGfx, eventsStatus, parentPanel, keyPressed, keyModPressed);
 	}
-	else if (event.type == SDL_KEYUP)
+	else if (event.type == GFX_KEYUP)
 	{
-		SDL_Keycode keyPressed = event.key.keysym.sym;
+		GfxKeycode keyPressed = event.key.keysym.sym;
 		Uint16 keyModPressed = event.key.keysym.mod;
 		// Send a key release to the focused ui element
 		onKeyUpHelper(cGfx, eventsStatus, parentPanel, keyPressed, keyModPressed);

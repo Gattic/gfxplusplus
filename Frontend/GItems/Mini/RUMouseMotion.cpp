@@ -24,7 +24,7 @@ RUMouseMotion::RUMouseMotion()
 	// event listeners
 	MouseMotionListener = GeneralListener();
 	unhovered = false;
-	cursor = SDL_SYSTEM_CURSOR_ARROW;
+	cursor = GFX_SYSTEM_CURSOR_ARROW;
 	customCursor = false;
 }
 
@@ -33,20 +33,20 @@ RUMouseMotion::~RUMouseMotion()
 	// event listeners
 	MouseMotionListener = GeneralListener();
 	unhovered = false;
-	cursor = SDL_SYSTEM_CURSOR_ARROW;
+	cursor = GFX_SYSTEM_CURSOR_ARROW;
 	customCursor = false;
 }
 
-SDL_SystemCursor RUMouseMotion::getCursor() const
+GfxSystemCursor RUMouseMotion::getCursor() const
 {
 	return cursor;
 }
 
-void RUMouseMotion::setCursor(SDL_SystemCursor newCursor)
+void RUMouseMotion::setCursor(GfxSystemCursor newCursor)
 {
 	cursor = newCursor;
 	customCursor = true;
-	cursorPtr = SDL_CreateSystemCursor(cursor);
+	cursorPtr = GFX_CreateSystemCursor(cursor);
 }
 
 void RUMouseMotion::setMouseMotionListener(GeneralListener f)
@@ -55,7 +55,7 @@ void RUMouseMotion::setMouseMotionListener(GeneralListener f)
 }
 
 void RUMouseMotion::onMouseMotionHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPanel,
-										int eventX, int eventY, bool overrideRange)
+						int eventX, int eventY, bool overrideRange)
 {
 	if (!cGfx)
 		return;
@@ -77,7 +77,7 @@ void RUMouseMotion::onMouseMotionHelper(gfxpp* cGfx, EventTracker* eventsStatus,
 	if ((customCursor) && (!eventsStatus->hovered))
 	{
 		// Set the custom cursor
-		SDL_SetCursor(cursorPtr);
+		GFX_SetCursor(cursorPtr);
 	}
 
 	// pass on the event

@@ -17,30 +17,18 @@
 #include "RUProgressBar.h"
 #include "../GItems/RUColors.h"
 #include "../Graphics/graphics.h"
+#include "../Graphics/GfxRenderer.h"
 
 RUProgressBar::RUProgressBar()
 {
+	barColor = RUColors::DEFAULT_COLOR_BAR;
 	value = 0;
-	maxValue = 0;
-	toggleBorder(true);
-	barColor = RUColors::DEFAULT_COLOR_PROGRESS_BAR;
-	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
-}
-
-RUProgressBar::RUProgressBar(int newMaxValue)
-{
-	value = 0;
-	maxValue = newMaxValue;
-	toggleBorder(true);
-	barColor = RUColors::DEFAULT_COLOR_PROGRESS_BAR;
-	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+	maxValue = 100;
 }
 
 RUProgressBar::~RUProgressBar()
 {
 	value = 0;
-	maxValue = 0;
-	toggleBorder(true);
 }
 
 int RUProgressBar::getValue() const
@@ -48,43 +36,30 @@ int RUProgressBar::getValue() const
 	return value;
 }
 
-int RUProgressBar::getMaxValue() const
-{
-	return maxValue;
-}
-
 void RUProgressBar::setValue(int newValue)
 {
 	value = newValue;
 	if (value < 0)
 		value = 0;
-	else if (value > maxValue)
+	if (value > maxValue)
 		value = maxValue;
-
-	drawUpdate = true;
-}
-
-void RUProgressBar::setMaxValue(int newMaxValue)
-{
-	maxValue = newMaxValue;
-	if (maxValue < 0)
-		maxValue = 0;
-
-	drawUpdate = true;
 }
 
 void RUProgressBar::updateBackground(gfxpp* cGfx)
 {
-	// draw the bar
-	SDL_Rect barRect;
+	int barWidth = (maxValue == 0) ? 0 : (width * value) / maxValue;
+	GfxRect barRect;
 	barRect.x = 0;
 	barRect.y = 0;
-	barRect.w = (((float)value) / ((float)maxValue)) * width;
+	barRect.w = barWidth;
 	barRect.h = height;
 
-	SDL_SetRenderDrawColor(cGfx->getRenderer(), barColor.r, barColor.g, barColor.b,
-						   SDL_ALPHA_OPAQUE);
-	SDL_RenderFillRect(cGfx->getRenderer(), &barRect);
+	if (cGfx->getDraw())
+	{
+		cGfx->getDraw()->setDrawColor(barColor.r, barColor.g, barColor.b,
+					 GFX_ALPHA_OPAQUE);
+		cGfx->getDraw()->fillRect(&barRect);
+	}
 }
 
 shmea::GString RUProgressBar::getType() const

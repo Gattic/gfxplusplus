@@ -38,7 +38,7 @@ void RUKeyDown::setKeyDownListener(GeneralListener f)
 }
 
 void RUKeyDown::onKeyDownHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPanel,
-								SDL_Keycode keyPressed, Uint16 keyModPressed)
+					GfxKeycode keyPressed, Uint16 keyModPressed)
 {
 	if (!cGfx)
 		return;
@@ -80,7 +80,7 @@ void RUKeyDown::onKeyDownHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel*
 	eventsStatus->keyPressed = true;
 }
 
-void RUKeyDown::onKeyDown(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode keyPressed, Uint16 keyModPressed)
+void RUKeyDown::onKeyDown(gfxpp* cGfx, GPanel* cPanel, GfxKeycode keyPressed, Uint16 keyModPressed)
 {
 	// printf("RUKeyDown: ");
 }

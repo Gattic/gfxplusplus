@@ -24,7 +24,7 @@ RUButton::RUButton()
 	setBGColor(RUColors::DEFAULT_BUTTON_BLUE);
 	//setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
 	//toggleBorder(true);
-	setCursor(SDL_SYSTEM_CURSOR_HAND);
+	setCursor(GFX_SYSTEM_CURSOR_HAND);
 }
 
 RUButton::RUButton(shmea::GString buttonColor_)
@@ -55,7 +55,7 @@ RUButton::RUButton(shmea::GString buttonColor_)
 	}
 
 	//toggleBorder(true);
-	setCursor(SDL_SYSTEM_CURSOR_HAND);
+	setCursor(GFX_SYSTEM_CURSOR_HAND);
 }
 
 RUButton::~RUButton()

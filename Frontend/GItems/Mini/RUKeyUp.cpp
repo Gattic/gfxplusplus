@@ -38,7 +38,7 @@ void RUKeyUp::setKeyUpListener(GeneralListener f)
 }
 
 void RUKeyUp::onKeyUpHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPanel,
-							SDL_Keycode keyPressed, Uint16 keyModPressed)
+					GfxKeycode keyPressed, Uint16 keyModPressed)
 {
 	if (!cGfx)
 		return;
@@ -66,7 +66,7 @@ void RUKeyUp::onKeyUpHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPa
 	KeyUpListener.call(cItem->getName());
 }
 
-void RUKeyUp::onKeyUp(gfxpp* cGfx, GPanel* cPanel, SDL_Keycode keyPressed, Uint16 keyModPressed)
+void RUKeyUp::onKeyUp(gfxpp* cGfx, GPanel* cPanel, GfxKeycode keyPressed, Uint16 keyModPressed)
 {
 	// printf("RUKeyUp: ");
 }

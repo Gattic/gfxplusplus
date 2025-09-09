@@ -17,6 +17,7 @@
 #include "Graphable.h"
 #include "RUGraph.h"
 #include "../GFXUtilities/Ellipse.h"
+#include "../Graphics/GfxRenderer.h"
 
 template <>
 void Graphable<Ellipse>::computeAxisRanges(bool additionOptimization)
@@ -24,64 +25,75 @@ void Graphable<Ellipse>::computeAxisRanges(bool additionOptimization)
 	if (!parent)
 		return;
 
-	for (unsigned int i = 1; i < points.size(); ++i)
+	if (points.empty())
+		return;
+
+	redoRange = !additionOptimization;
+	if(additionOptimization)
 	{
-		Ellipse* pt = points[i];
-		pt->createHeatmap();
+		// keep current ranges; ellipse points are pre-normalized elsewhere
 	}
 
+	// Use focal point as reference for ranges
+	unsigned int i = 0;
+	for (; i < points.size(); ++i)
+	{
+		Ellipse* pt = points[i];
+		const Point2* f = pt->getFocalPoint(0);
+		if (!f)
+			continue;
+		float x_pt = f->getX();
+		float y_pt = f->getY();
+
+		setXMax(x_pt);
+		setXMin(x_pt);
+		setYMax(y_pt);
+		setYMin(y_pt);
+	}
+
+	// Set the parents
+	parent->setXMin(getXMin());
+	parent->setXMax(getXMax());
+	parent->setYMin(getYMin());
+	parent->setYMax(getYMax());
+
+	// Normalize the points
+	normalizedPoints = points;
 	parent->requireDrawUpdate();
 }
 
 template <>
 void Graphable<Ellipse>::draw(gfxpp* cGfx)
 {
-	for (unsigned int i = 0; i < points.size(); ++i)
+	if (!parent)
+		return;
+
+	if (cGfx->getDraw())
+		cGfx->getDraw()->setDrawColor(getColor().r, getColor().g, getColor().b,
+					   getColor().a);
+
+	for (unsigned int p = 0; p < normalizedPoints.size(); ++p)
 	{
-		Ellipse* pt = points[i];
+		Ellipse* pt = normalizedPoints[p];
+		if (!pt)
+			continue;
 
-		if (pt->getRadius() <= 0)
-			return;
-	
-		if (pt->foci.size() == 0)
-			return;
+		double r = pt->getRadius();
+		const Point2* f = pt->getFocalPoint(0);
+		if (!f)
+			continue;
+		int cx = static_cast<int>(f->getX());
+		int cy = static_cast<int>(f->getY());
 
-	
-		SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b,
-							   getColor().a);
-	
-		std::map<int, std::map<int, int> >::const_iterator itr = pt->heatmap.begin();
-		unsigned int focalIndex = 0;
-		for (; itr != pt->heatmap.end(); ++itr)
+		// draw a circle approximation from radius
+		for (int i = -static_cast<int>(r); i <= static_cast<int>(r); ++i)
 		{
-			//const Point2* cFocalPoint = pt->foci[focalIndex];
-
-			int xIndex = itr->first;
-			std::map<int, int>::const_iterator itr2 = pt->heatmap[xIndex].begin();
-			for (; itr2 != pt->heatmap[xIndex].end(); ++itr2)
+			int j = static_cast<int>(sqrt(r*r - i*i));
+			if (cGfx->getDraw())
 			{
-				int yIndex = itr2->first;
-				int cHeat = itr2->second;
-				// printf("pt->heatmap[%d][%d]: %d\n", xIndex, yIndex, cHeat);
-	
-				// calculate the hue
-				double hue = ((double)cHeat) / ((double)pt->getMaxHit());
-				hue = 1.0f - hue;
-	
-				// get the color
-				int8_t redMask = 0;
-				int8_t greenMask = 0;
-				int8_t blueMask = 0;
-				unsigned int colorMask = gfxpp::RGBfromHue(hue, &redMask, &greenMask, &blueMask);
-	
-				// set the color and draw the point
-				SDL_SetRenderDrawColor(cGfx->getRenderer(), redMask, greenMask, blueMask, SDL_ALPHA_OPAQUE);
-				//SDL_RenderDrawPoint(cGfx->getRenderer(), cFocalPoint->getX() + xIndex, cFocalPoint->getY() + yIndex);
-				//SDL_RenderDrawPoint(cGfx->getRenderer(), parent->getX() + xIndex, parent->getY() + yIndex);
-				SDL_RenderDrawPoint(cGfx->getRenderer(), xIndex, yIndex);
-				//printf("(%d,%d): 0x%08X\n", cFocalPoint->getX()+xIndex, cFocalPoint->getY()+yIndex, colorMask);
+				cGfx->getDraw()->drawPoint(cx + i, cy + j);
+				cGfx->getDraw()->drawPoint(cx + i, cy - j);
 			}
-			++focalIndex;
 		}
 	}
 }
