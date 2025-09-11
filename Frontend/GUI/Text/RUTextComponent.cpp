@@ -37,6 +37,8 @@ RUTextComponent::RUTextComponent()
 	readOnly = true;
 	FONT_COLOR = 0;
 	xClick = 0;
+	fontPixelHeight = 0;
+	autoWidthToText = true;
 
 	// event listeners
 	KeyListener = 0;
@@ -54,6 +56,8 @@ RUTextComponent::~RUTextComponent()
 	readOnly = true;
 	xClick = 0;
 	FONT_COLOR = 0;
+	fontPixelHeight = 0;
+	autoWidthToText = true;
 
 	// event listeners
 	KeyListener = 0;
@@ -135,6 +139,84 @@ void RUTextComponent::setFontColor(int newFontColor)
 	drawUpdate = true;
 }
 
+void RUTextComponent::setFontSize(int newPixelHeight)
+{
+	fontPixelHeight = newPixelHeight;
+	requireDrawUpdate();
+}
+
+int RUTextComponent::getFontSize() const
+{
+	return fontPixelHeight;
+}
+
+void RUTextComponent::setAutoWidthToText(bool enable)
+{
+	autoWidthToText = enable;
+	requireDrawUpdate();
+}
+
+bool RUTextComponent::getAutoWidthToText() const
+{
+	return autoWidthToText;
+}
+
+int RUTextComponent::measureFullTextWidth(gfxpp* cGfx) const
+{
+	if (!cGfx)
+		return 0;
+
+	GFont* cFont = NULL;
+	int fontColor = FONT_COLOR;
+	std::map<int, GFont*>::const_iterator it = cGfx->graphicsFonts.find(fontColor);
+	if (it != cGfx->graphicsFonts.end())
+		cFont = it->second;
+	if (!cFont)
+		return 0;
+
+	const char* raw = text.c_str();
+	if (!raw)
+		return 0;
+	std::string fullText = std::string(raw);
+	if (fullText.empty())
+		return 0;
+
+#ifdef GFX_HAVE_OPENGL
+	if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
+	{
+		const char* fontPathC = cFont->getFontPath().c_str();
+		std::string fontPathStr = fontPathC ? std::string(fontPathC) : std::string();
+		int glPixelHeight = (fontPixelHeight > 0) ? fontPixelHeight : (cFont->getFontSize() > 0 ? cFont->getFontSize() : (getHeight() > 0 ? getHeight() : 16));
+		GLTextRenderer* glText = cGfx->getGLText(fontPathStr, glPixelHeight);
+		if (!glText)
+			return 0;
+		return glText->measureTextWidth(fullText);
+	}
+#endif
+
+#ifdef GFX_HAVE_SDL2
+	if (cFont->getFont())
+	{
+		int baseHeight = cFont->getMaxHeight();
+		if (baseHeight <= 0)
+			baseHeight = 1;
+		int targetPixelHeight = (fontPixelHeight > 0) ? fontPixelHeight : (getHeight() > 0 ? getHeight() : (cFont->getFontSize() > 0 ? cFont->getFontSize() : baseHeight));
+		float ratio = ((float)targetPixelHeight) / ((float)baseHeight);
+		int widthSum = 0;
+		for (size_t i = 0; i < fullText.size(); ++i)
+		{
+			GLetter* cLetter = cFont->getLetter(fullText[i]);
+			if (!cLetter)
+				continue;
+			widthSum += cLetter->getWidth();
+		}
+		return (int)(ratio * (float)widthSum);
+	}
+#endif
+
+	return 0;
+}
+
 void RUTextComponent::calculateRenderInfo(GFont* cFont)
 {
 	if ((!cFont) || (!cFont->getFont()))
@@ -151,7 +233,8 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 	if (text.length())
 	{
 		int newHeight = cFont->getMaxHeight();
-		dimRatio = (((float)(getHeight())) / ((float)(newHeight)));
+		int targetPixelHeight = (fontPixelHeight > 0) ? fontPixelHeight : getHeight();
+		dimRatio = (((float)(targetPixelHeight)) / ((float)(newHeight)));
 
 		// Text has not tested it bounds
 		do
@@ -256,7 +339,8 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 	if (!cFont)
 		return;
 
-	float cursorYGap = (getHeight() - cFont->getFontSize());
+	int caretPixelHeight = (fontPixelHeight > 0) ? fontPixelHeight : getHeight();
+	float cursorYGap = (getHeight() - caretPixelHeight);
 
 	// For SDL path, draw to texture; for GL path, draw directly
 #ifdef GFX_HAVE_SDL2
@@ -282,11 +366,7 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 	{
 		const char* fontPathC = cFont->getFontPath().c_str();
 		std::string fontPathStr = fontPathC ? std::string(fontPathC) : std::string();
-		int glPixelHeight = cFont->getFontSize();
-		if (glPixelHeight <= 0)
-			glPixelHeight = getHeight();
-		if (glPixelHeight > getHeight())
-			glPixelHeight = getHeight();
+		int glPixelHeight = (fontPixelHeight > 0) ? fontPixelHeight : (cFont->getFontSize() > 0 ? cFont->getFontSize() : getHeight());
 		GLTextRenderer* glText = cGfx->getGLText(fontPathStr, glPixelHeight);
 		if (glText)
 		{
@@ -435,9 +515,9 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 			int glyphW = static_cast<int>(dimRatio * cLetter->getWidth());
 			GfxRect dstRect;
 			dstRect.x = textRect.x;
-			dstRect.y = 0;
+			dstRect.y = (cursorYGap > 0 ? (int)(cursorYGap / 2.0f) : 0);
 			dstRect.w = glyphW;
-			dstRect.h = getHeight();
+			dstRect.h = (int)((fontPixelHeight > 0) ? fontPixelHeight : getHeight());
 			if (cGfx->getDraw())
 				cGfx->getDraw()->copyTexture(cLetter->getTexture(), NULL, &dstRect);
 			textRect.x += glyphW;
@@ -465,11 +545,7 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 				// Align caret to GL text baseline and pixel height used
 				const char* fontPathC2 = cFont->getFontPath().c_str();
 				std::string fontPathStr2 = fontPathC2 ? std::string(fontPathC2) : std::string();
-				int glPixelHeight2 = cFont->getFontSize();
-				if (glPixelHeight2 <= 0)
-					glPixelHeight2 = getHeight();
-				if (glPixelHeight2 > getHeight())
-					glPixelHeight2 = getHeight();
+				int glPixelHeight2 = (fontPixelHeight > 0) ? fontPixelHeight : (cFont->getFontSize() > 0 ? cFont->getFontSize() : getHeight());
 				float baselineY2 = (float)getHeight() - 2.0f;
 				cursorRect.y = (int)(baselineY2 - glPixelHeight2);
 				cursorRect.w = 2;
@@ -480,7 +556,7 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 			{
 				cursorRect.y = cursorYGap / 2.0f;
 				cursorRect.w = 2;
-				cursorRect.h = ((float)height) - cursorYGap;
+				cursorRect.h = (int)((fontPixelHeight > 0) ? fontPixelHeight : (((float)height) - cursorYGap));
 			}
 			cGfx->getDraw()->fillRect(&cursorRect);
 		}

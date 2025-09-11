@@ -166,6 +166,7 @@ void RUListbox::addOption(shmea::GString newItemText)
 
 	// create the new item label
 	RULabel* newLabel = new RULabel(newItemText);
+	newLabel->setAutoWidthToText(false);
 	newLabel->setMarginX(0);
 	newLabel->setWidth(newLabelWidth);
 	newLabel->setCursor(GFX_SYSTEM_CURSOR_HAND);

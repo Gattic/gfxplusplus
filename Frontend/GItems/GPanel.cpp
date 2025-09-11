@@ -127,6 +127,15 @@ void GPanel::calculateSubItemPositions(std::pair<int, int> parentOffset)
 		if (cItem == NULL)
 			continue;
 
+		// If a layout has no explicit size, default it to fill the panel.
+		shmea::GString t = cItem->getType();
+		if ((t == "GRelativeLayout" || t == "GLinearLayout") &&
+			(cItem->getWidth() <= 0 || cItem->getHeight() <= 0))
+		{
+			cItem->setWidth(width);
+			cItem->setHeight(height);
+		}
+
 		// draw the item
 		cItem->calculateSubItemPositions(parentOffset);
 	}
