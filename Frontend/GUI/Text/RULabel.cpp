@@ -22,15 +22,15 @@
 RULabel::RULabel()
 {
 	//
-	//toggleBG(false);
-	setBGColor(RUColors::COLOR_DARK_GRAY);
+	toggleBG(false);
+	//setBGColor(RUColors::COLOR_DARK_GRAY);
 	setAutoWidthToText(true);
 }
 
 RULabel::RULabel(shmea::GString newText)
 {
-	//toggleBG(false);
-	setBGColor(RUColors::COLOR_DARK_GRAY);
+	toggleBG(false);
+	//setBGColor(RUColors::COLOR_DARK_GRAY);
 	setText(newText);
 	setAutoWidthToText(true);
 }
@@ -49,6 +49,21 @@ void RULabel::updateBackground(gfxpp* cGfx)
 		{
 			setWidth(newW);
 			// Request a full panel redraw to prevent stale overlaps when bounds change
+			if (cGfx && cGfx->focusedPanel)
+			{
+				std::pair<int,int> zero(0,0);
+				cGfx->focusedPanel->calculateSubItemPositions(zero);
+				cGfx->focusedPanel->requireDrawUpdate();
+			}
+			requireDrawUpdate();
+		}
+	}
+	if (getAutoHeightToFont())
+	{
+		int newH = measureFontPixelHeight(cGfx);
+		if (newH > 0 && newH != getHeight())
+		{
+			setHeight(newH);
 			if (cGfx && cGfx->focusedPanel)
 			{
 				std::pair<int,int> zero(0,0);

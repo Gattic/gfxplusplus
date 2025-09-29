@@ -84,6 +84,21 @@ void RUButton::updateBackground(gfxpp* cGfx)
 			requireDrawUpdate();
 		}
 	}
+	if (getAutoHeightToFont())
+	{
+		int newH = measureFontPixelHeight(cGfx);
+		if (newH > 0 && newH != getHeight())
+		{
+			setHeight(newH);
+			if (cGfx && cGfx->focusedPanel)
+			{
+				std::pair<int,int> zero(0,0);
+				cGfx->focusedPanel->calculateSubItemPositions(zero);
+				cGfx->focusedPanel->requireDrawUpdate();
+			}
+			requireDrawUpdate();
+		}
+	}
 	drawText(cGfx);
 }
 

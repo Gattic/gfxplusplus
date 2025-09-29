@@ -17,11 +17,13 @@
 #include "RUTextbox.h"
 #include "../../GItems/RUColors.h"
 #include "../../Graphics/graphics.h"
+#include "../../GItems/GPanel.h"
 
 RUTextbox::RUTextbox()
 {
 	readOnly = false;
 	staticBorder = false;
+	setAutoWidthToText(false);
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 	// Draw a bg image instead of color?
 	setCursor(GFX_SYSTEM_CURSOR_IBEAM);
@@ -34,6 +36,21 @@ RUTextbox::~RUTextbox()
 
 void RUTextbox::updateBackground(gfxpp* cGfx)
 {
+	if (getAutoHeightToFont())
+	{
+		int newH = measureFontPixelHeight(cGfx);
+		if (newH > 0 && newH != getHeight())
+		{
+			setHeight(newH);
+			if (cGfx && cGfx->focusedPanel)
+			{
+				std::pair<int,int> zero(0,0);
+				cGfx->focusedPanel->calculateSubItemPositions(zero);
+				cGfx->focusedPanel->requireDrawUpdate();
+			}
+			requireDrawUpdate();
+		}
+	}
 	drawText(cGfx);
 }
 

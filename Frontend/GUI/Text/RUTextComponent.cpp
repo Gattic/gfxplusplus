@@ -19,6 +19,7 @@
 #include "Backend/Database/GString.h"
 #include "GFont.h"
 #include "../../Graphics/GfxRenderer.h"
+#include "../../GItems/GPanel.h"
 #ifdef GFX_HAVE_OPENGL
 #include "GLTextRenderer.h"
 #endif
@@ -39,6 +40,7 @@ RUTextComponent::RUTextComponent()
 	xClick = 0;
 	fontPixelHeight = 0;
 	autoWidthToText = true;
+	autoHeightToFont = true;
 
 	// event listeners
 	KeyListener = 0;
@@ -58,9 +60,54 @@ RUTextComponent::~RUTextComponent()
 	FONT_COLOR = 0;
 	fontPixelHeight = 0;
 	autoWidthToText = true;
+	autoHeightToFont = true;
 
 	// event listeners
 	KeyListener = 0;
+}
+void RUTextComponent::updateBackgroundHelper(gfxpp* cGfx)
+{
+    // If auto-height is enabled and height is not set, compute a sensible height early
+    if (getAutoHeightToFont())
+    {
+        int newH = measureFontPixelHeight(cGfx);
+        if (newH > 0 && newH != getHeight())
+        {
+            setHeight(newH);
+            if (cGfx && cGfx->focusedPanel)
+            {
+                std::pair<int,int> zero(0,0);
+                cGfx->focusedPanel->calculateSubItemPositions(zero);
+                cGfx->focusedPanel->requireDrawUpdate();
+            }
+            requireDrawUpdate();
+        }
+    }
+    // If auto-width is enabled and width is not set, compute width from text early
+    if (getAutoWidthToText())
+    {
+        int newW = measureFullTextWidth(cGfx);
+        if (newW <= 0)
+        {
+            // Provide a sensible default width for empty text (textbox case)
+            int ph = measureFontPixelHeight(cGfx);
+            if (ph <= 0)
+                ph = 16;
+            newW = ph * 8; // approx. 8-character field as a baseline
+        }
+        if (newW > 0 && newW != getWidth())
+        {
+            setWidth(newW);
+            if (cGfx && cGfx->focusedPanel)
+            {
+                std::pair<int,int> zero(0,0);
+                cGfx->focusedPanel->calculateSubItemPositions(zero);
+                cGfx->focusedPanel->requireDrawUpdate();
+            }
+            requireDrawUpdate();
+        }
+    }
+    RUComponent::updateBackgroundHelper(cGfx);
 }
 
 shmea::GString RUTextComponent::getText() const
@@ -161,6 +208,17 @@ bool RUTextComponent::getAutoWidthToText() const
 	return autoWidthToText;
 }
 
+void RUTextComponent::setAutoHeightToFont(bool enable)
+{
+	autoHeightToFont = enable;
+	requireDrawUpdate();
+}
+
+bool RUTextComponent::getAutoHeightToFont() const
+{
+	return autoHeightToFont;
+}
+
 int RUTextComponent::measureFullTextWidth(gfxpp* cGfx) const
 {
 	if (!cGfx)
@@ -215,6 +273,43 @@ int RUTextComponent::measureFullTextWidth(gfxpp* cGfx) const
 #endif
 
 	return 0;
+}
+
+int RUTextComponent::measureFontPixelHeight(gfxpp* cGfx) const
+{
+    if (!cGfx)
+        return 0;
+
+    GFont* cFont = NULL;
+    int fontColor = FONT_COLOR;
+    std::map<int, GFont*>::const_iterator it = cGfx->graphicsFonts.find(fontColor);
+    if (it != cGfx->graphicsFonts.end())
+        cFont = it->second;
+    if (!cFont)
+        return 0;
+
+#ifdef GFX_HAVE_OPENGL
+    if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
+    {
+        const char* fontPathC = cFont->getFontPath().c_str();
+        std::string fontPathStr = fontPathC ? std::string(fontPathC) : std::string();
+        int glPixelHeight = (fontPixelHeight > 0) ? fontPixelHeight : (cFont->getFontSize() > 0 ? cFont->getFontSize() : (getHeight() > 0 ? getHeight() : 16));
+        return glPixelHeight;
+    }
+#endif
+
+#ifdef GFX_HAVE_SDL2
+    if (cFont->getFont())
+    {
+        int baseHeight = cFont->getMaxHeight();
+        if (baseHeight <= 0)
+            baseHeight = 1;
+        int targetPixelHeight = (fontPixelHeight > 0) ? fontPixelHeight : (getHeight() > 0 ? getHeight() : (cFont->getFontSize() > 0 ? cFont->getFontSize() : baseHeight));
+        return targetPixelHeight;
+    }
+#endif
+
+    return 0;
 }
 
 void RUTextComponent::calculateRenderInfo(GFont* cFont)
