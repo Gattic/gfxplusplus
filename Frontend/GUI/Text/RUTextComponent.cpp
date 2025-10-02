@@ -168,11 +168,16 @@ void RUTextComponent::setText(shmea::GType newItem)
 void RUTextComponent::setPasswordChar(char newPasswordChar)
 {
 	passwordChar = newPasswordChar;
+	requireDrawUpdate();
 }
 
 void RUTextComponent::setPasswordField(bool newPasswordField)
 {
 	passwordField = newPasswordField;
+	cursor.reset();
+	strDrawText = "";
+	strWidth = 0.0f;
+	requireDrawUpdate();
 }
 
 void RUTextComponent::setReadOnly(bool newReadOnly)
@@ -239,6 +244,11 @@ int RUTextComponent::measureFullTextWidth(gfxpp* cGfx) const
 	if (fullText.empty())
 		return 0;
 
+	// Use masked text for measurement when password mode is enabled
+	std::string maskedText;
+	if (passwordField)
+		maskedText.assign(fullText.size(), passwordChar);
+
 #ifdef GFX_HAVE_OPENGL
 	if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
 	{
@@ -248,7 +258,8 @@ int RUTextComponent::measureFullTextWidth(gfxpp* cGfx) const
 		GLTextRenderer* glText = cGfx->getGLText(fontPathStr, glPixelHeight);
 		if (!glText)
 			return 0;
-		return glText->measureTextWidth(fullText);
+		const std::string& textToMeasure = passwordField ? maskedText : fullText;
+		return glText->measureTextWidth(textToMeasure);
 	}
 #endif
 
@@ -261,9 +272,10 @@ int RUTextComponent::measureFullTextWidth(gfxpp* cGfx) const
 		int targetPixelHeight = (fontPixelHeight > 0) ? fontPixelHeight : (getHeight() > 0 ? getHeight() : (cFont->getFontSize() > 0 ? cFont->getFontSize() : baseHeight));
 		float ratio = ((float)targetPixelHeight) / ((float)baseHeight);
 		int widthSum = 0;
-		for (size_t i = 0; i < fullText.size(); ++i)
+		const std::string& textToMeasure = passwordField ? maskedText : fullText;
+		for (size_t i = 0; i < textToMeasure.size(); ++i)
 		{
-			GLetter* cLetter = cFont->getLetter(fullText[i]);
+			GLetter* cLetter = cFont->getLetter(textToMeasure[i]);
 			if (!cLetter)
 				continue;
 			widthSum += cLetter->getWidth();
@@ -339,8 +351,19 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 
 			bool cursorSet = false;
 			int newWidth = 0;
-			strDrawText = text.substr(cursor.index, cursor.maxLen);
-			for (unsigned int i = 0; i < strDrawText.length(); ++i)
+			shmea::GString rawSubG = text.substr(cursor.index, cursor.maxLen);
+			const char* rawSubC = rawSubG.c_str();
+			std::string rawSub = rawSubC ? std::string(rawSubC) : std::string();
+			if (passwordField)
+			{
+				std::string masked(rawSub.size(), passwordChar);
+				strDrawText = masked.c_str();
+			}
+			else
+			{
+				strDrawText = rawSubG;
+			}
+			for (unsigned int i = 0; i < rawSub.length(); ++i)
 			{
 				if (i == cursor.cursorIndex)
 				{
@@ -349,7 +372,8 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 				}
 
 				int prevWidth = dimRatio * newWidth;
-				GLetter* cLetter = cFont->getLetter(strDrawText[i]);
+				char widthCh = passwordField ? passwordChar : rawSub[i];
+				GLetter* cLetter = cFont->getLetter(widthCh);
 				if (!cLetter)
 					continue;
 
@@ -393,14 +417,26 @@ void RUTextComponent::calculateRenderInfo(GFont* cFont)
 			}
 
 			int newWidth = 0;
-			strDrawText = text.substr(cursor.index, cursor.maxLen);
-			for (unsigned int i = 0; i < strDrawText.length(); ++i)
+			shmea::GString rawSub2G = text.substr(cursor.index, cursor.maxLen);
+			const char* rawSub2C = rawSub2G.c_str();
+			std::string rawSub2 = rawSub2C ? std::string(rawSub2C) : std::string();
+			if (passwordField)
 			{
-				GLetter* cLetter = cFont->getLetter(strDrawText[i]);
-				if (!cLetter)
+				std::string masked2(rawSub2.size(), passwordChar);
+				strDrawText = masked2.c_str();
+			}
+			else
+			{
+				strDrawText = rawSub2G;
+			}
+			for (unsigned int i = 0; i < rawSub2.length(); ++i)
+			{
+				char widthCh2 = passwordField ? passwordChar : rawSub2[i];
+				GLetter* cLetter2 = cFont->getLetter(widthCh2);
+				if (!cLetter2)
 					continue;
 
-				newWidth += cLetter->getWidth();
+				newWidth += cLetter2->getWidth();
 			}
 
 			strWidth = dimRatio * newWidth;
@@ -475,9 +511,20 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 						++cursor.maxLen;
 
 					bool cursorSet = false;
-					int newWidth = 0;
-					strDrawText = text.substr(cursor.index, cursor.maxLen);
-					for (unsigned int i = 0; i < strDrawText.length(); ++i)
+			int newWidth = 0;
+			shmea::GString rawSubG = text.substr(cursor.index, cursor.maxLen);
+			const char* rawSubC = rawSubG.c_str();
+			std::string rawSub = rawSubC ? std::string(rawSubC) : std::string();
+					if (passwordField)
+					{
+						std::string masked(rawSub.size(), passwordChar);
+						strDrawText = masked.c_str();
+					}
+					else
+					{
+						strDrawText = rawSubG;
+					}
+					for (unsigned int i = 0; i < rawSub.length(); ++i)
 					{
 						if (i == cursor.cursorIndex)
 						{
@@ -486,7 +533,8 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 						}
 
 						int prevWidth = newWidth;
-						newWidth += glText->getGlyphAdvance(strDrawText[i]);
+						char widthCh = passwordField ? passwordChar : rawSub[i];
+						newWidth += glText->getGlyphAdvance(widthCh);
 
 						// Move the cursor to the click
 						if ((xClick) && (newWidth >= xClick))
@@ -524,10 +572,24 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 						--cursor.maxLen;
 					}
 
-					int newWidth = 0;
-					strDrawText = text.substr(cursor.index, cursor.maxLen);
-					for (unsigned int i = 0; i < strDrawText.length(); ++i)
-						newWidth += glText->getGlyphAdvance(strDrawText[i]);
+			int newWidth = 0;
+			shmea::GString rawSub2G = text.substr(cursor.index, cursor.maxLen);
+			const char* rawSub2C = rawSub2G.c_str();
+			std::string rawSub2 = rawSub2C ? std::string(rawSub2C) : std::string();
+					if (passwordField)
+					{
+						std::string masked2(rawSub2.size(), passwordChar);
+						strDrawText = masked2.c_str();
+					}
+					else
+					{
+						strDrawText = rawSub2G;
+					}
+					for (unsigned int i = 0; i < rawSub2.length(); ++i)
+					{
+						char widthCh2 = passwordField ? passwordChar : rawSub2[i];
+						newWidth += glText->getGlyphAdvance(widthCh2);
+					}
 
 					strWidth = newWidth;
 				}
@@ -538,7 +600,8 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 					int recomputedCursorX = 0;
 					for (unsigned int i = 0; i < strDrawText.length(); ++i)
 					{
-						int adv = glText->getGlyphAdvance(strDrawText[i]);
+						char widthCh3 = passwordField ? passwordChar : strDrawText[i];
+						int adv = glText->getGlyphAdvance(widthCh3);
 						if (i < cursor.cursorIndex)
 							recomputedCursorX += adv;
 						recomputedWidth += adv;
