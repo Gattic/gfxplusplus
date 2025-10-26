@@ -771,6 +771,19 @@ void gfxpp::display()
 	leftPressed = false;
 	rightPressed = false;
 
+	// Pre-layout warmup: stabilize auto-sized components (labels, buttons, textboxes)
+	// so their final sizes are known before the first visible frame is presented.
+	// We run a small number of passes: layout -> background/helpers -> layout.
+	if (focusedPanel && this->draw)
+	{
+		std::pair<int,int> zero(0,0);
+		focusedPanel->calculateSubItemPositions(zero);
+		// Trigger components (e.g., RUTextComponent) to compute auto sizes during their helpers
+		focusedPanel->updateBackgroundHelper(this);
+		// Recompute layout once more using final measured sizes
+		focusedPanel->calculateSubItemPositions(zero);
+	}
+
 	// draw/event loop
 	while (running)
 	{
@@ -1113,6 +1126,8 @@ void gfxpp::clean2D()
 {
 	// clean up the componenets
 	focusedItem = NULL;
+	// Also clear the focusedPanel to avoid dereferencing a freed panel
+	focusedPanel = NULL;
 
 	// gui
 	for (unsigned int i = 0; i < guiElements.size(); ++i)
@@ -1162,6 +1177,8 @@ void gfxpp::finish()
 	if (finalized)
 		return;
 	running = false;
+	// Ensure no stale UI pointers remain before cleaning up UI elements
+	focusedPanel = NULL;
 	clean2D();
 
 	if (this->draw)

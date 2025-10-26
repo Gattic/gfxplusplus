@@ -316,11 +316,6 @@ void GRelativeLayout::updateBackgroundHelper(gfxpp* cGfx)
 	if (!visible)
 		return;
 
-	// Ensure positions are up-to-date each frame in case nested layouts changed size
-	{
-		std::pair<int,int> zero(0,0);
-		calculateSubItemPositions(zero);
-	}
 
 	// Draw children back-to-front (reverse for dropdown-like overlays)
 	for (unsigned int i = subitems.size(); i > 0; --i)
@@ -346,6 +341,10 @@ void GRelativeLayout::addSubItem(GItem* newItem, unsigned int newZIndex)
 	// Default to TOP_LEFT if not specified
 	itemAlignment[newItem] = TOP_LEFT;
 	GItem::addSubItem(newItem, newZIndex);
+	// Recompute positions immediately so there is no visible shift on next frame
+	std::pair<int, int> offset(0, 0);
+	calculateSubItemPositions(offset);
+	drawUpdate = true;
 }
 
 void GRelativeLayout::addSubItemAligned(GItem* newItem, Alignment alignment, unsigned int newZIndex)
@@ -355,6 +354,10 @@ void GRelativeLayout::addSubItemAligned(GItem* newItem, Alignment alignment, uns
 
 	itemAlignment[newItem] = (int)alignment;
 	GItem::addSubItem(newItem, newZIndex);
+	// Recompute positions immediately so there is no visible shift on next frame
+	std::pair<int, int> offset(0, 0);
+	calculateSubItemPositions(offset);
+	drawUpdate = true;
 }
 
 void GRelativeLayout::setItemAlignment(GItem* item, Alignment alignment)
