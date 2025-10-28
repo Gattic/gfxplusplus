@@ -20,12 +20,14 @@
 #include "../GItems/Mini/RUBackgroundComponent.h"
 #include "../GItems/Mini/RUBorderComponent.h"
 #include "../Graphics/graphics.h"
+#include <stdio.h>
 
 GLinearLayout::GLinearLayout(shmea::GString layoutName, int newOrientation)
 {
 	name = layoutName;
 	layoutType = 1; // 0 = Relative; 1 = Linear
 	orientation = newOrientation;
+	horizontalAlign = ALIGN_LEFT;
 }
 
 int GLinearLayout::getOrientation() const
@@ -36,6 +38,16 @@ int GLinearLayout::getOrientation() const
 void GLinearLayout::setOrientation(int newOrientation)
 {
 	orientation = newOrientation;
+}
+
+void GLinearLayout::setAlignment(HAlign align)
+{
+	horizontalAlign = align;
+}
+
+GLinearLayout::HAlign GLinearLayout::getAlignment() const
+{
+	return horizontalAlign;
 }
 
 void GLinearLayout::updateBackground(gfxpp* cGfx)
@@ -49,6 +61,28 @@ void GLinearLayout::calculateSubItemPositions(std::pair<int, int> parentOffset)
 	width = 0;
 	height = 0;
 
+	// First pass: compute max width (VERTICAL) or max height (HORIZONTAL)
+	int maxChildWidth = 0;
+	int maxChildHeight = 0;
+	for (unsigned int i = 0; i < subitems.size(); ++i)
+	{
+		GItem* cItem = subitems[i];
+		if (!cItem || !cItem->isVisible())
+			continue;
+		// Allow children to compute their own sizes before we position
+		cItem->calculateSubItemPositions(parentOffset);
+		if (orientation == VERTICAL)
+		{
+			int w = cItem->getPaddingX() + cItem->getWidth();
+			if (w > maxChildWidth) maxChildWidth = w;
+		}
+		else
+		{
+			int h = cItem->getPaddingY() + cItem->getHeight();
+			if (h > maxChildHeight) maxChildHeight = h;
+		}
+	}
+
 	// Default layout coordinates
 	std::pair<int, int> cItemOffset(parentOffset.first + getX(), parentOffset.second + getY());
 	for (unsigned int i = 0; i < subitems.size(); ++i)
@@ -57,14 +91,22 @@ void GLinearLayout::calculateSubItemPositions(std::pair<int, int> parentOffset)
 		if (cItem == NULL)
 			continue;
 
-		cItem->setX(cItemOffset.first + cItem->getMarginX());
+		// Compute aligned X for vertical stacks
+		int alignedX = cItemOffset.first + cItem->getMarginX();
+		if (orientation == VERTICAL)
+		{
+			const int itemW = cItem->getWidth();
+			if (horizontalAlign == ALIGN_CENTER)
+				alignedX += (maxChildWidth - itemW) / 2;
+			else if (horizontalAlign == ALIGN_RIGHT)
+				alignedX += (maxChildWidth - itemW);
+			// ALIGN_LEFT -> no change
+		}
+		cItem->setX(alignedX);
 		cItem->setY(cItemOffset.second + cItem->getMarginY());
 
 		if(!cItem->isVisible())
-		    continue;
-
-		// draw the item
-		cItem->calculateSubItemPositions(parentOffset);
+			continue;
 
 		// Prepare for the next item offset
 		if (orientation == VERTICAL)
@@ -74,8 +116,8 @@ void GLinearLayout::calculateSubItemPositions(std::pair<int, int> parentOffset)
 			height += cItem->getPaddingY() + cItem->getHeight();
 
 			// Update the other dimensions max
-			if (cItem->getWidth() > width)
-				width = cItem->getPaddingX() + cItem->getWidth();
+			if (maxChildWidth > width)
+				width = maxChildWidth;
 		}
 		else if (orientation == HORIZONTAL)
 		{
@@ -84,8 +126,8 @@ void GLinearLayout::calculateSubItemPositions(std::pair<int, int> parentOffset)
 			width += cItem->getPaddingX() + cItem->getWidth();
 
 			// Update the other dimensions max
-			if (cItem->getHeight() > height)
-				height = cItem->getPaddingY() + cItem->getHeight();
+			if (maxChildHeight > height)
+				height = maxChildHeight;
 		}
 
 		// Create an overflow variable
@@ -96,8 +138,8 @@ void GLinearLayout::calculateSubItemPositions(std::pair<int, int> parentOffset)
 }
 
 void GLinearLayout::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus,
-										 GPanel* parentPanel, SDL_Event event, int mouseX,
-										 int mouseY)
+							 GPanel* parentPanel, GfxEvent event, int mouseX,
+							 int mouseY)
 {
 	if (!eventsStatus)
 		return;
@@ -131,7 +173,8 @@ void GLinearLayout::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus
 
 void GLinearLayout::updateBackgroundHelper(gfxpp* cGfx)
 {
-	if (!cGfx->getRenderer())
+	// In OpenGL mode there is no SDL_Renderer; use draw abstraction instead
+	if (!cGfx->getDraw())
 		return;
 
 	if (!visible)

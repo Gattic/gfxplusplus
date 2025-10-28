@@ -17,6 +17,7 @@
 #include "Graphable.h"
 #include "RUGraph.h"
 #include "../GFXUtilities/Circle.h"
+#include "../Graphics/GfxRenderer.h"
 
 template <>
 void Graphable<Circle>::computeAxisRanges(bool additionOptimization)
@@ -120,7 +121,8 @@ void Graphable<Circle>::draw(gfxpp* cGfx)
 		if (pt->getCenter() == NULL)
 			return;
 	
-		SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
+		if (cGfx->getDraw())
+			cGfx->getDraw()->setDrawColor(getColor().r, getColor().g, getColor().b, getColor().a);
 	
 		const Point2* cFocalPoint = pt->getCenter();
 		double radius = pt->getRadius();
@@ -145,10 +147,13 @@ void Graphable<Circle>::draw(gfxpp* cGfx)
 				int8_t greenMask = 0;
 				int8_t blueMask = 0;
 				unsigned int colorMask = gfxpp::RGBfromHue(hue, &redMask, &greenMask, &blueMask);
-	
+			
 				// Set the color and draw the point
-				SDL_SetRenderDrawColor(cGfx->getRenderer(), redMask, greenMask, blueMask, SDL_ALPHA_OPAQUE);
-				SDL_RenderDrawPoint(cGfx->getRenderer(), xIndex, yIndex);
+				if (cGfx->getDraw())
+				{
+					cGfx->getDraw()->setDrawColor(redMask, greenMask, blueMask, GFX_ALPHA_OPAQUE);
+					cGfx->getDraw()->drawPoint(xIndex, yIndex);
+				}
 				//printf("DRAW-CIRCLE[%d][%d]: %08X\n", xIndex, yIndex, colorMask);
 			}
 		}

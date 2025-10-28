@@ -19,6 +19,9 @@
 #include "../GUI/RUMsgBox.h"
 #include "../GUI/Text/RUTextComponent.h"
 #include "../Graphics/graphics.h"
+#ifdef GFX_HAVE_OPENGL
+#include <GLFW/glfw3.h>
+#endif
 #include "Backend/Networking/main.h"
 #include "GItem.h"
 #include "GLayout.h"
@@ -26,6 +29,7 @@
 #include "Mini/RUBorderComponent.h"
 #include "RUColors.h"
 #include "RUComponent.h"
+#include "../Graphics/GfxRenderer.h"
 
 GPanel::GPanel(const shmea::GString& newName, int newWidth, int newHeight)
 {
@@ -123,13 +127,22 @@ void GPanel::calculateSubItemPositions(std::pair<int, int> parentOffset)
 		if (cItem == NULL)
 			continue;
 
+		// If a layout has no explicit size, default it to fill the panel.
+		shmea::GString t = cItem->getType();
+		if ((t == "GRelativeLayout" || t == "GLinearLayout") &&
+			(cItem->getWidth() <= 0 || cItem->getHeight() <= 0))
+		{
+			cItem->setWidth(width);
+			cItem->setHeight(height);
+		}
+
 		// draw the item
 		cItem->calculateSubItemPositions(parentOffset);
 	}
 }
 
 void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* parentPanel,
-								  SDL_Event event, int mouseX, int mouseY)
+				  GfxEvent event, int mouseX, int mouseY)
 {
 	if (!cGfx)
 		return;
@@ -152,8 +165,8 @@ void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPane
 	if (!hovered)
 	{
 		// Set the default cursor
-		SDL_Cursor* renderCursor = cGfx->getSystemCursor();
-		SDL_SetCursor(renderCursor);
+		GfxCursor* renderCursor = cGfx->getSystemCursor();
+		GFX_SetCursor(renderCursor);
 	}
 }
 
@@ -200,7 +213,7 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 	if (!cGfx)
 		return;
 
-	if (!cGfx->getRenderer())
+	if (!cGfx->getDraw())
 		return;
 
 	if (!visible)
@@ -218,70 +231,78 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 		drawUpdate = false;
 
 		// reset the backgrounds
+#ifdef GFX_HAVE_SDL2
 		if (background)
-			SDL_DestroyTexture(background);
+			GFX_DestroyTexture(background);
 		background = NULL;
 
-		// draw the background
-		background = SDL_CreateTexture(cGfx->getRenderer(), SDL_PIXELFORMAT_RGBA8888,
-									   SDL_TEXTUREACCESS_TARGET, width, height);
-		if (!background)
+		// Try to draw into an offscreen texture (SDL path). If unavailable (GL path), draw directly.
+		background = cGfx->getDraw()->createRenderTargetTexture(width, height);
+		if (background)
 		{
-			background = NULL;
-			return;
+			cGfx->getDraw()->setTargetTexture(background);
+			cGfx->getDraw()->setTextureBlendMode(background, GFX_BLENDMODE_BLEND);
+			// draw the background
+			cGfx->getDraw()->setTargetTexture(background);
+			updateBGBackground(cGfx);
+			// Call the component draw call
+			cGfx->getDraw()->setTargetTexture(background);
+			updateBackground(cGfx);
+			// draw the border
+			cGfx->getDraw()->setTargetTexture(background);
+			updateBorderBackground(cGfx);
+			// reset the render target to default
+			cGfx->getDraw()->resetTarget();
 		}
-
-		SDL_SetRenderTarget(cGfx->getRenderer(), background);
-		SDL_SetTextureBlendMode(background, SDL_BLENDMODE_BLEND);
-
-		// draw the background
-		SDL_SetRenderTarget(cGfx->getRenderer(), background);
-		updateBGBackground(cGfx);
-
-		// Call the component draw call
-		SDL_SetRenderTarget(cGfx->getRenderer(), background);
-		updateBackground(cGfx);
-
-		// draw the border
-		SDL_SetRenderTarget(cGfx->getRenderer(), background);
-		updateBorderBackground(cGfx);
-
-		// reset the render target to default
-		SDL_SetRenderTarget(cGfx->getRenderer(), NULL);
+		else
+#endif
+		{
+			// Fallback path for OpenGL backend: draw directly to default framebuffer
+			if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
+			{
+#ifdef GFX_HAVE_OPENGL
+				glPushMatrix();
+				glLoadIdentity();
+				glTranslatef((float)getX(), (float)getY(), 0.0f);
+				updateBGBackground(cGfx);
+				updateBackground(cGfx);
+				updateBorderBackground(cGfx);
+				// Also draw subitems within the translated space
+				for (int i = subitems.size() - 1; i >= 0; --i)
+					subitems[i]->updateBackgroundHelper(cGfx);
+				glPopMatrix();
+				return; // Skip texture blit path below
+#endif
+			}
+		}
 	}
 
 	// draw the background
-	SDL_Rect dRect = getLocationRect();
+	GfxRect dRect = getLocationRect();
 	dRect.x = getX();
 	dRect.y = getY();
-	SDL_Texture* geBackground = getBackground();
+	GfxTexture* geBackground = getBackground();
+#ifdef GFX_HAVE_SDL2
 	if (geBackground)
-		SDL_RenderCopy(cGfx->getRenderer(), geBackground, NULL, &dRect);
-
-	/*
-	// Setup the render vector
-	std::vector<GItem*> sortedRenderItems;
-	if (subitems.size() > 0)
-		sortedRenderItems.push_back(subitems[0]);
-
-	// insertion sort the render items
-	for (int i = 1; i < subitems.size(); ++i)
+		cGfx->getDraw()->copyTexture(geBackground, NULL, &dRect);
+	else
+#endif
+	if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
 	{
-		int cZIndex = subitems[i]->getZIndex();
-		bool addedSubItem = false;
-		for (int j = 0; j < sortedRenderItems.size(); ++j)
-		{
-			if (cZIndex >= sortedRenderItems[j]->getZIndex())
-			{
-				sortedRenderItems.insert(sortedRenderItems.begin() + j, subitems[i]);
-				addedSubItem = true;
-				break;
-			}
-		}
-
-		if (!addedSubItem)
-			sortedRenderItems.insert(sortedRenderItems.begin(), subitems[i]);
-	}*/
+#ifdef GFX_HAVE_OPENGL
+		// No cached texture on GL path: draw every frame (children draw within this transform)
+		glPushMatrix();
+		glLoadIdentity();
+		glTranslatef((float)getX(), (float)getY(), 0.0f);
+		updateBGBackground(cGfx);
+		updateBackground(cGfx);
+		updateBorderBackground(cGfx);
+		for (int i = subitems.size() - 1; i >= 0; --i)
+			subitems[i]->updateBackgroundHelper(cGfx);
+		glPopMatrix();
+		return;
+#endif
+	}
 
 	// Go backwards because of dropdowns
 	for (int i = subitems.size() - 1; i >= 0; --i)
@@ -291,13 +312,13 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 void GPanel::updateBackground(gfxpp* cGfx)
 {
 	// set the background rect
-	SDL_Rect fullRect;
+	GfxRect fullRect;
 	fullRect.x = 0;
 	fullRect.y = 0;
 	fullRect.w = width;
 	fullRect.h = height;
 
-	drawVerticalGradient(cGfx->getRenderer(), fullRect, RUColors::COLOR_DARK_GRAY, RUColors::COLOR_BLACK, 0);
+	drawVerticalGradient(cGfx->getDraw(), fullRect, RUColors::COLOR_DARK_GRAY, RUColors::COLOR_BLACK, 0);
 }
 
 shmea::GString GPanel::getType() const

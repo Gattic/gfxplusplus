@@ -17,40 +17,98 @@
 #include "GFont.h"
 #include "../../GItems/RUColors.h"
 #include "Backend/Database/GString.h"
+#include "../../Graphics/GfxRenderer.h"
 
 GFont::GFont()
 {
-	fontPath = "resources/fonts/Open_Sans/OpenSans-SemiBold.ttf";
+	fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
 	fontSize = DEFAULT_FONT_SIZE;
-	font = TTF_OpenFont(fontPath.c_str(), 10 * fontSize);
+	font = NULL;
+	ownsTTF = false;
+#ifdef GFX_HAVE_SDL2
+	if (TTF_WasInit())
+	{
+		font = TTF_OpenFont(fontPath.c_str(), 10 * fontSize);
+		if (!font)
+		{
+			const char* sysFonts[] = {
+				"/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+				"/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+				"/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+				"resources/fonts/osaka-re.ttf",
+				"resources/fonts/Open_Sans/OpenSans-SemiBold.ttf"
+			};
+			for (size_t i = 0; (!font) && (i < (sizeof(sysFonts)/sizeof(sysFonts[0]))); ++i)
+			{
+				TTF_Font* tryFont = TTF_OpenFont(sysFonts[i], 10 * fontSize);
+				if (tryFont)
+				{
+					font = tryFont;
+					fontPath = sysFonts[i];
+				}
+			}
+		}
+	}
 	maxHeight = 0;
 
-	if (!font)
+	if (TTF_WasInit() && !font)
 	{
 		printf("[GUI] TTF Font load error 1: %s\n", TTF_GetError());
 		font = NULL;
 	}
+#else
+	maxHeight = 0;
+#endif
 
 	setTextColor(RUColors::DEFAULT_TEXT_COLOR);
 	loadLetters();
 }
 
-GFont::GFont(SDL_Renderer* newRenderer, shmea::GString newFontPath)
+GFont::GFont(GfxNativeRenderer* newRenderer, shmea::GString newFontPath)
 {
 	cRenderer = newRenderer;
 	fontPath = newFontPath;
 	if (fontPath.length() == 0)
-		fontPath = "resources/fonts/Open_Sans/OpenSans-SemiBold.ttf";
+		fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
 
 	fontSize = DEFAULT_FONT_SIZE;
-	font = TTF_OpenFont(fontPath.c_str(), 10 * fontSize);
+	font = NULL;
+	ownsTTF = false;
+#ifdef GFX_HAVE_SDL2
+	if (TTF_WasInit())
+	{
+		font = TTF_OpenFont(fontPath.c_str(), 10 * fontSize);
+		if (!font)
+		{
+			const char* sysFonts[] = {
+				"/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+				"/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+				"/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+				"/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+				"resources/fonts/osaka-re.ttf",
+				"resources/fonts/Open_Sans/OpenSans-SemiBold.ttf"
+			};
+			for (size_t i = 0; (!font) && (i < (sizeof(sysFonts)/sizeof(sysFonts[0]))); ++i)
+			{
+				TTF_Font* tryFont = TTF_OpenFont(sysFonts[i], 10 * fontSize);
+				if (tryFont)
+				{
+					font = tryFont;
+					fontPath = sysFonts[i];
+				}
+			}
+		}
+	}
 	maxHeight = 0;
 
-	if (!font)
+	if (TTF_WasInit() && !font)
 	{
 		printf("[GUI] TTF Font load error 2: %s\n", TTF_GetError());
 		font = NULL;
 	}
+#else
+	maxHeight = 0;
+#endif
 
 	setTextColor(RUColors::DEFAULT_TEXT_COLOR);
 	loadLetters();
@@ -73,8 +131,10 @@ GFont::~GFont()
 	fontPath = "";
 	fontSize = DEFAULT_FONT_SIZE;
 
-	if (font)
+#ifdef GFX_HAVE_SDL2
+	if (font && TTF_WasInit() && ownsTTF)
 		TTF_CloseFont(font);
+#endif
 	font = NULL;
 
 	for (std::map<char, GLetter*>::iterator itr = textureMap.begin(); itr != textureMap.end(); ++itr)
@@ -90,30 +150,30 @@ GFont::~GFont()
 
 void GFont::loadLetters()
 {
-	if (!font)
-		return;
-
-	if (!cRenderer)
+#ifdef GFX_HAVE_SDL2
+	if (!font || !cRenderer)
 		return;
 
 	maxHeight = 0;
 	for (unsigned char i = 1; i != 0; ++i)
 	{
-		SDL_Surface* textMessage =
+		GfxSurface* textMessage =
 			TTF_RenderText_Solid(font, shmea::GString::charTOstring(i).c_str(), textColor);
 
 		if (!textMessage)
 		{
-			printf("[GUI] GFont create error[%d]: %s\n", i, SDL_GetError());
+			printf("[GUI] GFont create error[%d]: %s\n", i, GFX_GetError());
 			continue;
 		}
 
-		SDL_Texture* textTex = SDL_CreateTextureFromSurface(cRenderer, textMessage);
+		GfxTexture* textTex = NULL;
+		// If a renderer is passed through elsewhere, we could use it; fallback to native path here
+		textTex = GFX_CreateTextureFromSurface(cRenderer, textMessage);
 		if (textMessage)
-			SDL_FreeSurface(textMessage);
+			GFX_FreeSurface(textMessage);
 		if (!textTex)
 		{
-			printf("[GUI] Texture error: %s\n", SDL_GetError());
+			printf("[GUI] Texture error: %s\n", GFX_GetError());
 			return;
 		}
 
@@ -131,14 +191,20 @@ void GFont::loadLetters()
 		GLetter* cLetter = new GLetter(i, textTex, newWidth);
 		textureMap[i] = cLetter;
 	}
+#else
+	// No SDL_ttf path in OpenGL-only; keep map empty and maxHeight 0
+	(void)textColor;
+	(void)cRenderer;
+	maxHeight = 0;
+#endif
 }
 
-SDL_Color GFont::getTextColor() const
+GfxColor GFont::getTextColor() const
 {
 	return textColor;
 }
 
-TTF_Font* GFont::getFont() const
+TTF_Font_Type* GFont::getFont() const
 {
 	return font;
 }
@@ -171,12 +237,13 @@ void GFont::setFontSize(int newFontSize)
 	fontSize = newFontSize;
 }
 
-void GFont::setTextColor(SDL_Color newTextColor)
+void GFont::setTextColor(GfxColor newTextColor)
 {
 	textColor = newTextColor;
 	loadLetters();
 }
 
+//
 bool GFont::validChar(char text)
 {
 	text = shmea::GString::toLower(text);
@@ -310,138 +377,138 @@ char GFont::specialChar(char keyPressed)
 	}
 }
 
-char GFont::keycodeTOchar(SDL_Keycode keyPressed)
+char GFont::keycodeTOchar(GfxKeycode keyPressed)
 {
 	switch (keyPressed)
 	{
 	// letters
-	case SDLK_a:
+	case GFXK_a:
 		return 'a';
-	case SDLK_b:
+	case GFXK_b:
 		return 'b';
-	case SDLK_c:
+	case GFXK_c:
 		return 'c';
-	case SDLK_d:
+	case GFXK_d:
 		return 'd';
-	case SDLK_e:
+	case GFXK_e:
 		return 'e';
-	case SDLK_f:
+	case GFXK_f:
 		return 'f';
-	case SDLK_g:
+	case GFXK_g:
 		return 'g';
-	case SDLK_h:
+	case GFXK_h:
 		return 'h';
-	case SDLK_i:
+	case GFXK_i:
 		return 'i';
-	case SDLK_j:
+	case GFXK_j:
 		return 'j';
-	case SDLK_k:
+	case GFXK_k:
 		return 'k';
-	case SDLK_l:
+	case GFXK_l:
 		return 'l';
-	case SDLK_m:
+	case GFXK_m:
 		return 'm';
-	case SDLK_n:
+	case GFXK_n:
 		return 'n';
-	case SDLK_o:
+	case GFXK_o:
 		return 'o';
-	case SDLK_p:
+	case GFXK_p:
 		return 'p';
-	case SDLK_q:
+	case GFXK_q:
 		return 'q';
-	case SDLK_r:
+	case GFXK_r:
 		return 'r';
-	case SDLK_s:
+	case GFXK_s:
 		return 's';
-	case SDLK_t:
+	case GFXK_t:
 		return 't';
-	case SDLK_u:
+	case GFXK_u:
 		return 'u';
-	case SDLK_v:
+	case GFXK_v:
 		return 'v';
-	case SDLK_w:
+	case GFXK_w:
 		return 'w';
-	case SDLK_x:
+	case GFXK_x:
 		return 'x';
-	case SDLK_y:
+	case GFXK_y:
 		return 'y';
-	case SDLK_z:
+	case GFXK_z:
 		return 'z';
 
 	// numbers
-	case SDLK_0:
+	case GFXK_0:
 		return '0';
-	case SDLK_1:
+	case GFXK_1:
 		return '1';
-	case SDLK_2:
+	case GFXK_2:
 		return '2';
-	case SDLK_3:
+	case GFXK_3:
 		return '3';
-	case SDLK_4:
+	case GFXK_4:
 		return '4';
-	case SDLK_5:
+	case GFXK_5:
 		return '5';
-	case SDLK_6:
+	case GFXK_6:
 		return '6';
-	case SDLK_7:
+	case GFXK_7:
 		return '7';
-	case SDLK_8:
+	case GFXK_8:
 		return '8';
-	case SDLK_9:
+	case GFXK_9:
 		return '9';
 
 	// symbols
-	case SDLK_SPACE:
+	case GFXK_SPACE:
 		return ' ';
-	case SDLK_PLUS:
+	case GFXK_PLUS:
 		return '+';
-	case SDLK_MINUS:
+	case GFXK_MINUS:
 		return '-';
-	case SDLK_UNDERSCORE:
+	case GFXK_UNDERSCORE:
 		return '_';
-	case SDLK_EXCLAIM:
+	case GFXK_EXCLAIM:
 		return '!';
-	case SDLK_AT:
+	case GFXK_AT:
 		return '@';
-	case SDLK_HASH:
+	case GFXK_HASH:
 		return '#';
-	case SDLK_DOLLAR:
+	case GFXK_DOLLAR:
 		return '$';
-	case SDLK_ASTERISK:
+	case GFXK_ASTERISK:
 		return '*';
-	case SDLK_QUESTION:
+	case GFXK_QUESTION:
 		return '?';
-	case SDLK_CARET:
+	case GFXK_CARET:
 		return '^';
-	case SDLK_LEFTPAREN:
+	case GFXK_LEFTPAREN:
 		return '(';
-	case SDLK_RIGHTPAREN:
+	case GFXK_RIGHTPAREN:
 		return ')';
-	case SDLK_AMPERSAND:
+	case GFXK_AMPERSAND:
 		return '&';
-	case SDLK_PERIOD:
+	case GFXK_PERIOD:
 		return '.';
-	case SDLK_COMMA:
+	case GFXK_COMMA:
 		return ',';
-	case SDLK_LESS:
+	case GFXK_LESS:
 		return '<';
-	case SDLK_GREATER:
+	case GFXK_GREATER:
 		return '>';
-	case SDLK_SLASH:
+	case GFXK_SLASH:
 		return '/';
-	case SDLK_BACKSLASH:
+	case GFXK_BACKSLASH:
 		return '\\';
-	case SDLK_COLON:
+	case GFXK_COLON:
 		return ':';
-	case SDLK_SEMICOLON:
+	case GFXK_SEMICOLON:
 		return ';';
-	case SDLK_LEFTBRACKET:
+	case GFXK_LEFTBRACKET:
 		return '[';
-	case SDLK_RIGHTBRACKET:
+	case GFXK_RIGHTBRACKET:
 		return ']';
-	case SDLK_EQUALS:
+	case GFXK_EQUALS:
 		return '=';
-	case SDLK_PERCENT:
+	case GFXK_PERCENT:
 		return '%';
 
 	default:

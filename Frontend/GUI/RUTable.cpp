@@ -221,6 +221,7 @@ void RUTable::updateLabels()
 		for (unsigned int col = 0; col < numberOfCols(); ++col)
 		{
 			RULabel* newItem = new RULabel();
+			newItem->setAutoWidthToText(false);
 			newItem->setText(getCell(row, col));
 			newItem->setMarginX(col * cellWidth);
 			newItem->setMarginY(row * cellHeight);

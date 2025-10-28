@@ -16,6 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphable.h"
 #include "RUGraph.h"
+#include "../Graphics/GfxRenderer.h"
 
 //TODO: Separate Scalar1D from Point2D and implement this add fncality
 
@@ -129,29 +130,31 @@ void Graphable<Point2>::computeAxisRanges(bool additionOptimization)
 template <>
 void Graphable<Point2>::draw(gfxpp* cGfx)
 {
-    if (!parent)
-        return;
+	if (!parent)
+		return;
 
-    SDL_Color color = getColor();
-    SDL_SetRenderDrawColor(cGfx->getRenderer(), color.r, color.g, color.b, color.a);
+	GfxColor color = getColor();
+	if (cGfx->getDraw())
+		cGfx->getDraw()->setDrawColor(color.r, color.g, color.b, color.a);
 
-    float vscale = parent->getVScale();
+	float vscale = parent->getVScale();
 
-    if (normalizedPoints.empty())
-        return;
+	if (normalizedPoints.empty())
+		return;
 
-    // Prepare the points array for SDL_RenderDrawLines
-    std::vector<SDL_Point> points(normalizedPoints.size());
+	// Prepare the points array for polyline
+	std::vector<GfxPoint> points(normalizedPoints.size());
 
-    for (unsigned int i = 0; i < normalizedPoints.size(); ++i)
-    {
-        Point2* cPoint = normalizedPoints[i];
-        SDL_Point point;
-        point.x = static_cast<int>(cPoint->getX());
-        point.y = static_cast<int>(cPoint->getY());
-        points[i] = point;
-    }
+	for (unsigned int i = 0; i < normalizedPoints.size(); ++i)
+	{
+		Point2* cPoint = normalizedPoints[i];
+		GfxPoint point;
+		point.x = static_cast<int>(cPoint->getX());
+		point.y = static_cast<int>(cPoint->getY());
+		points[i] = point;
+	}
 
-    // Draw all the lines at once
-    SDL_RenderDrawLines(cGfx->getRenderer(), &points[0], points.size());
+	// Draw all the lines at once
+	if (cGfx->getDraw())
+		cGfx->getDraw()->drawLines(points);
 }

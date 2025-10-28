@@ -93,7 +93,7 @@ void RUDrawComponent::addCircle(const Point2* focalPoint, double radius)//this w
 	// printf("Circle(%f, %f, %f)\n", focalPoint->getX(), focalPoint->getY(), radius);
 
 	shmea::GString newCircleName = "Circle: " + shmea::GType::longTOstring(circles.size());
-	SDL_Color newCircleColor = {0x00, 0x00, 0xFF, 0xFF};
+	GfxColor newCircleColor = {0x00, 0x00, 0xFF, 0xFF};
 	Circle* newCircle = new Circle(this, newCircleColor);
 	newCircle->addFocalPoint(focalPoint);
 	newCircle->setRadius(radius);
@@ -137,13 +137,13 @@ void RUDrawComponent::add(gfxpp* cGfx, const shmea::GString& label, const Point2
 }
 
 void RUDrawComponent::set(gfxpp* cGfx, const shmea::GString& label, const std::vector<Point2*>& graphPoints,
-				  SDL_Color lineColor)
+				  GfxColor lineColor)
 {
 	//
 }
 
 void RUDrawComponent::set(gfxpp* cGfx, const shmea::GString& label, const shmea::GList& graphPoints,
-				  SDL_Color lineColor)
+				  GfxColor lineColor)
 {
 	//
 }

@@ -17,6 +17,7 @@
 #include "RUButton.h"
 #include "../../GItems/RUColors.h"
 #include "../../Graphics/graphics.h"
+#include "../../GItems/GPanel.h"
 
 RUButton::RUButton()
 {
@@ -24,7 +25,8 @@ RUButton::RUButton()
 	setBGColor(RUColors::DEFAULT_BUTTON_BLUE);
 	//setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
 	//toggleBorder(true);
-	setCursor(SDL_SYSTEM_CURSOR_HAND);
+	setCursor(GFX_SYSTEM_CURSOR_HAND);
+	setAutoWidthToText(true);
 }
 
 RUButton::RUButton(shmea::GString buttonColor_)
@@ -55,7 +57,8 @@ RUButton::RUButton(shmea::GString buttonColor_)
 	}
 
 	//toggleBorder(true);
-	setCursor(SDL_SYSTEM_CURSOR_HAND);
+	setCursor(GFX_SYSTEM_CURSOR_HAND);
+	setAutoWidthToText(true);
 }
 
 RUButton::~RUButton()
@@ -65,6 +68,37 @@ RUButton::~RUButton()
 
 void RUButton::updateBackground(gfxpp* cGfx)
 {
+	if (getAutoWidthToText())
+	{
+		int newW = measureFullTextWidth(cGfx);
+		if (newW != getWidth())
+		{
+			setWidth(newW);
+			// Request a full panel redraw to prevent stale overlaps when bounds change
+			if (cGfx && cGfx->focusedPanel)
+			{
+				std::pair<int,int> zero(0,0);
+				cGfx->focusedPanel->calculateSubItemPositions(zero);
+				cGfx->focusedPanel->requireDrawUpdate();
+			}
+			requireDrawUpdate();
+		}
+	}
+	if (getAutoHeightToFont())
+	{
+		int newH = measureFontPixelHeight(cGfx);
+		if (newH > 0 && newH != getHeight())
+		{
+			setHeight(newH);
+			if (cGfx && cGfx->focusedPanel)
+			{
+				std::pair<int,int> zero(0,0);
+				cGfx->focusedPanel->calculateSubItemPositions(zero);
+				cGfx->focusedPanel->requireDrawUpdate();
+			}
+			requireDrawUpdate();
+		}
+	}
 	drawText(cGfx);
 }
 

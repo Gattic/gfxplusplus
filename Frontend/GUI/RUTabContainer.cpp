@@ -165,7 +165,7 @@ void RUTabContainer::addTab(shmea::GString newItemText, GItem* tabItem)
 	newLabel->setText(newItemText);
 	newLabel->setMarginX(0);
 	newLabel->setWidth(newLabelWidth);
-	newLabel->setCursor(SDL_SYSTEM_CURSOR_HAND);
+	newLabel->setCursor(GFX_SYSTEM_CURSOR_HAND);
 	if (optionsShown > 0)
 	{
 		int labelWidth = (getWidth() - (getPaddingX() * optionsShown)) / optionsShown;

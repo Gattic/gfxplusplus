@@ -18,6 +18,7 @@
 #include "../GItems/RUColors.h"
 #include "../Graphics/graphics.h"
 #include "Backend/Database/image.h"
+#include "Backend/Database/png-helper.h"
 
 RUImageComponent::RUImageComponent()
 {
@@ -46,7 +47,9 @@ RUImageComponent::~RUImageComponent()
 
 void RUImageComponent::updateBackground(gfxpp* cGfx)
 {
-	//
+	// Reuse RUBackgroundComponent mechanisms via RUComponent base
+	// If a location is set, ensure it is loaded (SDL path already handled)
+	(void)cGfx;
 }
 
 shmea::GString RUImageComponent::getType() const

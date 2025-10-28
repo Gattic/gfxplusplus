@@ -27,7 +27,7 @@ RUCheckbox::RUCheckbox(shmea::GString message)
 	// checkbox
 	checkboxLocation = "resources/gui/Checkbox/unchecked.bmp";
 	checkbox = new RUImageComponent(checkboxLocation);
-	checkbox->setCursor(SDL_SYSTEM_CURSOR_HAND);
+	checkbox->setCursor(GFX_SYSTEM_CURSOR_HAND);
 	checkbox->setBorderColor(RUColors::DEFAULT_BUTTON_BORDER_BLUE);
 	checkbox->setBorderWidth(1);
 	checkbox->toggleBorder(true);

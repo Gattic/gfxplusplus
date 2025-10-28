@@ -17,6 +17,7 @@
 #include "Graphable.h"
 #include "RUGraph.h"
 #include "../GFXUtilities/ActionBubble.h"
+#include "../Graphics/GfxRenderer.h"
 
 template <>
 void Graphable<ActionBubble>::computeAxisRanges(bool additionOptimization)
@@ -31,72 +32,34 @@ void Graphable<ActionBubble>::draw(gfxpp* cGfx)
 	if (!parent)
 		return;
 
-	std::map<shmea::GString, GeneralGraphable*> gs = parent->getGraphables();
-	shmea::GString candleLabel = "candles";
-	if ((gs.find(candleLabel) == gs.end()) || (gs[candleLabel] == NULL))
-		return;
-
-	Graphable<Candle>* candlePlotter = parent->getGraphables()["candles"]->get(Candle());
-	if(!candlePlotter)
-		return;
-
-	if((candlePlotter->size() == 0) || (candlePlotter->normalizedPoints.size() == 0))
-		return;
-
-	float candleWidth = ((float)parent->getWidth()) / candlePlotter->size();
-	float yRange = getYMax() - getYMin();
-	float pointYGap = ((float)parent->getHeight()) / yRange;
-
 	for (unsigned int i = 0; i < points.size(); ++i)
 	{
-		const ActionBubble* cBubble = points[i];
+		ActionBubble* cBubble = points[i];
 		if (!cBubble)
 			continue;
 
 		if(cBubble->getActionType() == ActionBubble::ACTION_BUY)
-			SDL_SetRenderDrawColor(cGfx->getRenderer(), RUColors::COLOR_WHITE.r, RUColors::COLOR_WHITE.g, RUColors::COLOR_WHITE.b, RUColors::COLOR_WHITE.a);
+		{
+			if (cGfx->getDraw())
+				cGfx->getDraw()->setDrawColor(RUColors::COLOR_WHITE.r, RUColors::COLOR_WHITE.g, RUColors::COLOR_WHITE.b, RUColors::COLOR_WHITE.a);
+		}
 		else if(cBubble->getActionType() == ActionBubble::ACTION_SELL)
-			SDL_SetRenderDrawColor(cGfx->getRenderer(), RUColors::COLOR_BLACK.r, RUColors::COLOR_BLACK.g, RUColors::COLOR_BLACK.b, RUColors::COLOR_BLACK.a);
+		{
+			if (cGfx->getDraw())
+				cGfx->getDraw()->setDrawColor(RUColors::COLOR_BLACK.r, RUColors::COLOR_BLACK.g, RUColors::COLOR_BLACK.b, RUColors::COLOR_BLACK.a);
+		}
 		else
 		{
-			SDL_SetRenderDrawColor(cGfx->getRenderer(), getColor().r, getColor().g, getColor().b, getColor().a);
+			if (cGfx->getDraw())
+				cGfx->getDraw()->setDrawColor(getColor().r, getColor().g, getColor().b, getColor().a);
 			continue;
 		}
 
-		const Point2* cFocalPoint = cBubble->getFocalPoint();
-		if (!cFocalPoint)
-			continue;
-
-		double radius = candleWidth / 2.0f;
-		if (radius <= 0)
-			continue;
-	
-		for (int drawX = -radius; drawX < radius; ++drawX)
-		{
-			unsigned int xIndex = cFocalPoint->getX();
-			if(xIndex >= candlePlotter->normalizedPoints.size())
-				continue;
-
-			int xVal = candlePlotter->normalizedPoints[xIndex]->getX() + drawX - radius; // from candle X
-
-			std::map<int, int> newMap;
-			for (int drawY = -radius; drawY < radius; ++drawY)
-			{
-				double distance = sqrt(pow(((double)drawX), 2.0f) + pow(((double)drawY), 2.0f));
-				if (distance > radius)
-					continue;
-
-				float yVal = (cFocalPoint->getY() - getYMin()) * pointYGap;
-				if(cBubble->getActionType() == ActionBubble::ACTION_BUY)
-					yVal = (float)parent->getHeight() - yVal - (candleWidth*3.0f);
-				else if(cBubble->getActionType() == ActionBubble::ACTION_SELL)
-					yVal = (float)parent->getHeight() - yVal + (candleWidth*3.0f);
-				yVal += drawY;
-	
-				// set the color and draw the point
-				SDL_RenderDrawPoint(cGfx->getRenderer(), parent->getX() + xVal,
-									parent->getY() + yVal);
-			}
-		}
+		const Point2* f = cBubble->getFocalPoint();
+		if (!f) continue;
+		int xVal = static_cast<int>(f->getX());
+		int yVal = static_cast<int>(f->getY());
+		if (cGfx->getDraw())
+			cGfx->getDraw()->drawPoint(parent->getX() + xVal, parent->getY() + yVal);
 	}
 }

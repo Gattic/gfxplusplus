@@ -26,7 +26,19 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 #Project
 project(gfxplusplus)
 set(G_VERSION_MAJOR 0)
-set(G_VERSION_MINOR 57)
+set(G_VERSION_MINOR 58)
+
+# Backend build options
+option(ENABLE_SDL2 "Build with SDL2 backend" OFF)
+option(ENABLE_OPENGL "Build with OpenGL/GLFW backend" ON)
+
+# Propagate compile definitions for conditional compilation
+if(ENABLE_SDL2)
+  add_definitions(-DGFX_HAVE_SDL2)
+endif()
+if(ENABLE_OPENGL)
+  add_definitions(-DGFX_HAVE_OPENGL)
+endif()
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
@@ -60,7 +72,7 @@ add_library(${PROJECT_NAME} SHARED ${MAIN_SRC_FILES})
 
 #Link libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
-	GUI GFX GLayout GraphGUI GFXItem GU GNet DB)#custom libs
+	GFX GU GUI TextC GLayout GraphGUI GFXItem GNet DB)
 
 #target_include_directories(gfxplusplus PUBLIC "include")
 #target_include_directories(gfxplusplus PUBLIC "Frontend")

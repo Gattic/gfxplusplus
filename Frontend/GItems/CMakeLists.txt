@@ -1,9 +1,11 @@
 add_subdirectory("Mini")
 
-#opengl lib
+# Optional OpenGL (used only when OpenGL backend is enabled)
+if(ENABLE_OPENGL)
 set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIRS})
+endif()
 
 set(GFXItem_src_files
 	RUColors.cpp
@@ -22,7 +24,10 @@ set(GFXItem_src_files
 )
 add_library(GFXItem ${GFXItem_src_files})
 
-target_link_libraries(GFXItem MiniC ${OPENGL_LIBRARIES})
+target_link_libraries(GFXItem MiniC GU)
+if(ENABLE_OPENGL)
+    target_link_libraries(GFXItem ${OPENGL_LIBRARIES})
+endif()
 
 install(TARGETS GFXItem EXPORT gfxplusplusConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}

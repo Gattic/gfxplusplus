@@ -32,6 +32,7 @@ RUDropdown::RUDropdown()
 	selectedIndex = -1;
 	prevSelectedIndex = -1;
 	selectedLabel = new RULabel();
+	selectedLabel->setAutoWidthToText(false);
 	selectedLabel->setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 	selectedLabel->toggleBG(true);
 	selectedLabel->toggleBorder(true);
@@ -42,7 +43,7 @@ RUDropdown::RUDropdown()
 	arrow = new RUImageComponent(arrowLocation);
 	arrow->setBorderColor(RUColors::DEFAULT_DROPDOWN_ARROW);
 	arrow->toggleBorder(true);
-	arrow->setCursor(SDL_SYSTEM_CURSOR_HAND);
+	arrow->setCursor(GFX_SYSTEM_CURSOR_HAND);
 	addSubItem(arrow);
 
 	// lb dropdown

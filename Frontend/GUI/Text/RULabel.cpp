@@ -17,19 +17,22 @@
 #include "RULabel.h"
 #include "../../GItems/RUColors.h"
 #include "../../Graphics/graphics.h"
+#include "../../GItems/GPanel.h"
 
 RULabel::RULabel()
 {
 	//
-	//toggleBG(false);
-	setBGColor({54, 69, 79, 255});
+	toggleBG(false);
+	//setBGColor(RUColors::COLOR_DARK_GRAY);
+	setAutoWidthToText(true);
 }
 
 RULabel::RULabel(shmea::GString newText)
 {
-	//toggleBG(false);
-	setBGColor(RUColors::COLOR_DARK_GRAY);
+	toggleBG(false);
+	//setBGColor(RUColors::COLOR_DARK_GRAY);
 	setText(newText);
+	setAutoWidthToText(true);
 }
 
 RULabel::~RULabel()
@@ -39,6 +42,37 @@ RULabel::~RULabel()
 
 void RULabel::updateBackground(gfxpp* cGfx)
 {
+	if (getAutoWidthToText())
+	{
+		int newW = measureFullTextWidth(cGfx);
+		if (newW != getWidth())
+		{
+			setWidth(newW);
+			// Request a full panel redraw to prevent stale overlaps when bounds change
+			if (cGfx && cGfx->focusedPanel)
+			{
+				std::pair<int,int> zero(0,0);
+				cGfx->focusedPanel->calculateSubItemPositions(zero);
+				cGfx->focusedPanel->requireDrawUpdate();
+			}
+			requireDrawUpdate();
+		}
+	}
+	if (getAutoHeightToFont())
+	{
+		int newH = measureFontPixelHeight(cGfx);
+		if (newH > 0 && newH != getHeight())
+		{
+			setHeight(newH);
+			if (cGfx && cGfx->focusedPanel)
+			{
+				std::pair<int,int> zero(0,0);
+				cGfx->focusedPanel->calculateSubItemPositions(zero);
+				cGfx->focusedPanel->requireDrawUpdate();
+			}
+			requireDrawUpdate();
+		}
+	}
 	drawText(cGfx);
 }
 
