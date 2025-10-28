@@ -41,9 +41,19 @@ void RULayerInfo::setWeights(int neuron, std::vector<shmea::GPointer<float> > ne
 	neuronList[neuron]->setWeights(newWeights);
 }
 
+void RULayerInfo::setBiasWeight(float weight)
+{
+    biasWeight = weight;
+}
+
 int RULayerInfo::getNeurons() const
 {
 	return neuronQty;
+}
+
+float RULayerInfo::getBiasWeight() const
+{
+	return biasWeight;
 }
 
 std::vector<shmea::GPointer<DrawNeuron> > RULayerInfo::getNeuronList() const{

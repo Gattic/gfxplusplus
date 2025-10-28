@@ -114,7 +114,15 @@ void DrawNeuralNet::setWeights(shmea::GList weights)
 	    {
 		++layer;
 		neuron = 0;
-	    }
+	    } else if (weights.getString(i) == "B") {
+            ++i;
+            for (int j = 1; j < layer; ++j, ++i) {
+                if (j < layerInfoList.size() && i < weights.size()) {
+                    layerInfoList[j]->setBiasWeight(weights.getFloat(i));
+                }
+            }
+            break;
+        }
 	}
     }
 	
@@ -141,6 +149,15 @@ int DrawNeuralNet::getLayerNeuronsCount(int layer)
 	    return 0;
 	}
 	return layerInfoList[layer]->getNeurons();
+}
+
+float DrawNeuralNet::getLayerBiasWeight(int layer)
+{
+    if (layer < 0 || layer >= layers)
+	{
+	    return 0;
+	}
+	return layerInfoList[layer]->getBiasWeight();
 }
 
 void DrawNeuralNet::displayNeuralNet()
