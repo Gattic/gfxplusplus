@@ -38,6 +38,7 @@ bool GLTextRenderer::init(const std::string& fontPath, int pixelHeight)
 	candidates.push_back("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
 	candidates.push_back("/usr/share/fonts/truetype/freefont/FreeSans.ttf");
 	candidates.push_back("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf");
+	candidates.push_back("/usr/share/fonts/open-sans/OpenSans-Regular.ttf");
 	candidates.push_back("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf");
 	candidates.push_back("resources/fonts/osaka-re.ttf");
 	candidates.push_back("resources/fonts/Open_Sans/OpenSans-SemiBold.ttf");
