@@ -1,7 +1,9 @@
-#sdl2 lib
+#sdl2 lib (only when SDL2 is enabled)
+if(ENABLE_SDL2)
 include(FindPkgConfig)
 pkg_search_module(SDL2 REQUIRED sdl2 sdl2_ttf sdl2_image)
 include_directories(${SDL2_INCLUDE_DIR})
+endif()
 
 set(MiniC_src_files
 	RUBorderComponent.cpp
@@ -24,8 +26,12 @@ set(MiniC_src_files
 	RUKeyUp.h
 )
 add_library(MiniC ${MiniC_src_files})
-
-target_link_libraries(MiniC ${OPENGL_LIBRARIES} ${SDL2_LIBRARIES} SDL2_ttf SDL2_image)
+if(ENABLE_OPENGL)
+	target_link_libraries(MiniC ${OPENGL_LIBRARIES})
+endif()
+if(ENABLE_SDL2)
+	target_link_libraries(MiniC ${SDL2_LIBRARIES} SDL2_ttf SDL2_image)
+endif()
 
 install(TARGETS MiniC EXPORT gfxplusplusConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}

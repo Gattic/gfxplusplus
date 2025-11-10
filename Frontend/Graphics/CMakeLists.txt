@@ -27,8 +27,7 @@ set(GFX_src_files
 
 if(ENABLE_SDL2)
 	list(APPEND GFX_src_files
-		GfxRendererSDL.h
-		GfxRendererGL.h)
+		GfxRendererSDL.h)
 endif()
 
 if(ENABLE_OPENGL)

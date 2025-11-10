@@ -76,8 +76,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 
 #target_include_directories(gfxplusplus PUBLIC "include")
 #target_include_directories(gfxplusplus PUBLIC "Frontend")
-target_include_directories(gfxplusplus PUBLIC  
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
+target_include_directories(gfxplusplus PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>  # <prefix>/include
 )
 

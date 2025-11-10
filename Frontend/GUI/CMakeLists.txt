@@ -1,5 +1,4 @@
-add_subdirectory("Text")
-
+# Add GUI Text subdir only when SDL2 is enabled (TextC depends on SDL2)
 #opengl lib (optional)
 if(ENABLE_OPENGL)
 set(OpenGL_GL_PREFERENCE "GLVND")
@@ -38,6 +37,8 @@ set(GUI_src_files
 )
 add_library(GUI ${GUI_src_files})
 
+# Always build and link TextC (our own static lib)
+add_subdirectory("Text")
 target_link_libraries(GUI TextC)
 if(ENABLE_SDL2)
     target_link_libraries(GUI ${SDL2_LIBRARIES} SDL2_ttf SDL2_image)
