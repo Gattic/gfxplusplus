@@ -4,6 +4,8 @@
 
 ## Dependencies
 
+### Debian
+
 `cmake`
 
 `make`
@@ -20,6 +22,17 @@ SDL2 TTF for GUI
 
 SDL2 Image for GUI
 `libsdl2-image-dev`
+
+`sudo apt-get install libglfw3 libglfw3-dev`
+
+### Fedora
+
+sudo dnf install -y gcc gcc-c++ clang cmake make
+sudo dnf install -y freetype-devel
+sudo dnf install -y libasan
+
+sudo dnf install -y mesa-libGL-devel mesa-libGLU-devel libglvnd-devel
+sudo dnf install -y glfw-devel
 
 ---
 
