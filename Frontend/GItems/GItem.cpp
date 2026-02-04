@@ -237,16 +237,17 @@ EventTracker* GItem::processEvents(gfxpp* cGfx, GPanel* parentPanel, GfxEvent ev
 	if (!visible)
 		return eventsStatus;
 
-	//
-	processSubItemEvents(cGfx, eventsStatus, parentPanel, event, mouseX, mouseY);
+	// Only mouse-like events need recursive dispatch to sub-items.
+	// Key events are handled strictly by the focused item and should not walk the UI tree.
+	const bool isMouseEvent = (event.type == GFX_MOUSEBUTTONDOWN) || (event.type == GFX_MOUSEBUTTONUP) ||
+					  (event.type == GFX_MOUSEMOTION) || (event.type == GFX_MOUSEWHEEL);
+	if (isMouseEvent)
+		processSubItemEvents(cGfx, eventsStatus, parentPanel, event, mouseX, mouseY);
 
 	// Dont want to toggle dropdowns all the time
-	bool dropdownToggle = (getType() == "RUDropdown");
-	if (dropdownToggle)
-	{
-		if (clickedSubItems.size() == 0)
-			dropdownToggle = false;
-	}
+	bool dropdownToggle = false;
+	if (isMouseEvent && (getType() == "RUDropdown"))
+		dropdownToggle = (clickedSubItems.size() != 0);
 
 	//
 	if (event.type == GFX_MOUSEBUTTONDOWN)
@@ -256,26 +257,6 @@ EventTracker* GItem::processEvents(gfxpp* cGfx, GPanel* parentPanel, GfxEvent ev
 	else if (event.type == GFX_MOUSEMOTION)
 	{
 		onMouseMotionHelper(cGfx, eventsStatus, parentPanel, mouseX, mouseY, dropdownToggle);
-
-		// hover and unhover subevents
-		if (eventsStatus->hovered)
-			hover(cGfx);
-		else
-		{
-			if (!unhovered)
-			{
-				// Dont want to override subcomps cursor
-				if (customCursor)
-				{
-					// Set the cursor
-					GfxCursor* renderCursor = cGfx->getSystemCursor();
-					GFX_SetCursor(renderCursor);
-				}
-
-				unhover(cGfx);
-				unhovered = true;
-			}
-		}
 	}
 	else if (event.type == GFX_MOUSEWHEEL)
 	{

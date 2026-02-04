@@ -24,9 +24,9 @@ set(GFXItem_src_files
 )
 add_library(GFXItem ${GFXItem_src_files})
 
-target_link_libraries(GFXItem MiniC GU)
+target_link_libraries(GFXItem PUBLIC GFX MiniC GU)
 if(ENABLE_OPENGL)
-    target_link_libraries(GFXItem ${OPENGL_LIBRARIES})
+    target_link_libraries(GFXItem PUBLIC ${OPENGL_LIBRARIES})
 endif()
 
 install(TARGETS GFXItem EXPORT gfxplusplusConfig

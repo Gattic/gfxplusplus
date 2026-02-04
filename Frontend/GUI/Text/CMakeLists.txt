@@ -25,15 +25,19 @@ if(ENABLE_OPENGL AND ENABLE_SDL2)
 endif()
 add_library(TextC ${TextC_src_files})
 
-target_link_libraries(TextC ${FREETYPE_LIBRARIES})
+# Ensure core graphics symbols (e.g., gfxDestroyTexture) are available to consumers
+# when SDL2 is disabled and we use OpenGL-backed textures.
+target_link_libraries(TextC PUBLIC GFX)
+
+target_link_libraries(TextC PUBLIC ${FREETYPE_LIBRARIES})
 if(ENABLE_SDL2)
 	include(FindPkgConfig)
 	pkg_search_module(SDL2 REQUIRED sdl2 sdl2_ttf sdl2_image)
 	include_directories(${SDL2_INCLUDE_DIRS})
-	target_link_libraries(TextC ${SDL2_LIBRARIES} SDL2_ttf SDL2_image)
+	target_link_libraries(TextC PUBLIC ${SDL2_LIBRARIES} SDL2_ttf SDL2_image)
 endif()
 if(ENABLE_OPENGL AND ENABLE_SDL2)
-	target_link_libraries(TextC ${OPENGL_LIBRARIES})
+	target_link_libraries(TextC PUBLIC ${OPENGL_LIBRARIES})
 endif()
 
 install(TARGETS TextC EXPORT gfxplusplusConfig

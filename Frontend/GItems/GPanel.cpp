@@ -38,6 +38,7 @@ GPanel::GPanel(const shmea::GString& newName, int newWidth, int newHeight)
 	height = newHeight;
 	focus = false;
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+	lastMouseMotionItem = NULL;
 
 	qMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
 	pthread_mutex_init(qMutex, NULL);
@@ -150,6 +151,59 @@ void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPane
 	if (!focus)
 		return;
 
+	// Key events only matter to the focused item; don't scan the whole UI.
+	if (event.type == GFX_KEYDOWN || event.type == GFX_KEYUP)
+	{
+		GItem* focused = cGfx->getFocusedItem();
+		if (focused)
+			focused->processEvents(cGfx, this, event, mouseX, mouseY);
+		return;
+	}
+
+	// Mouse move is by far the most frequent event. Cache the previously-hovered
+	// top-level item and only process that subtree plus the current target.
+	if (event.type == GFX_MOUSEMOTION)
+	{
+		GItem* candidate = NULL;
+		for (unsigned int i = 0; i < subitems.size(); ++i)
+		{
+			GItem* cItem = subitems[i];
+			if (!cItem)
+				continue;
+			if (!cItem->isVisible())
+				continue;
+			if (cItem->containsPoint(mouseX, mouseY))
+				candidate = cItem; // keep last match (stable with previous multi-item behavior)
+		}
+
+		// Let the previous hovered item see the motion event so it can unhover itself.
+		if (lastMouseMotionItem && lastMouseMotionItem != candidate)
+			lastMouseMotionItem->processEvents(cGfx, this, event, mouseX, mouseY);
+
+		bool hovered = false;
+		if (candidate)
+		{
+			EventTracker* st = candidate->processEvents(cGfx, this, event, mouseX, mouseY);
+			if (st && st->hovered)
+			{
+				hovered = true;
+				lastMouseMotionItem = candidate;
+			}
+			else
+				lastMouseMotionItem = NULL;
+		}
+		else
+			lastMouseMotionItem = NULL;
+
+		if (!hovered)
+		{
+			// Set the default cursor
+			GfxCursor* renderCursor = cGfx->getSystemCursor();
+			GFX_SetCursor(renderCursor);
+		}
+		return;
+	}
+
 	bool hovered = false;
 	for (unsigned int i = 0; i < subitems.size(); ++i)
 	{
@@ -230,34 +284,29 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 	{
 		drawUpdate = false;
 
-		// reset the backgrounds
-#ifdef GFX_HAVE_SDL2
+		// Drop any cached background texture and rebuild it.
 		if (background)
 			GFX_DestroyTexture(background);
 		background = NULL;
 
-		// Try to draw into an offscreen texture (SDL path). If unavailable (GL path), draw directly.
+		// Preferred path (SDL + OpenGL-with-FBO): render panel once into an offscreen texture.
 		background = cGfx->getDraw()->createRenderTargetTexture(width, height);
 		if (background)
 		{
 			cGfx->getDraw()->setTargetTexture(background);
 			cGfx->getDraw()->setTextureBlendMode(background, GFX_BLENDMODE_BLEND);
-			// draw the background
-			cGfx->getDraw()->setTargetTexture(background);
+			cGfx->getDraw()->setDrawColor(0, 0, 0, 0);
+			cGfx->getDraw()->clear();
+
 			updateBGBackground(cGfx);
-			// Call the component draw call
-			cGfx->getDraw()->setTargetTexture(background);
 			updateBackground(cGfx);
-			// draw the border
-			cGfx->getDraw()->setTargetTexture(background);
 			updateBorderBackground(cGfx);
-			// reset the render target to default
+
 			cGfx->getDraw()->resetTarget();
 		}
 		else
-#endif
 		{
-			// Fallback path for OpenGL backend: draw directly to default framebuffer
+			// Fallback path: draw directly when render targets are unavailable.
 			if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
 			{
 #ifdef GFX_HAVE_OPENGL
@@ -267,7 +316,6 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 				updateBGBackground(cGfx);
 				updateBackground(cGfx);
 				updateBorderBackground(cGfx);
-				// Also draw subitems within the translated space
 				for (int i = subitems.size() - 1; i >= 0; --i)
 					subitems[i]->updateBackgroundHelper(cGfx);
 				glPopMatrix();
@@ -282,15 +330,12 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 	dRect.x = getX();
 	dRect.y = getY();
 	GfxTexture* geBackground = getBackground();
-#ifdef GFX_HAVE_SDL2
-	if (geBackground)
+	if (geBackground && cGfx->getDraw())
 		cGfx->getDraw()->copyTexture(geBackground, NULL, &dRect);
-	else
-#endif
-	if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
+	else if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
 	{
 #ifdef GFX_HAVE_OPENGL
-		// No cached texture on GL path: draw every frame (children draw within this transform)
+		// No cached texture available: draw directly.
 		glPushMatrix();
 		glLoadIdentity();
 		glTranslatef((float)getX(), (float)getY(), 0.0f);

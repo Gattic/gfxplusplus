@@ -459,6 +459,8 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 	if (!cGfx->getDraw())
 		return;
 
+	bool didSetTarget = false;
+
 	GFont* cFont = NULL;
 	int fontColor = FONT_COLOR;
 	std::map<int, GFont*>::iterator it = cGfx->graphicsFonts.find(fontColor);
@@ -479,6 +481,7 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 	{
 		if (cGfx->getDraw())
 			cGfx->getDraw()->setTargetTexture(getBackground());
+		didSetTarget = true;
 		cGfx->getDraw()->setDrawColor(0, 0, 0, 0);
 		cGfx->getDraw()->clear();
 		updateBGBackground(cGfx);
@@ -719,13 +722,17 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 			cGfx->getDraw()->fillRect(&cursorRect);
 		}
 	}
+	// Only keep the component "dirty" while actively focused/editable (caret blinking).
+	// Marking every label dirty every frame destroys caching and kills performance.
+	if (!readOnly && isFocused())
+		drawUpdate = true;
 
-	// Reset target
-	if (cGfx->getDraw())
+	// Reset render target only if we changed it. (OpenGL backend may be rendering into an
+	// offscreen panel/component texture; resetting here would break that.)
+#ifdef GFX_HAVE_SDL2
+	if (didSetTarget && cGfx->getDraw())
 		cGfx->getDraw()->resetTarget();
-
-	// Continuously request redraw so caret can blink and clear on unfocus
-	drawUpdate = true;
+#endif
 
 }
 

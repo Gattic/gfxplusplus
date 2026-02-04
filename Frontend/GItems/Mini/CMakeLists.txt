@@ -26,11 +26,12 @@ set(MiniC_src_files
 	RUKeyUp.h
 )
 add_library(MiniC ${MiniC_src_files})
+target_link_libraries(MiniC PUBLIC GFX)
 if(ENABLE_OPENGL)
-	target_link_libraries(MiniC ${OPENGL_LIBRARIES})
+	target_link_libraries(MiniC PUBLIC ${OPENGL_LIBRARIES})
 endif()
 if(ENABLE_SDL2)
-	target_link_libraries(MiniC ${SDL2_LIBRARIES} SDL2_ttf SDL2_image)
+	target_link_libraries(MiniC PUBLIC ${SDL2_LIBRARIES} SDL2_ttf SDL2_image)
 endif()
 
 install(TARGETS MiniC EXPORT gfxplusplusConfig

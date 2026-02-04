@@ -24,6 +24,7 @@ RUMouseMotion::RUMouseMotion()
 	// event listeners
 	MouseMotionListener = GeneralListener();
 	unhovered = false;
+	hoverState = false;
 	cursor = GFX_SYSTEM_CURSOR_ARROW;
 	customCursor = false;
 }
@@ -33,6 +34,7 @@ RUMouseMotion::~RUMouseMotion()
 	// event listeners
 	MouseMotionListener = GeneralListener();
 	unhovered = false;
+	hoverState = false;
 	cursor = GFX_SYSTEM_CURSOR_ARROW;
 	customCursor = false;
 }
@@ -69,9 +71,24 @@ void RUMouseMotion::onMouseMotionHelper(gfxpp* cGfx, EventTracker* eventsStatus,
 	if (!visible)
 		return;
 
-	// To close the dropdown
+	// Hover/unhover should only fire on enter/leave transitions.
+	// `onMouseMotion` remains continuous while hovered.
 	if ((!overrideRange) && (!inRange(eventX, eventY)))
+	{
+		if (hoverState)
+		{
+			// Leaving hover: reset cursor if we set a custom one.
+			if (customCursor)
+			{
+				GfxCursor* renderCursor = cGfx->getSystemCursor();
+				GFX_SetCursor(renderCursor);
+			}
+			unhover(cGfx);
+			unhovered = true;
+			hoverState = false;
+		}
 		return;
+	}
 
 	// Dont want to override subcomps cursor
 	if ((customCursor) && (!eventsStatus->hovered))
@@ -80,7 +97,14 @@ void RUMouseMotion::onMouseMotionHelper(gfxpp* cGfx, EventTracker* eventsStatus,
 		GFX_SetCursor(cursorPtr);
 	}
 
-	// pass on the event
+	// Enter hover (only once)
+	if (!hoverState)
+	{
+		hover(cGfx);
+		hoverState = true;
+	}
+
+	// pass on the event (continuous while hovered)
 	unhovered = false;
 	onMouseMotion(cGfx, cPanel, eventX - getX(), eventY - getY());
 

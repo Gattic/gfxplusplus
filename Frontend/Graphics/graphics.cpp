@@ -31,6 +31,57 @@
 #endif
 #include <unistd.h>
 #include <string.h>
+#include <sys/time.h>
+
+// Monotonic-ish time in milliseconds for both backends.
+// (C++98: helper free function)
+static int32_t gfxpp_now_ms(const gfxpp* g)
+{
+#ifdef GFX_HAVE_OPENGL
+	if (g && g->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
+		return (int32_t)(glfwGetTime() * 1000.0);
+#endif
+#ifdef GFX_HAVE_SDL2
+	return (int32_t)SDL_GetTicks();
+#else
+#ifdef GFX_HAVE_OPENGL
+	return (int32_t)(glfwGetTime() * 1000.0);
+#else
+	(void)g;
+	return 0;
+#endif
+#endif
+}
+
+// Higher-resolution time in microseconds for profiling/logging.
+static int64_t gfxpp_now_us(const gfxpp* g)
+{
+#ifdef GFX_HAVE_OPENGL
+	if (g && g->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
+		return (int64_t)(glfwGetTime() * 1000000.0);
+#endif
+	// Fallback: wall-clock microseconds.
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return (int64_t)tv.tv_sec * 1000000LL + (int64_t)tv.tv_usec;
+}
+
+static bool gfxpp_ui_profile_enabled()
+{
+	const char* v = getenv("GFXPP_UI_PROFILE");
+	return (v && v[0] != '\0' && v[0] != '0');
+}
+
+static void gfxpp_collect_dirty_items(GItem* item, std::vector<GItem*>& out)
+{
+	if (!item)
+		return;
+	if (item->getDrawUpdateRequired())
+		out.push_back(item);
+	std::vector<GItem*> kids = item->getItems();
+	for (size_t i = 0; i < kids.size(); ++i)
+		gfxpp_collect_dirty_items(kids[i], out);
+}
 
 // GLFW -> SDL event translation helpers (C++98: use free functions)
 #ifdef GFX_HAVE_OPENGL
@@ -39,7 +90,7 @@ void glfw_window_close_cb(GLFWwindow* w)
 	gfxpp* self = reinterpret_cast<gfxpp*>(glfwGetWindowUserPointer(w));
 	if (!self) return;
 	#ifdef GFX_HAVE_SDL2
-	SDL_Event e; memset(&e, 0, sizeof(SDL_Event)); e.type = SDL_QUIT; self->glfwEventQueue.push_back(e);
+	GfxEvent e; memset(&e, 0, sizeof(GfxEvent)); e.type = SDL_QUIT; self->glfwEventQueue.push_back(e);
 	#else
 	self->running = false;
 	#endif
@@ -49,7 +100,7 @@ void glfw_key_cb(GLFWwindow* w, int key, int scancode, int action, int mods)
 {
 	gfxpp* self = reinterpret_cast<gfxpp*>(glfwGetWindowUserPointer(w));
 	if (!self) return;
-	SDL_Event e; memset(&e, 0, sizeof(SDL_Event));
+	GfxEvent e; memset(&e, 0, sizeof(GfxEvent));
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) e.type = SDL_KEYDOWN; else if (action == GLFW_RELEASE) e.type = SDL_KEYUP; else return;
 	int sdlk = 0;
 	switch (key)
@@ -142,10 +193,11 @@ void glfw_mouse_button_cb(GLFWwindow* w, int button, int action, int mods)
 	if (!self) return;
 	double cx=0, cy=0; glfwGetCursorPos(w, &cx, &cy);
 	int winW=0, winH=0; glfwGetWindowSize(w, &winW, &winH);
-	if (winW <= 0) winW = 1; if (winH <= 0) winH = 1;
+	if (winW <= 0) winW = 1;
+	if (winH <= 0) winH = 1;
 	double sx = (double)self->getWidth() / (double)winW;
 	double sy = (double)self->getHeight() / (double)winH;
-	SDL_Event e; memset(&e, 0, sizeof(SDL_Event));
+	GfxEvent e; memset(&e, 0, sizeof(GfxEvent));
 	if (action == GLFW_PRESS) e.type = SDL_MOUSEBUTTONDOWN; else if (action == GLFW_RELEASE) e.type = SDL_MOUSEBUTTONUP; else return;
 	e.button.x = (int)(cx * sx); e.button.y = (int)(cy * sy);
 	switch (button)
@@ -163,19 +215,24 @@ void glfw_cursor_pos_cb(GLFWwindow* w, double x, double y)
 	gfxpp* self = reinterpret_cast<gfxpp*>(glfwGetWindowUserPointer(w));
 	if (!self) return;
 	int winW=0, winH=0; glfwGetWindowSize(w, &winW, &winH);
-	if (winW <= 0) winW = 1; if (winH <= 0) winH = 1;
+	if (winW <= 0) winW = 1;
+	if (winH <= 0) winH = 1;
 	double sx = (double)self->getWidth() / (double)winW;
 	double sy = (double)self->getHeight() / (double)winH;
-	SDL_Event e; memset(&e, 0, sizeof(SDL_Event));
+	GfxEvent e; memset(&e, 0, sizeof(GfxEvent));
 	e.type = SDL_MOUSEMOTION; e.motion.x = (int)(x * sx); e.motion.y = (int)(y * sy);
-	self->glfwEventQueue.push_back(e);
+	// Coalesce high-frequency mouse motion events to avoid queue blowups.
+	if (!self->glfwEventQueue.empty() && self->glfwEventQueue.back().type == SDL_MOUSEMOTION)
+		self->glfwEventQueue.back() = e;
+	else
+		self->glfwEventQueue.push_back(e);
 }
 
 void glfw_scroll_cb(GLFWwindow* w, double xoffset, double yoffset)
 {
 	gfxpp* self = reinterpret_cast<gfxpp*>(glfwGetWindowUserPointer(w));
 	if (!self) return;
-	SDL_Event e; memset(&e, 0, sizeof(SDL_Event));
+	GfxEvent e; memset(&e, 0, sizeof(GfxEvent));
 	e.type = SDL_MOUSEWHEEL;
 	// Cast offsets to integer steps consistent with SDL semantics
 	e.wheel.x = (int)(xoffset);
@@ -201,7 +258,8 @@ static gfxpp::RenderBackend gRenderBackend =
 #endif
 
 // Define non-integral static class member for broad standards compatibility
-const float gfxpp::MAX_FRAMES_PER_SECOND = 30.0f;
+// 60fps improves perceived input responsiveness (hover, caret, drag).
+const float gfxpp::MAX_FRAMES_PER_SECOND = 60.0f;
 
 gfxpp::gfxpp()
 {
@@ -785,9 +843,31 @@ void gfxpp::display()
 	}
 
 	// draw/event loop
+	int32_t fpsWindowStartMs = gfxpp_now_ms(this);
+	int32_t fpsWindowFrames = 0;
+	int lastLogicalW = -1;
+	int lastLogicalH = -1;
+
+	// Optional perf profiling (enable with env var: GFXPP_UI_PROFILE=1)
+	const bool uiProfile = gfxpp_ui_profile_enabled();
+	int64_t profWindowStartUs = gfxpp_now_us(this);
+	int64_t profEventDispatchUs = 0;
+	int64_t profEventPumpUs = 0;
+	int64_t profRenderUs = 0;
+	int64_t profPresentUs = 0;
+	int64_t profMaxEventDispatchUs = 0;
+	int64_t profMaxRenderUs = 0;
+	int64_t profMaxPresentUs = 0;
+	uint32_t profEvents = 0;
+	uint32_t profMotionEvents = 0;
+	uint32_t profKeyEvents = 0;
+
 	while (running)
 	{
 		++frames;
+		++fpsWindowFrames;
+		const int32_t frameStartMs = gfxpp_now_ms(this);
+		const int64_t frameStartUs = uiProfile ? gfxpp_now_us(this) : 0;
 
 		//=================EVENTS=================
 		#ifdef GFX_HAVE_OPENGL
@@ -795,11 +875,12 @@ void gfxpp::display()
 			glfwPollEvents();
 		if (renderBackend == RENDER_BACKEND_OPENGL && glfwWindow)
 		{
+			const int64_t pumpStartUs = uiProfile ? gfxpp_now_us(this) : 0;
 			// Pump synthetic events immediately without requiring SDL loop
-			while (!glfwEventQueue.empty())
+			// Avoid O(n^2) erase-at-begin by iterating and clearing once.
+			for (size_t qi = 0; qi < glfwEventQueue.size(); ++qi)
 			{
-				SDL_Event e2 = glfwEventQueue.front();
-				glfwEventQueue.erase(glfwEventQueue.begin());
+				GfxEvent e2 = glfwEventQueue[qi];
 				// update mouse position for motion or button events
 				if (e2.type == SDL_MOUSEMOTION) { mouseX = e2.motion.x; mouseY = e2.motion.y; }
 				else if (e2.type == SDL_MOUSEBUTTONDOWN || e2.type == SDL_MOUSEBUTTONUP) { mouseX = e2.button.x; mouseY = e2.button.y; }
@@ -872,10 +953,28 @@ void gfxpp::display()
 				}
 				if (e2.type == SDL_QUIT) running = false;
 				if (focusedPanel)
+				{
+					const int64_t dispatchStartUs = uiProfile ? gfxpp_now_us(this) : 0;
 					focusedPanel->processSubItemEvents(this, NULL, NULL, e2, mouseX, mouseY);
+					if (uiProfile)
+					{
+						const int64_t dt = gfxpp_now_us(this) - dispatchStartUs;
+						profEventDispatchUs += dt;
+						if (dt > profMaxEventDispatchUs) profMaxEventDispatchUs = dt;
+					}
+				}
 				for (size_t li = 0; li < listeners.size(); ++li)
 					listeners[li].fn(e2, listeners[li].userData);
+
+				if (uiProfile)
+				{
+					++profEvents;
+					if (e2.type == SDL_MOUSEMOTION) ++profMotionEvents;
+					else if (e2.type == SDL_KEYDOWN || e2.type == SDL_KEYUP) ++profKeyEvents;
+				}
 			}
+			glfwEventQueue.clear();
+			if (uiProfile) profEventPumpUs += (gfxpp_now_us(this) - pumpStartUs);
 		}
 		#endif
 
@@ -886,6 +985,7 @@ void gfxpp::display()
 		#endif
 		while (SDL_PollEvent(&event))
 		{
+			const int64_t pumpStartUs = uiProfile ? gfxpp_now_us(this) : 0;
 			if (event.type == SDL_QUIT)
 				running = false;
 
@@ -1006,18 +1106,43 @@ void gfxpp::display()
 			}
 
 			if (focusedPanel)
+			{
+				const int64_t dispatchStartUs = uiProfile ? gfxpp_now_us(this) : 0;
 				focusedPanel->processSubItemEvents(this, NULL, NULL, event, mouseX, mouseY);
+				if (uiProfile)
+				{
+					const int64_t dt = gfxpp_now_us(this) - dispatchStartUs;
+					profEventDispatchUs += dt;
+					if (dt > profMaxEventDispatchUs) profMaxEventDispatchUs = dt;
+				}
+			}
 
 			for (size_t li = 0; li < listeners.size(); ++li)
 				listeners[li].fn(event, listeners[li].userData);
+
+			if (uiProfile)
+			{
+				++profEvents;
+				if (event.type == SDL_MOUSEMOTION) ++profMotionEvents;
+				else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) ++profKeyEvents;
+				profEventPumpUs += (gfxpp_now_us(this) - pumpStartUs);
+			}
 		}
 		#endif
 
 		//=================Render=================
+		const int64_t renderStartUs = uiProfile ? gfxpp_now_us(this) : 0;
 		if (this->draw)
 		{
 			// Ensure viewport/projection up-to-date before drawing; reset modelview
-			this->draw->setLogicalSize(getWidth(), getHeight());
+			const int w = getWidth();
+			const int h = getHeight();
+			if (w != lastLogicalW || h != lastLogicalH)
+			{
+				this->draw->setLogicalSize(w, h);
+				lastLogicalW = w;
+				lastLogicalH = h;
+			}
 		#ifdef GFX_HAVE_OPENGL
 			if (renderBackend == RENDER_BACKEND_OPENGL)
 			{
@@ -1064,59 +1189,115 @@ void gfxpp::display()
 				}
 			}
 		}
-
-		// fps
-		#ifdef GFX_HAVE_OPENGL
-		if (renderBackend == RENDER_BACKEND_OPENGL)
-			now = (int32_t)(glfwGetTime() * 1000.0);
-		else
-		#endif
+		if (uiProfile)
 		{
-		#ifdef GFX_HAVE_SDL2
-			now = SDL_GetTicks();
-		#else
-			#ifdef GFX_HAVE_OPENGL
-			now = (int32_t)(glfwGetTime() * 1000.0);
-			#else
-			now = 0;
-			#endif
-		#endif
-		}
-		float cFrames = ((float)frames * 1000.0f) / ((float)(now - then));
-		/*if (running)
-		{
-			char fpsBuffer[26];
-			bzero(&fpsBuffer, 26);
-			sprintf(fpsBuffer, "%2.1f fps", cFrames);
-		}*/
-
-		// Cap the frame rate
-		fps = cFrames;
-		if ((cFrames - MAX_FRAMES_PER_SECOND > 0) && (cFrames > MAX_FRAMES_PER_SECOND))
-		{
-		#ifdef GFX_HAVE_OPENGL
-			if (renderBackend == RENDER_BACKEND_OPENGL)
-			{
-				int ms = (int)((cFrames - MAX_FRAMES_PER_SECOND) * 10.0f);
-				if (ms > 0) usleep(ms * 1000);
-			}
-			else
-		#endif
-			{
-			#ifdef GFX_HAVE_SDL2
-				SDL_Delay((Uint32)((cFrames - MAX_FRAMES_PER_SECOND) * 10.0f));
-			#else
-				int ms = (int)((cFrames - MAX_FRAMES_PER_SECOND) * 10.0f);
-				if (ms > 0) usleep(ms * 1000);
-			#endif
-			}
+			const int64_t dt = gfxpp_now_us(this) - renderStartUs;
+			profRenderUs += dt;
+			if (dt > profMaxRenderUs) profMaxRenderUs = dt;
 		}
 
 		// Present every frame so interactive elements (caret) update reliably
 		if (this->draw)
 		{
-			this->draw->setLogicalSize(getWidth(), getHeight());
+			const int64_t presentStartUs = uiProfile ? gfxpp_now_us(this) : 0;
 			this->draw->present();
+			if (uiProfile)
+			{
+				const int64_t dt = gfxpp_now_us(this) - presentStartUs;
+				profPresentUs += dt;
+				if (dt > profMaxPresentUs) profMaxPresentUs = dt;
+			}
+		}
+
+		// Periodic UI perf log (once per second)
+		if (uiProfile)
+		{
+			const int64_t nowUs = gfxpp_now_us(this);
+			const int64_t windowUs = nowUs - profWindowStartUs;
+			if (windowUs >= 1000000LL)
+			{
+				std::vector<GItem*> dirty;
+				if (focusedPanel)
+					gfxpp_collect_dirty_items(focusedPanel, dirty);
+
+				const double windowMs = (double)windowUs / 1000.0;
+				const double avgEventDispatchUs = (profEvents > 0) ? ((double)profEventDispatchUs / (double)profEvents) : 0.0;
+
+				printf("[UI PERF] %.0fms window fps=%.1f events=%u (motion=%u key=%u) "
+					   "pump=%.1fms dispatch=%.1fms(avg=%.1fus max=%.1fus) "
+					   "render=%.1fms(max=%.1fus) present=%.1fms(max=%.1fus) dirty=%zu\n",
+					   windowMs, fps,
+					   (unsigned int)profEvents, (unsigned int)profMotionEvents, (unsigned int)profKeyEvents,
+					   (double)profEventPumpUs / 1000.0,
+					   (double)profEventDispatchUs / 1000.0,
+					   avgEventDispatchUs, (double)profMaxEventDispatchUs,
+					   (double)profRenderUs / 1000.0, (double)profMaxRenderUs,
+					   (double)profPresentUs / 1000.0, (double)profMaxPresentUs,
+					   dirty.size());
+
+				// Print a few dirty items to spot what's constantly re-rendering.
+				const size_t maxPrint = 8;
+				for (size_t i = 0; i < dirty.size() && i < maxPrint; ++i)
+				{
+					GItem* it = dirty[i];
+					printf("  dirty[%u]: type=%s name=%s id=%d w=%d h=%d\n",
+						   (unsigned int)i,
+						   it->getType().c_str(),
+						   it->getName().c_str(),
+						   it->getID(),
+						   it->getWidth(), it->getHeight());
+				}
+
+				// Reset window counters
+				profWindowStartUs = nowUs;
+				profEventDispatchUs = 0;
+				profEventPumpUs = 0;
+				profRenderUs = 0;
+				profPresentUs = 0;
+				profMaxEventDispatchUs = 0;
+				profMaxRenderUs = 0;
+				profMaxPresentUs = 0;
+				profEvents = 0;
+				profMotionEvents = 0;
+				profKeyEvents = 0;
+			}
+		}
+
+		// Frame pacing: cap based on actual frame duration (not average FPS).
+		// The previous code used average FPS since startup, which could cause huge sleeps
+		// early on and make input feel unresponsive.
+		int32_t frameEndMs = gfxpp_now_ms(this);
+		int32_t frameMs = frameEndMs - frameStartMs;
+		if (frameMs < 1) frameMs = 1;
+
+		if (MAX_FRAMES_PER_SECOND > 0.0f)
+		{
+			int targetMs = (int)(1000.0f / MAX_FRAMES_PER_SECOND);
+			if (targetMs < 1) targetMs = 1;
+			if (frameMs < targetMs)
+			{
+				int sleepMs = targetMs - frameMs;
+#ifdef GFX_HAVE_SDL2
+				if (renderBackend == RENDER_BACKEND_SDL2)
+					SDL_Delay((Uint32)sleepMs);
+				else
+#endif
+					usleep((useconds_t)(sleepMs * 1000));
+
+				frameEndMs = gfxpp_now_ms(this);
+				frameMs = frameEndMs - frameStartMs;
+				if (frameMs < 1) frameMs = 1;
+			}
+		}
+
+		// Update FPS a few times per second (stable and cheap).
+		if ((frameEndMs - fpsWindowStartMs) >= 500)
+		{
+			const int32_t windowMs = frameEndMs - fpsWindowStartMs;
+			if (windowMs > 0)
+				fps = ((float)fpsWindowFrames * 1000.0f) / (float)windowMs;
+			fpsWindowStartMs = frameEndMs;
+			fpsWindowFrames = 0;
 		}
 	}
 }

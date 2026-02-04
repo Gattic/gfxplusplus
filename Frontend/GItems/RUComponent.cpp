@@ -29,6 +29,7 @@
 RUComponent::RUComponent()
 {
 	setBGColor(RUColors::DEFAULT_COMPONENT_BACKGROUND);
+	lastMouseMotionSubItem = NULL;
 }
 
 void RUComponent::calculateSubItemPositions(std::pair<int, int> parentOffset)
@@ -66,6 +67,43 @@ void RUComponent::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, 
 
 	// Pass on the event to the subcomps
 	clickedSubItems.clear();
+
+	// Optimize mouse motion: only process the previously-hovered child and the current target.
+	if (event.type == GFX_MOUSEMOTION)
+	{
+		GItem* candidate = NULL;
+		for (unsigned int i = 0; i < subitems.size(); ++i)
+		{
+			GItem* cItem = subitems[i];
+			if (!cItem)
+				continue;
+			if (!cItem->isVisible())
+				continue;
+			if (cItem->containsPoint(mouseX, mouseY))
+				candidate = cItem;
+		}
+
+		if (lastMouseMotionSubItem && lastMouseMotionSubItem != candidate)
+			lastMouseMotionSubItem->processEvents(cGfx, parentPanel, event, mouseX, mouseY);
+
+		if (candidate)
+		{
+			EventTracker* subEventsStatus =
+				candidate->processEvents(cGfx, parentPanel, event, mouseX, mouseY);
+			if (subEventsStatus && subEventsStatus->hovered)
+			{
+				eventsStatus->hovered = true;
+				lastMouseMotionSubItem = candidate;
+			}
+			else
+				lastMouseMotionSubItem = NULL;
+		}
+		else
+			lastMouseMotionSubItem = NULL;
+
+		return;
+	}
+
 	for (unsigned int i = 0; i < subitems.size(); ++i)
 	{
 		EventTracker* subEventsStatus =
@@ -96,36 +134,29 @@ void RUComponent::updateBackgroundHelper(gfxpp* cGfx)
 	{
 		drawUpdate = false;
 
-		// draw the new background (SDL path only)
-#ifdef GFX_HAVE_SDL2
-		if (!background)
-			background = cGfx->getDraw()->createRenderTargetTexture(width, height);
+		// Drop any cached background texture and rebuild it.
+		if (background)
+			GFX_DestroyTexture(background);
+		background = NULL;
 
+		// Preferred path (SDL + OpenGL-with-FBO): render component once into an offscreen texture.
+		background = cGfx->getDraw()->createRenderTargetTexture(width, height);
 		if (background)
 		{
-			// Assign the background as the render target and reset the background
 			cGfx->getDraw()->setTargetTexture(background);
 			cGfx->getDraw()->setTextureBlendMode(background, GFX_BLENDMODE_BLEND);
+			cGfx->getDraw()->setDrawColor(0, 0, 0, 0);
+			cGfx->getDraw()->clear();
 
-			// draw the background
-			cGfx->getDraw()->setTargetTexture(background);
 			updateBGBackground(cGfx);
-
-			// Call the component draw call
-			cGfx->getDraw()->setTargetTexture(background);
 			updateBackground(cGfx);
-
-			// draw the border
-			cGfx->getDraw()->setTargetTexture(background);
 			updateBorderBackground(cGfx);
 
-			// Reset the render target to default
 			cGfx->getDraw()->resetTarget();
 		}
 		else
-#endif
 		{
-			// Fallback: draw directly for GL backend. Parent is responsible for positioning.
+			// Fallback: draw directly when render targets are unavailable.
 			if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
 			{
 #ifdef GFX_HAVE_OPENGL
@@ -152,15 +183,12 @@ void RUComponent::updateBackgroundHelper(gfxpp* cGfx)
 	dRect.x = getX();
 	dRect.y = getY();
 	GfxTexture* geBackground = getBackground();
-#ifdef GFX_HAVE_SDL2
 	if (geBackground && cGfx->getDraw())
 		cGfx->getDraw()->copyTexture(geBackground, NULL, &dRect);
-	else
-#endif
-	if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
+	else if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
 	{
 #ifdef GFX_HAVE_OPENGL
-		// Translate to this component's position and draw at local origin
+		// No cached texture available: draw directly.
 		glPushMatrix();
 		glTranslatef((float)getX(), (float)getY(), 0.0f);
 		updateBGBackground(cGfx);

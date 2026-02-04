@@ -34,6 +34,12 @@ if(ENABLE_OPENGL)
 	list(APPEND GFX_src_files
 		GfxRendererGLFW.h
 		GfxRendererGLFW.cpp)
+	# When SDL2 is disabled, provide OpenGL texture wrappers (FBO render targets, etc.)
+	if(NOT ENABLE_SDL2)
+		list(APPEND GFX_src_files
+			GfxTextureGL.h
+			GfxTextureGL.cpp)
+	endif()
 	# If GUI/Text is not built (SDL2 disabled), include GLTextRenderer here
 	if(NOT ENABLE_SDL2)
 		list(APPEND GFX_src_files
