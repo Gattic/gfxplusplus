@@ -1,8 +1,7 @@
-#sdl2 lib (only when SDL2 is enabled)
 if(ENABLE_SDL2)
-include(FindPkgConfig)
-pkg_search_module(SDL2 REQUIRED sdl2 sdl2_ttf sdl2_image)
-include_directories(${SDL2_INCLUDE_DIR})
+    find_package(SDL2 REQUIRED)
+    find_package(SDL2_ttf REQUIRED)
+    find_package(SDL2_image REQUIRED)
 endif()
 
 set(MiniC_src_files
@@ -25,19 +24,27 @@ set(MiniC_src_files
 	RUKeyUp.cpp
 	RUKeyUp.h
 )
-add_library(MiniC ${MiniC_src_files})
+add_library(MiniC STATIC ${MiniC_src_files})
+
 if(ENABLE_OPENGL)
-	target_link_libraries(MiniC ${OPENGL_LIBRARIES})
+	target_link_libraries(MiniC PUBLIC OpenGL::GL)
 endif()
 if(ENABLE_SDL2)
-	target_link_libraries(MiniC ${SDL2_LIBRARIES} SDL2_ttf SDL2_image)
+	target_link_libraries(MiniC PUBLIC SDL2::SDL2 SDL2_ttf::SDL2_ttf SDL2_image::SDL2_image)
 endif()
 
-install(TARGETS MiniC EXPORT gfxplusplusConfig
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
+target_include_directories(MiniC PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Frontend/GItems/Mini>
+)
 
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
+if(MSVC)
+  set_property(TARGET MiniC PROPERTY MSVC_RUNTIME_LIBRARY "${GFXPP_MSVC_RUNTIME}")
+endif()
 
-export(TARGETS MiniC FILE gfxplusplusConfig.cmake)
+install(TARGETS MiniC
+    EXPORT gfxplusplusTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

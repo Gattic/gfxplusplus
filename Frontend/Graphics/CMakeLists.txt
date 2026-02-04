@@ -1,21 +1,19 @@
 # Backend-specific dependencies
 if(ENABLE_OPENGL)
-set(OpenGL_GL_PREFERENCE "GLVND")
-find_package(OpenGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIRS})
+    set(OpenGL_GL_PREFERENCE "GLVND")
+    find_package(OpenGL REQUIRED)
 
-# FreeType for OpenGL text rendering
-find_package(Freetype REQUIRED)
-include_directories(${FREETYPE_INCLUDE_DIRS})
+    # FreeType for OpenGL text rendering
+    find_package(Freetype REQUIRED)
 
-# GLFW for OpenGL window/context and events (OpenGL backend)
-find_package(glfw3 3.3 REQUIRED)
+    # GLFW for OpenGL window/context and events (OpenGL backend)
+    find_package(glfw3 3.3 REQUIRED)
 endif()
 
 if(ENABLE_SDL2)
-include(FindPkgConfig)
-pkg_search_module(SDL2 REQUIRED sdl2 sdl2_ttf sdl2_image)
-include_directories(${SDL2_INCLUDE_DIRS})
+    find_package(SDL2 REQUIRED)
+    find_package(SDL2_ttf REQUIRED)
+    find_package(SDL2_image REQUIRED)
 endif()
 
 set(GFX_src_files
@@ -40,20 +38,28 @@ if(ENABLE_OPENGL)
 			../GUI/Text/GLTextRenderer.cpp)
 	endif()
 endif()
-add_library(GFX ${GFX_src_files})
+
+add_library(GFX STATIC ${GFX_src_files})
+
+target_include_directories(GFX PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Frontend/Graphics>
+)
 
 if(ENABLE_OPENGL)
-target_link_libraries(GFX ${OPENGL_LIBRARIES} ${FREETYPE_LIBRARIES} glfw)
+    target_link_libraries(GFX PUBLIC OpenGL::GL Freetype::Freetype glfw)
 endif()
 if(ENABLE_SDL2)
-target_link_libraries(GFX ${SDL2_LIBRARIES} SDL2_ttf SDL2_image)
+    target_link_libraries(GFX PUBLIC SDL2::SDL2 SDL2_ttf::SDL2_ttf SDL2_image::SDL2_image)
 endif()
 
-install(TARGETS GFX EXPORT gfxplusplusConfig
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
+if(MSVC)
+  set_property(TARGET GFX PROPERTY MSVC_RUNTIME_LIBRARY "${GFXPP_MSVC_RUNTIME}")
+endif()
 
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
-
-export(TARGETS GFX FILE gfxplusplusConfig.cmake)
+install(TARGETS GFX
+    EXPORT gfxplusplusTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

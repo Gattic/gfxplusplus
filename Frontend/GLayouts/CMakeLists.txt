@@ -4,13 +4,20 @@ set(GLayout_src_files
 	GRelativeLayout.cpp
 	GRelativeLayout.h
 )
-add_library(GLayout ${GLayout_src_files})
+add_library(GLayout STATIC ${GLayout_src_files})
 
-install(TARGETS GLayout EXPORT gfxplusplusConfig
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
+target_include_directories(GLayout PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Frontend/GLayouts>
+)
 
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
+if(MSVC)
+  set_property(TARGET GLayout PROPERTY MSVC_RUNTIME_LIBRARY "${GFXPP_MSVC_RUNTIME}")
+endif()
 
-export(TARGETS GLayout FILE gfxplusplusConfig.cmake)
+install(TARGETS GLayout
+    EXPORT gfxplusplusTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

@@ -12,16 +12,21 @@ set(GraphGUI_src_files
 	Graphable.h
 	RUGraph.cpp
 	RUGraph.h
-	#RUDrawComponent.cpp # And Reimplement Circle too
-	#RUDrawComponent.h
 )
-add_library(GraphGUI ${GraphGUI_src_files})
+add_library(GraphGUI STATIC ${GraphGUI_src_files})
 
-install(TARGETS GraphGUI EXPORT gfxplusplusConfig
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
+target_include_directories(GraphGUI PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Frontend/RUGraph>
+)
 
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
+if(MSVC)
+  set_property(TARGET GraphGUI PROPERTY MSVC_RUNTIME_LIBRARY "${GFXPP_MSVC_RUNTIME}")
+endif()
 
-export(TARGETS GraphGUI FILE gfxplusplusConfig.cmake)
+install(TARGETS GraphGUI
+    EXPORT gfxplusplusTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

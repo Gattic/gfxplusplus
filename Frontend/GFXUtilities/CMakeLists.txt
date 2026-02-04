@@ -26,13 +26,20 @@ set(GU_src_files
 	RULayerInfo.cpp
 	RULayerInfo.h
 )
-add_library(GU ${GU_src_files})
+add_library(GU STATIC ${GU_src_files})
 
-install(TARGETS GU EXPORT gfxplusplusConfig
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
+target_include_directories(GU PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Frontend/GFXUtilities>
+)
 
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
+if(MSVC)
+  set_property(TARGET GU PROPERTY MSVC_RUNTIME_LIBRARY "${GFXPP_MSVC_RUNTIME}")
+endif()
 
-export(TARGETS GU FILE gfxplusplusConfig.cmake)
+install(TARGETS GU
+    EXPORT gfxplusplusTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

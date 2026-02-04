@@ -1,10 +1,9 @@
 add_subdirectory("Mini")
 
-# Optional OpenGL (used only when OpenGL backend is enabled)
+# Optional OpenGL
 if(ENABLE_OPENGL)
-set(OpenGL_GL_PREFERENCE "GLVND")
-find_package(OpenGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIRS})
+    set(OpenGL_GL_PREFERENCE "GLVND")
+    find_package(OpenGL REQUIRED)
 endif()
 
 set(GFXItem_src_files
@@ -22,18 +21,25 @@ set(GFXItem_src_files
 	RUItemArea.cpp
 	RUItemArea.h
 )
-add_library(GFXItem ${GFXItem_src_files})
+add_library(GFXItem STATIC ${GFXItem_src_files})
 
-target_link_libraries(GFXItem MiniC GU)
+target_link_libraries(GFXItem PUBLIC MiniC GU)
 if(ENABLE_OPENGL)
-    target_link_libraries(GFXItem ${OPENGL_LIBRARIES})
+    target_link_libraries(GFXItem PUBLIC OpenGL::GL)
 endif()
 
-install(TARGETS GFXItem EXPORT gfxplusplusConfig
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
+target_include_directories(GFXItem PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Frontend/GItems>
+)
 
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
+if(MSVC)
+  set_property(TARGET GFXItem PROPERTY MSVC_RUNTIME_LIBRARY "${GFXPP_MSVC_RUNTIME}")
+endif()
 
-export(TARGETS GFXItem FILE gfxplusplusConfig.cmake)
+install(TARGETS GFXItem
+    EXPORT gfxplusplusTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
