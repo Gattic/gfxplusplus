@@ -18,6 +18,7 @@
 #define _GPANEL
 
 #include "GItem.h"
+#include "GMutex.h"
 #include "Backend/Database/ServiceData.h"
 #include "Backend/Database/GString.h"
 #include <SDL2/SDL.h>
@@ -41,7 +42,7 @@ class GPanel : public GItem
 protected:
 
 	std::queue<const shmea::ServiceData*> updateQueue;
-	pthread_mutex_t* qMutex;
+	GMutex* qMutex;
 
 	void processQ(gfxpp*);
 	void popQ();

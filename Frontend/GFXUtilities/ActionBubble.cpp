@@ -17,6 +17,8 @@
 #include "ActionBubble.h"
 #include "point2.h"
 //#include "../Graphics/graphics.h"
+static double AB_DEFAULT_RADIUS = 20.0f;
+
 
 ActionBubble::ActionBubble()
 {

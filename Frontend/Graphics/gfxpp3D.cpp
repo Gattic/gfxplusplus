@@ -2,6 +2,8 @@
 #include "../GFXUtilities/quaternion.h"
 #include "object.h"
 
+const float MAX_FRAMES_PER_SECOND = 30.0f;
+
 gfxpp3D::gfxpp3D()
 {
     width = 800;

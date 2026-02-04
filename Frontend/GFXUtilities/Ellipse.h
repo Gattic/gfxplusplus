@@ -28,30 +28,30 @@
 
 class gfxpp;
 class Point2;
+namespace ru {
+	class Ellipse
+	{
+	protected:
 
-class Ellipse
-{
-protected:
+		double radius;
+		int maxHit;
 
-	double radius;
-	int maxHit;
+	public:
 
-public:
+		std::map<int, std::map<int, int> > heatmap;
+		std::vector<const Point2*> foci;
 
-	std::map<int, std::map<int, int> > heatmap;
-	std::vector<const Point2*> foci;
+		// constructors & destructor
+		Ellipse();
+		~Ellipse();
 
-	// constructors & destructor
-	Ellipse();
-	~Ellipse();
+		void addFocalPoint(const Point2*);
+		void setRadius(double);
+		void createHeatmap();
 
-	void addFocalPoint(const Point2*);
-	void setRadius(double);
-	void createHeatmap();
-
-	const Point2* getFocalPoint(unsigned int) const;
-	double getRadius() const;
-	int getMaxHit() const;
-};
-
+		const Point2* getFocalPoint(unsigned int) const;
+		double getRadius() const;
+		int getMaxHit() const;
+	};
+}
 #endif

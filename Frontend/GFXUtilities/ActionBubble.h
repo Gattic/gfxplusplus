@@ -41,7 +41,7 @@ protected:
 
 public:
 
-	const static double AB_DEFAULT_RADIUS = 20.0f;
+	const static double AB_DEFAULT_RADIUS;
 
 	const static int ACTION_BUY = 0;
 	const static int ACTION_SELL = 1;

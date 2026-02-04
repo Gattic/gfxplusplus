@@ -18,15 +18,20 @@
 #include "RUGraph.h"
 #include "../GFXUtilities/Ellipse.h"
 
+// Kill the Windows GDI macro if present:
+#ifdef Ellipse
+#  undef Ellipse
+#endif
+
 template <>
-void Graphable<Ellipse>::computeAxisRanges(bool additionOptimization)
+void Graphable<ru::Ellipse>::computeAxisRanges(bool additionOptimization)
 {
 	if (!parent)
 		return;
 
 	for (unsigned int i = 1; i < points.size(); ++i)
 	{
-		Ellipse* pt = points[i];
+		ru::Ellipse* pt = points[i];
 		pt->createHeatmap();
 	}
 
@@ -34,11 +39,11 @@ void Graphable<Ellipse>::computeAxisRanges(bool additionOptimization)
 }
 
 template <>
-void Graphable<Ellipse>::draw(gfxpp* cGfx)
+void Graphable<ru::Ellipse>::draw(gfxpp* cGfx)
 {
 	for (unsigned int i = 0; i < points.size(); ++i)
 	{
-		Ellipse* pt = points[i];
+		ru::Ellipse* pt = points[i];
 
 		if (pt->getRadius() <= 0)
 			return;

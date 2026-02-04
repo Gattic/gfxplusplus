@@ -171,18 +171,18 @@ void GPanel::processQ(gfxpp* cGfx)
 
 void GPanel::addToQ(const shmea::ServiceData* cData)
 {
-	pthread_mutex_lock(qMutex);
+	qMutex->lock();
 	updateQueue.push(cData);
-	pthread_mutex_unlock(qMutex);
+	qMutex->unlock();
 }
 
 void GPanel::popQ()
 {
 	const shmea::ServiceData* cData;
-	pthread_mutex_lock(qMutex);
+	qMutex->lock();
 	cData = updateQueue.front();
 	updateQueue.pop();
-	pthread_mutex_unlock(qMutex);
+	qMutex->unlock();
 
 	updateFromQ(cData);
 }

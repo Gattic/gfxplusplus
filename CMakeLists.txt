@@ -1,132 +1,149 @@
-if(NOT (${CMAKE_BINARY_DIR} STREQUAL "${CMAKE_SOURCE_DIR}/build"))
-	message(FATAL_ERROR "Must be in \"build\" directory")
+# gfxplusplus / top-level CMakeLists.txt (package of static libs + umbrella interface)
+
+cmake_minimum_required(VERSION 3.21)
+project(gfxplusplus VERSION 0.57 LANGUAGES CXX)
+
+# ---------- Global: all static, MSVC static runtime ----------
+set(BUILD_SHARED_LIBS OFF)
+if(MSVC)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
-
-set (CMAKE_INSTALL_PREFIX "$ENV{HOME}/.local" CACHE PATH "default install path" FORCE)
-file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/include)
-
-#Init
-cmake_minimum_required(VERSION 3.5.1)
-set(CMAKE_CXX_STANDARD 98)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
-#Compiler Flags
-#set(DEFAULT_BUILD_TYPE "Release")
-set(CMAKE_BUILD_TYPE Debug) # -g
-
-if(WIN32)
-	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
-else()
-	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC") # its set below
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-variable -Wno-unused-parameter")
-endif()
-set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
 
-#Project
-project(gfxplusplus)
-set(G_VERSION_MAJOR 0)
-set(G_VERSION_MINOR 57)
-
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
-  set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}" CACHE STRING "Choose the type of build." FORCE)
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+# ---------- Default install prefix ----------
+if(WIN32)
+  set(_default_prefix "$ENV{USERPROFILE}/.local")
+else()
+  set(_default_prefix "$ENV{HOME}/.local")
+endif()
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${_default_prefix}" CACHE PATH "Install prefix" FORCE)
 endif()
 
-#Import libs
-find_package(shmea REQUIRED)
+# ---------- Tooling / flags ----------
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release RelWithDebInfo MinSizeRel)
+endif()
+if(MSVC)
+  add_compile_options(/W3 /EHsc)
+else()
+  add_compile_options(-Wall -Wextra -Wno-unused-variable -Wno-unused-parameter)
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
+endif()
 
 include(GNUInstallDirs)
 
-#Subdirectories
-include_directories(${CMAKE_SOURCE_DIR})
-include_directories("include")
-include_directories("services")
-add_subdirectory("Frontend/GFXUtilities")
-add_subdirectory("Frontend/Graphics")
-add_subdirectory("Frontend/GItems")
-add_subdirectory("Frontend/GUI")
-add_subdirectory("Frontend/RUGraph")
-add_subdirectory("Frontend/GLayouts")
+# ---------- Make user-local shmea discoverable ----------
+if(WIN32)
+  set(_default_local "$ENV{USERPROFILE}/.local")
+else()
+  set(_default_local "$ENV{HOME}/.local")
+endif()
+if(EXISTS "${_default_local}/lib/cmake/shmea/shmeaConfig.cmake")
+  list(APPEND CMAKE_PREFIX_PATH "${_default_local}")
+endif()
 
-set(MAIN_SRC_FILES
-	main.cpp
-	main.h
+# ---------- Dependencies ----------
+find_package(shmea CONFIG REQUIRED)        # shmea::shmea
+set(OpenGL_GL_PREFERENCE "GLVND")
+find_package(OpenGL REQUIRED)
+
+# On Windows, prefer vcpkg config packages for SDL2*
+if(WIN32)
+  find_package(SDL2 CONFIG REQUIRED)
+  find_package(SDL2_ttf CONFIG REQUIRED)
+  find_package(SDL2_image CONFIG REQUIRED)
+  set(SDL2_LIBRARIES SDL2::SDL2 SDL2_ttf::SDL2_ttf SDL2_image::SDL2_image)
+else()
+  # (Optional) add your Linux discovery here (pkg-config) if you want cross-platform
+endif()
+
+# ---------- Subdirectories (each defines a STATIC lib and installs into gfxppTargets) ----------
+add_subdirectory(Frontend/GFXUtilities)  # -> GU
+add_subdirectory(Frontend/GItems)        # -> MiniC, GFXItem
+add_subdirectory(Frontend/GLayouts)      # -> GLayout
+add_subdirectory(Frontend/Graphics)      # -> GFX
+add_subdirectory(Frontend/GUI)           # -> GUI, TextC (inside its CMakeLists)
+add_subdirectory(Frontend/RUGraph)       # -> GraphGUI
+
+# ---------- Umbrella INTERFACE target for consumers ----------
+add_library(gfxplusplus INTERFACE)
+target_link_libraries(gfxplusplus INTERFACE
+  GUI GFX GLayout GraphGUI GFXItem GU MiniC
+  OpenGL::GL
+  ${SDL2_LIBRARIES}
+  shmea::shmea
 )
 
-add_library(${PROJECT_NAME} SHARED ${MAIN_SRC_FILES})
+# ---------- Install umbrella target only here ----------
+install(TARGETS gfxplusplus EXPORT gfxppTargets)
 
-#Link libraries
-target_link_libraries(${PROJECT_NAME} PUBLIC
-	GUI GFX GLayout GraphGUI GFXItem GU GNet DB)#custom libs
-
-#target_include_directories(gfxplusplus PUBLIC "include")
-#target_include_directories(gfxplusplus PUBLIC "Frontend")
-target_include_directories(gfxplusplus PUBLIC  
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
-    $<INSTALL_INTERFACE:include>  # <prefix>/include
+# ---------- Package config (single export set emitted only here) ----------
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/gfxplusplusConfigVersion.cmake"
+  VERSION "${PROJECT_VERSION}"
+  COMPATIBILITY SameMajorVersion
+)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/gfxplusplusConfig.cmake"
+  "include(\"\${CMAKE_CURRENT_LIST_DIR}/gfxppTargets.cmake\")\n"
+)
+install(EXPORT gfxppTargets
+  NAMESPACE gfxpp::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gfxplusplus
+)
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/gfxplusplusConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/gfxplusplusConfigVersion.cmake"
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/gfxplusplus
 )
 
-#target_include_directories(${PROJECT_NAME} PUBLIC
-#    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#    $<INSTALL_INTERFACE:include>
-#    PRIVATE Frontend)
-
-install(TARGETS ${PROJECT_NAME} EXPORT gfxplusplusConfig
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
-
-export(TARGETS ${PROJECT_NAME} FILE gfxplusplusConfig.cmake)
-
-#make fmt
+# Format all
 add_custom_target(fmt
-	COMMAND ./clang-format-all
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ./clang-format-all
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
-#make fullscreen
+# Custom run modes
 add_custom_target(fullscreen
-	COMMAND ${PROJECT_NAME} fullscreen
-	DEPENDS ${PROJECT_NAME}
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME} fullscreen
+    DEPENDS ${PROJECT_NAME}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
-#make nogui
 add_custom_target(nogui
-	COMMAND ${PROJECT_NAME} nogui
-	DEPENDS ${PROJECT_NAME}
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME} nogui
+    DEPENDS ${PROJECT_NAME}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
-#make debug
-add_custom_target(debug
-	COMMAND gdb ./build/${PROJECT_NAME}
-	DEPENDS ${PROJECT_NAME}
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
+# Linux-specific targets
+if(UNIX)
+    add_custom_target(debug
+        COMMAND gdb ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}
+        DEPENDS ${PROJECT_NAME}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
 
-#make mem
-	add_custom_target(mem
-	COMMAND valgrind --leak-check=full --track-origins=yes ./build/${PROJECT_NAME}
-	DEPENDS ${PROJECT_NAME}
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
+    add_custom_target(mem
+        COMMAND valgrind --leak-check=full --track-origins=yes ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}
+        DEPENDS ${PROJECT_NAME}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
 
-#make profile
-	add_custom_target(profile
-	COMMAND valgrind --tool=callgrind ./build/${PROJECT_NAME}
-	DEPENDS ${PROJECT_NAME}
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
+    add_custom_target(profile
+        COMMAND valgrind --tool=callgrind ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}
+        DEPENDS ${PROJECT_NAME}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+endif()
 
-#make uninstall
-	add_custom_target(uninstall
-	COMMAND xargs rm < ./build/install_manifest.txt
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+# Uninstall
+add_custom_target(uninstall
+    COMMAND xargs rm < ${CMAKE_BINARY_DIR}/install_manifest.txt
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )

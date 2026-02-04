@@ -67,7 +67,7 @@ private:
 	void clean3D();
 
 public:
-	static const float MAX_FRAMES_PER_SECOND = 30.0f;
+	static const float MAX_FRAMES_PER_SECOND;
 
 	static const int X_AXIS = 0;
 	static const int Y_AXIS = 1;

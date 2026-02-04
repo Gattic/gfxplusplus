@@ -22,6 +22,7 @@
 #include "../GItems/RUComponent.h"
 #include "../GUI/Text/GFont.h"
 //#include "../GUI/Text/RULabel.h"
+const float MAX_FRAMES_PER_SECOND = 30.0f;
 
 gfxpp::gfxpp()
 {

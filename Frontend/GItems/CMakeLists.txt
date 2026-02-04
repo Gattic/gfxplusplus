@@ -1,34 +1,25 @@
-add_subdirectory("Mini")
+add_subdirectory(Mini)
 
-#opengl lib
-set(OpenGL_GL_PREFERENCE "GLVND")
-find_package(OpenGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIRS})
-
+# GFXItem (widgets/containers)
 set(GFXItem_src_files
-	RUColors.cpp
-	RUColors.h
-	GeneralListener.h
-	GItem.cpp
-	GItem.h
-	RUComponent.cpp
-	RUComponent.h
-	GLayout.cpp
-	GLayout.h
-	GPanel.cpp
-	GPanel.h
-	RUItemArea.cpp
-	RUItemArea.h
+  RUColors.cpp RUColors.h
+  GeneralListener.h
+  GItem.cpp GItem.h
+  RUComponent.cpp RUComponent.h
+  GLayout.cpp GLayout.h
+  GPanel.cpp GPanel.h
+  RUItemArea.cpp RUItemArea.h
 )
 add_library(GFXItem ${GFXItem_src_files})
+target_link_libraries(GFXItem PUBLIC shmea::shmea MiniC SDL2::SDL2 OpenGL::GL)
 
-target_link_libraries(GFXItem MiniC ${OPENGL_LIBRARIES})
-
-install(TARGETS GFXItem EXPORT gfxplusplusConfig
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
-
-export(TARGETS GFXItem FILE gfxplusplusConfig.cmake)
+target_include_directories(GFXItem PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+install(TARGETS GFXItem EXPORT gfxppTargets
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
