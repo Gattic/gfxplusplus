@@ -1,4 +1,4 @@
-// Copyright 2020 Robert Carneiro, Derek Meer, Matthew Tabak, Eric Lujan
+// Copyright 2026 Robert Carneiro, Derek Meer, Matthew Tabak, Eric Lujan
 //
 // associated documentation files (the "Software"), to deal in the Software without restriction,
 // including without limitation the rights to use, copy, modify, merge, publish, distribute,
