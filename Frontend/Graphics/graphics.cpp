@@ -1181,6 +1181,21 @@ void gfxpp::display()
 		}
 		#endif
 
+		// If a quit was requested (window close, ESC, etc.), stop immediately.
+		// Some platforms/drivers can hang if we continue to render/present after the
+		// window has begun tearing down.
+		#ifdef GFX_HAVE_OPENGL
+		if (renderBackend == RENDER_BACKEND_OPENGL && glfwWindow)
+		{
+			// Backup: in case a close callback is not installed/triggered, honor the
+			// native close request directly.
+			if (glfwWindowShouldClose(glfwWindow))
+				running = false;
+		}
+		#endif
+		if (!running)
+			break;
+
 		//=================Render=================
 		const int64_t renderStartUs = uiProfile ? gfxpp_now_us(this) : 0;
 		if (this->draw)
