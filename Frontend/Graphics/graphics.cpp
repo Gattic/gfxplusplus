@@ -89,11 +89,17 @@ void glfw_window_close_cb(GLFWwindow* w)
 {
 	gfxpp* self = reinterpret_cast<gfxpp*>(glfwGetWindowUserPointer(w));
 	if (!self) return;
-	#ifdef GFX_HAVE_SDL2
-	GfxEvent e; memset(&e, 0, sizeof(GfxEvent)); e.type = SDL_QUIT; self->glfwEventQueue.push_back(e);
-	#else
+	// Always stop the render loop immediately on close.
+	// Some host programs may not pump our synthetic event queue, so relying on
+	// an enqueued SDL_QUIT alone can cause a "hang on close" (run() never returns).
 	self->running = false;
-	#endif
+#ifdef GFX_HAVE_SDL2
+	// Still enqueue SDL_QUIT so listener callbacks get consistent semantics.
+	GfxEvent e;
+	memset(&e, 0, sizeof(GfxEvent));
+	e.type = SDL_QUIT;
+	self->glfwEventQueue.push_back(e);
+#endif
 }
 
 void glfw_key_cb(GLFWwindow* w, int key, int scancode, int action, int mods)
@@ -266,25 +272,73 @@ static gfxpp::RenderBackend gRenderBackend =
 // wl_display_disconnect(). We therefore skip glfwTerminate() when GLFW is using
 // the Wayland platform; the OS will reclaim resources at process exit.
 static int g_glfw_refcount = 0;
+static bool g_glfw_inited = false;
+
+static bool gfxpp_env_true(const char* v)
+{
+	return (v && v[0] != '\0' && v[0] != '0');
+}
+
+static bool gfxpp_is_wayland_session()
+{
+	// Best-effort detection for older GLFW (< 3.4) where glfwGetPlatform() is unavailable.
+	// If this returns true, we avoid glfwTerminate() to sidestep known Wayland/NVIDIA teardown issues.
+	const char* wd = getenv("WAYLAND_DISPLAY");
+	if (wd && wd[0] != '\0')
+		return true;
+	const char* st = getenv("XDG_SESSION_TYPE");
+	if (st && strcmp(st, "wayland") == 0)
+		return true;
+	return false;
+}
+
+static bool gfxpp_should_terminate_glfw()
+{
+	// Allow override:
+	// - GFXPP_GLFW_NO_TERMINATE=1 forces skipping termination
+	// - GFXPP_GLFW_FORCE_TERMINATE=1 forces termination (useful for leak checks)
+	if (gfxpp_env_true(getenv("GFXPP_GLFW_NO_TERMINATE")))
+		return false;
+	if (gfxpp_env_true(getenv("GFXPP_GLFW_FORCE_TERMINATE")))
+		return true;
+
+#if (GLFW_VERSION_MAJOR > 3) || (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 4)
+	if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND)
+		return false;
+#endif
+	if (gfxpp_is_wayland_session())
+		return false;
+	return true;
+}
 
 static bool gfxpp_glfw_acquire()
 {
 	if (g_glfw_refcount == 0)
 	{
 #if (GLFW_VERSION_MAJOR > 3) || (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 4)
-		// Allow forcing platform at runtime (useful as a workaround for driver/Wayland issues).
-		// Values: "x11" or "wayland"
-		const char* p = getenv("GFXPP_GLFW_PLATFORM");
-		if (p && p[0] != '\0')
+		// If we previously skipped glfwTerminate() (Wayland teardown workaround),
+		// GLFW is still initialized; don't attempt to re-init.
+		if (!g_glfw_inited)
 		{
-			if (strcmp(p, "x11") == 0)
-				glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
-			else if (strcmp(p, "wayland") == 0)
-				glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
+			// Allow forcing platform at runtime (useful as a workaround for driver/Wayland issues).
+			// Values: "x11" or "wayland"
+			const char* p = getenv("GFXPP_GLFW_PLATFORM");
+			if (p && p[0] != '\0')
+			{
+				if (strcmp(p, "x11") == 0)
+					glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+				else if (strcmp(p, "wayland") == 0)
+					glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
+			}
 		}
 #endif
-		if (!glfwInit())
-			return false;
+
+		if (!g_glfw_inited)
+		{
+			if (!glfwInit())
+				return false;
+			g_glfw_inited = true;
+		}
 	}
 	++g_glfw_refcount;
 	return true;
@@ -299,12 +353,12 @@ static void gfxpp_glfw_release()
 	if (g_glfw_refcount != 0)
 		return;
 
-#if (GLFW_VERSION_MAJOR > 3) || (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 4)
-	// Workaround: avoid a known crash path in wl_display_disconnect on some setups.
-	if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND)
+	// Workaround: avoid known Wayland/NVIDIA teardown hangs/crashes.
+	// If we skip termination, keep g_glfw_inited=true so we won't re-init later.
+	if (!gfxpp_should_terminate_glfw())
 		return;
-#endif
 	glfwTerminate();
+	g_glfw_inited = false;
 }
 #endif
 
