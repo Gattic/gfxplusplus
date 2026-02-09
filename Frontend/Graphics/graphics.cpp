@@ -257,6 +257,57 @@ static gfxpp::RenderBackend gRenderBackend =
 	gfxpp::RENDER_BACKEND_SDL2;
 #endif
 
+#ifdef GFX_HAVE_OPENGL
+// GLFW is a process-global singleton. gfxpp may be constructed multiple times in
+// the same process, so keep a tiny refcount to avoid double-terminating GLFW.
+//
+// Additionally, on some Wayland stacks (notably in combination with NVIDIA),
+// calling glfwTerminate() can crash inside libwayland-client during
+// wl_display_disconnect(). We therefore skip glfwTerminate() when GLFW is using
+// the Wayland platform; the OS will reclaim resources at process exit.
+static int g_glfw_refcount = 0;
+
+static bool gfxpp_glfw_acquire()
+{
+	if (g_glfw_refcount == 0)
+	{
+#if (GLFW_VERSION_MAJOR > 3) || (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 4)
+		// Allow forcing platform at runtime (useful as a workaround for driver/Wayland issues).
+		// Values: "x11" or "wayland"
+		const char* p = getenv("GFXPP_GLFW_PLATFORM");
+		if (p && p[0] != '\0')
+		{
+			if (strcmp(p, "x11") == 0)
+				glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+			else if (strcmp(p, "wayland") == 0)
+				glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
+		}
+#endif
+		if (!glfwInit())
+			return false;
+	}
+	++g_glfw_refcount;
+	return true;
+}
+
+static void gfxpp_glfw_release()
+{
+	if (g_glfw_refcount <= 0)
+		return;
+
+	--g_glfw_refcount;
+	if (g_glfw_refcount != 0)
+		return;
+
+#if (GLFW_VERSION_MAJOR > 3) || (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 4)
+	// Workaround: avoid a known crash path in wl_display_disconnect on some setups.
+	if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND)
+		return;
+#endif
+	glfwTerminate();
+}
+#endif
+
 // Define non-integral static class member for broad standards compatibility
 // 60fps improves perceived input responsiveness (hover, caret, drag).
 const float gfxpp::MAX_FRAMES_PER_SECOND = 60.0f;
@@ -512,7 +563,7 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode
 		// GLFW path: initialize and create OpenGL window/context
 		if (!glfwInitialized)
 		{
-			if (!glfwInit())
+			if (!gfxpp_glfw_acquire())
 			{
 				printf("[GFX] GLFW init failed\n");
 				finish();
@@ -1374,12 +1425,23 @@ void gfxpp::finish()
 		// Destroy only if we own the GLFW lifecycle (created internally)
 		if (glfwWindow && glfwInitialized)
 		{
+			// Detach callbacks/user pointer to avoid any late callback using freed gfxpp.
+			glfwSetWindowUserPointer(glfwWindow, NULL);
+			glfwSetWindowCloseCallback(glfwWindow, NULL);
+			glfwSetKeyCallback(glfwWindow, NULL);
+			glfwSetMouseButtonCallback(glfwWindow, NULL);
+			glfwSetCursorPosCallback(glfwWindow, NULL);
+			glfwSetScrollCallback(glfwWindow, NULL);
+			glfwSetFramebufferSizeCallback(glfwWindow, NULL);
+
+			// Clear current context before destroy to avoid dangling current context.
+			glfwMakeContextCurrent(NULL);
 			glfwDestroyWindow(glfwWindow);
 			glfwWindow = NULL;
 		}
 		if (glfwInitialized)
 		{
-			glfwTerminate();
+			gfxpp_glfw_release();
 			glfwInitialized = false;
 		}
 		#ifdef GFX_HAVE_SDL2
