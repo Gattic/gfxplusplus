@@ -49,11 +49,11 @@ void RULabel::updateBackground(gfxpp* cGfx)
 		{
 			setWidth(newW);
 			// Request a full panel redraw to prevent stale overlaps when bounds change
-			if (cGfx && cGfx->focusedPanel)
+			if (cGfx && cGfx->getFocusedPanel())
 			{
 				std::pair<int,int> zero(0,0);
-				cGfx->focusedPanel->calculateSubItemPositions(zero);
-				cGfx->focusedPanel->requireDrawUpdate();
+				cGfx->getFocusedPanel()->calculateSubItemPositions(zero);
+				cGfx->getFocusedPanel()->requireDrawUpdate();
 			}
 			requireDrawUpdate();
 		}
@@ -64,11 +64,11 @@ void RULabel::updateBackground(gfxpp* cGfx)
 		if (newH > 0 && newH != getHeight())
 		{
 			setHeight(newH);
-			if (cGfx && cGfx->focusedPanel)
+			if (cGfx && cGfx->getFocusedPanel())
 			{
 				std::pair<int,int> zero(0,0);
-				cGfx->focusedPanel->calculateSubItemPositions(zero);
-				cGfx->focusedPanel->requireDrawUpdate();
+				cGfx->getFocusedPanel()->calculateSubItemPositions(zero);
+				cGfx->getFocusedPanel()->requireDrawUpdate();
 			}
 			requireDrawUpdate();
 		}

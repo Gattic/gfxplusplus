@@ -27,7 +27,7 @@
 GRelativeLayout::GRelativeLayout(shmea::GString layoutName)
 {
 	name = layoutName;
-	layoutType = 0; // 0 = Relative; 1 = Linear
+	layoutType = LAYOUT_RELATIVE;
 	computedContentWidth = 0;
 	computedContentHeight = 0;
 }
@@ -251,12 +251,6 @@ void GRelativeLayout::calculateSubItemPositions(std::pair<int, int> parentOffset
 		targetX += cItem->getMarginX();
 		targetY += cItem->getMarginY();
 
-		{
-			int align = TOP_LEFT;
-			std::map<GItem*, int>::const_iterator it = itemAlignment.find(cItem);
-			if (it != itemAlignment.end()) align = it->second;
-		}
-
 		// Commit absolute position
 		cItem->setX(targetX);
 		cItem->setY(targetY);
@@ -282,24 +276,7 @@ void GRelativeLayout::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStat
 	if (!visible)
 		return;
 
-	clickedSubItems.clear();
-	for (unsigned int i = 0; i < subitems.size(); ++i)
-	{
-		GItem* cItem = subitems[i];
-		if (cItem == NULL)
-			continue;
-
-		EventTracker* subEventsStatus =
-			cItem->processEvents(cGfx, parentPanel, event, mouseX, mouseY);
-		if (subEventsStatus->hovered)
-			eventsStatus->hovered = true;
-
-		if (subEventsStatus->downClicked)
-		{
-			eventsStatus->downClicked = true;
-			clickedSubItems.insert(std::pair<int, GItem*>(subitems[i]->getID(), subitems[i]));
-		}
-	}
+	dispatchSubItemEvents(cGfx, eventsStatus, parentPanel, event, mouseX, mouseY);
 }
 
 void GRelativeLayout::updateBackground(gfxpp* cGfx)
@@ -369,4 +346,10 @@ void GRelativeLayout::setItemAlignment(GItem* item, Alignment alignment)
 	std::pair<int, int> offset(0, 0);
 	calculateSubItemPositions(offset);
 	drawUpdate = true;
+}
+
+void GRelativeLayout::clearItems(unsigned int numToSave)
+{
+	itemAlignment.clear();
+	GItem::clearItems(numToSave);
 }

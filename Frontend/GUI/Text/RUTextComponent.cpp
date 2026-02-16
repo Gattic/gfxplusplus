@@ -74,11 +74,11 @@ void RUTextComponent::updateBackgroundHelper(gfxpp* cGfx)
         if (newH > 0 && newH != getHeight())
         {
             setHeight(newH);
-            if (cGfx && cGfx->focusedPanel)
+            if (cGfx && cGfx->getFocusedPanel())
             {
                 std::pair<int,int> zero(0,0);
-                cGfx->focusedPanel->calculateSubItemPositions(zero);
-                cGfx->focusedPanel->requireDrawUpdate();
+                cGfx->getFocusedPanel()->calculateSubItemPositions(zero);
+                cGfx->getFocusedPanel()->requireDrawUpdate();
             }
             requireDrawUpdate();
         }
@@ -98,11 +98,11 @@ void RUTextComponent::updateBackgroundHelper(gfxpp* cGfx)
         if (newW > 0 && newW != getWidth())
         {
             setWidth(newW);
-            if (cGfx && cGfx->focusedPanel)
+            if (cGfx && cGfx->getFocusedPanel())
             {
                 std::pair<int,int> zero(0,0);
-                cGfx->focusedPanel->calculateSubItemPositions(zero);
-                cGfx->focusedPanel->requireDrawUpdate();
+                cGfx->getFocusedPanel()->calculateSubItemPositions(zero);
+                cGfx->getFocusedPanel()->requireDrawUpdate();
             }
             requireDrawUpdate();
         }
@@ -231,9 +231,7 @@ int RUTextComponent::measureFullTextWidth(gfxpp* cGfx) const
 
 	GFont* cFont = NULL;
 	int fontColor = FONT_COLOR;
-	std::map<int, GFont*>::const_iterator it = cGfx->graphicsFonts.find(fontColor);
-	if (it != cGfx->graphicsFonts.end())
-		cFont = it->second;
+	cFont = cGfx->getFontManager()->getFontByColor(fontColor);
 	if (!cFont)
 		return 0;
 
@@ -255,7 +253,7 @@ int RUTextComponent::measureFullTextWidth(gfxpp* cGfx) const
 		const char* fontPathC = cFont->getFontPath().c_str();
 		std::string fontPathStr = fontPathC ? std::string(fontPathC) : std::string();
 		int glPixelHeight = (fontPixelHeight > 0) ? fontPixelHeight : (cFont->getFontSize() > 0 ? cFont->getFontSize() : (getHeight() > 0 ? getHeight() : 16));
-		GLTextRenderer* glText = cGfx->getGLText(fontPathStr, glPixelHeight);
+		GLTextRenderer* glText = cGfx->getFontManager()->getGLText(fontPathStr, glPixelHeight);
 		if (!glText)
 			return 0;
 		const std::string& textToMeasure = passwordField ? maskedText : fullText;
@@ -292,11 +290,7 @@ int RUTextComponent::measureFontPixelHeight(gfxpp* cGfx) const
     if (!cGfx)
         return 0;
 
-    GFont* cFont = NULL;
-    int fontColor = FONT_COLOR;
-    std::map<int, GFont*>::const_iterator it = cGfx->graphicsFonts.find(fontColor);
-    if (it != cGfx->graphicsFonts.end())
-        cFont = it->second;
+    GFont* cFont = cGfx->getFontManager()->getFontByColor(FONT_COLOR);
     if (!cFont)
         return 0;
 
@@ -461,14 +455,7 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 
 	bool didSetTarget = false;
 
-	GFont* cFont = NULL;
-	int fontColor = FONT_COLOR;
-	std::map<int, GFont*>::iterator it = cGfx->graphicsFonts.find(fontColor);
-	if (it != cGfx->graphicsFonts.end())
-	{
-		cFont = it->second;
-	}
-
+	GFont* cFont = cGfx->getFontManager()->getFontByColor(FONT_COLOR);
 	if (!cFont)
 		return;
 
@@ -501,7 +488,7 @@ void RUTextComponent::drawText(gfxpp* cGfx)
 		const char* fontPathC = cFont->getFontPath().c_str();
 		std::string fontPathStr = fontPathC ? std::string(fontPathC) : std::string();
 		int glPixelHeight = (fontPixelHeight > 0) ? fontPixelHeight : (cFont->getFontSize() > 0 ? cFont->getFontSize() : getHeight());
-		GLTextRenderer* glText = cGfx->getGLText(fontPathStr, glPixelHeight);
+		GLTextRenderer* glText = cGfx->getFontManager()->getGLText(fontPathStr, glPixelHeight);
 		if (glText)
 		{
 			// Compute visible substring based on cursor/index using glyph advances

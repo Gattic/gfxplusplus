@@ -53,7 +53,7 @@ void RUKeyUp::onKeyUpHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* cPa
 		return;
 
 	GItem* cItem = dynamic_cast<GItem*>(this);
-	if (!(cGfx->focusedItem == cItem))
+	if (!(cGfx->getFocusedItem() == cItem))
 		return;
 
 	// Render the GUI object

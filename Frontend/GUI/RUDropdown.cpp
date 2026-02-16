@@ -58,6 +58,9 @@ RUDropdown::~RUDropdown()
 	open = false;
 	arrowLocation = "";
 
+	// Clear subitems first to avoid dangling pointers during manual deletion
+	subitems.clear();
+
 	// delete the selection label
 	if (selectedLabel)
 		delete selectedLabel;
@@ -86,8 +89,9 @@ unsigned int RUDropdown::getOptionsShown() const
 
 unsigned int RUDropdown::getSelectedIndex()
 {
-	if (lbItems->size() > 0)
-		selectedIndex = lbItems->getItemsSelected()[0];
+	const std::vector<unsigned int> sel = lbItems->getItemsSelected();
+	if (lbItems->size() > 0 && !sel.empty())
+		selectedIndex = sel[0];
 	else
 		selectedIndex = -1;
 
@@ -258,28 +262,6 @@ void RUDropdown::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY
 	}
 	prevSelectedIndex = getSelectedIndex();
 
-	/*// open/close the listbox
-	if ((eventY <= getHeight()) && (eventX >= arrow->getMarginX()))
-	{
-		// arrow click
-		toggleOpen();
-	}
-	else
-	{
-		//In the listbox
-		if(eventY > getHeight())
-		{
-			// not scrollbar click
-			if(!(lbItems->scrollbar->isVisible() && (eventX >= lbItems->scrollbar->getMarginX())))
-			{
-				if (getSelectedIndex() >= lbItems->items.size())
-					return;
-
-				selectedLabel->setText(lbItems->items[getSelectedIndex()]->getText());
-				toggleOpen();
-			}
-		}
-	}*/
 }
 
 void RUDropdown::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY, int scrollType)
@@ -292,4 +274,9 @@ void RUDropdown::onMouseWheel(gfxpp* cGfx, GPanel* cPanel, int eventX, int event
 shmea::GString RUDropdown::getType() const
 {
 	return "RUDropdown";
+}
+
+bool RUDropdown::isDropdown() const
+{
+	return true;
 }

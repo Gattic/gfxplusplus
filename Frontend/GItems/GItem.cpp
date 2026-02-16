@@ -18,6 +18,7 @@
 #include "GItem.h"
 #include "../GFXUtilities/EventTracker.h"
 #include "../Graphics/graphics.h"
+#include "../Graphics/GfxRenderer.h"
 #include "GPanel.h"
 #include "RUColors.h"
 
@@ -28,21 +29,7 @@ GItem::GItem()
 	background = NULL;
 	zindex = -2;
 
-	eventsStatus = new EventTracker();
-
-	// Ready
-	visible = true;
-	drawUpdate = true;
-}
-
-GItem::GItem(int newX, int newY, int newWidth, int newHeight)
-{
-	id = 0;
-	name = "";
-	background = NULL;
-	zindex = -2;
-
-	eventsStatus = new EventTracker();
+	eventsStatus = shmea::GPointer<EventTracker>(new EventTracker());
 
 	// Ready
 	visible = true;
@@ -51,8 +38,6 @@ GItem::GItem(int newX, int newY, int newWidth, int newHeight)
 
 GItem::~GItem()
 {
-	eventsStatus = NULL;
-
 	if(background)
 		GFX_DestroyTexture(background);
 	background = NULL;
@@ -103,7 +88,7 @@ GfxTexture* GItem::getBackground()
 	return background;
 }
 
-std::vector<GItem*> GItem::getItems() const
+const std::vector<GItem*>& GItem::getItems() const
 {
 	return subitems;
 }
@@ -155,7 +140,7 @@ void GItem::addSubItem(GItem* newItem, unsigned int newZIndex)
 		return;
 
 	// Back of screen or front of screen (opposite of the order)
-	setZIndex(newZIndex);
+	newItem->setZIndex(newZIndex);
 	if (newZIndex == Z_BACK)
 	{
 		// Add to back of subitems
@@ -202,8 +187,9 @@ void GItem::removeItem(gfxpp* cGfx, const shmea::GString& itemName)
 	{
 		if (subitems[i]->getName() == itemName)
 		{
+			int itemID = subitems[i]->getID();       // Save ID before erase
 			subitems.erase(subitems.begin() + i);    // Remove item from this layout
-			cGfx->removeItem(subitems[i]->getID()); // Remove from master vector of GUI items
+			cGfx->removeItem(itemID);                // Use saved ID
 			break;
 		}
 	}
@@ -246,7 +232,7 @@ EventTracker* GItem::processEvents(gfxpp* cGfx, GPanel* parentPanel, GfxEvent ev
 
 	// Dont want to toggle dropdowns all the time
 	bool dropdownToggle = false;
-	if (isMouseEvent && (getType() == "RUDropdown"))
+	if (isMouseEvent && isDropdown())
 		dropdownToggle = (clickedSubItems.size() != 0);
 
 	//
@@ -302,4 +288,86 @@ EventTracker* GItem::processEvents(gfxpp* cGfx, GPanel* parentPanel, GfxEvent ev
 	}
 
 	return eventsStatus;
+}
+
+bool GItem::isDropdown() const
+{
+	return false;
+}
+
+bool GItem::isTextInput() const
+{
+	return false;
+}
+
+bool GItem::wantsAutoSize() const
+{
+	return false;
+}
+
+void GItem::dispatchSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPanel* parentPanel,
+						  GfxEvent event, int mouseX, int mouseY)
+{
+	clickedSubItems.clear();
+	for (unsigned int i = 0; i < subitems.size(); ++i)
+	{
+		GItem* cItem = subitems[i];
+		if (cItem == NULL)
+			continue;
+
+		EventTracker* subEventsStatus =
+			cItem->processEvents(cGfx, parentPanel, event, mouseX, mouseY);
+		if (subEventsStatus->hovered)
+			eventsStatus->hovered = true;
+
+		if (subEventsStatus->downClicked)
+		{
+			eventsStatus->downClicked = true;
+			clickedSubItems.insert(std::pair<int, GItem*>(subitems[i]->getID(), subitems[i]));
+		}
+	}
+}
+
+bool GItem::rebuildTexture(gfxpp* cGfx)
+{
+	if (!getDrawUpdateRequired())
+		return (background != NULL);
+
+	drawUpdate = false;
+
+	if (background)
+		GFX_DestroyTexture(background);
+	background = NULL;
+
+	background = cGfx->getDraw()->createRenderTargetTexture(width, height);
+	if (background)
+	{
+		cGfx->getDraw()->setTargetTexture(background);
+		cGfx->getDraw()->setTextureBlendMode(background, GFX_BLENDMODE_BLEND);
+		cGfx->getDraw()->setDrawColor(0, 0, 0, 0);
+		cGfx->getDraw()->clear();
+
+		updateBGBackground(cGfx);
+		updateBackground(cGfx);
+		updateBorderBackground(cGfx);
+
+		cGfx->getDraw()->resetTarget();
+		return true;
+	}
+
+	return false;
+}
+
+bool GItem::blitTexture(gfxpp* cGfx)
+{
+	GfxRect dRect = getLocationRect();
+	dRect.x = getX();
+	dRect.y = getY();
+	GfxTexture* geBackground = getBackground();
+	if (geBackground && cGfx->getDraw())
+	{
+		cGfx->getDraw()->copyTexture(geBackground, NULL, &dRect);
+		return true;
+	}
+	return false;
 }

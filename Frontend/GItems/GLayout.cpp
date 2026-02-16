@@ -25,6 +25,7 @@
 
 GLayout::GLayout()
 {
+	layoutType = LAYOUT_RELATIVE;
 	bgEnabled = false;
 	borderEnabled = false;
 }
@@ -35,9 +36,14 @@ GLayout::~GLayout()
 	borderEnabled = false;
 }
 
-int GLayout::getLayoutType() const
+GLayout::LayoutType GLayout::getLayoutType() const
 {
 	return layoutType;
+}
+
+bool GLayout::wantsAutoSize() const
+{
+	return true;
 }
 
 void GLayout::hover(gfxpp* cGfx)

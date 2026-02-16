@@ -53,10 +53,10 @@ void RUKeyDown::onKeyDownHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel*
 		return;
 
 	GItem* cItem = dynamic_cast<GItem*>(this);
-	if (!(cGfx->focusedItem == cItem))
+	if (!(cGfx->getFocusedItem() == cItem))
 		return;
 
-	if (!((cItem->getType() == "RUTextbox") && (!cGfx->CTRLPressed) && (!cGfx->ALTPressed)))
+	if (!(cItem->isTextInput() && (!cGfx->isCTRLPressed()) && (!cGfx->isALTPressed())))
 		return;
 
 	// Render the GUI object
@@ -69,12 +69,12 @@ void RUKeyDown::onKeyDownHelper(gfxpp* cGfx, EventTracker* eventsStatus, GPanel*
 	KeyDownListener.call(cItem->getName());
 
 	// Special textbox event
-	if ((cGfx->focusedItem->getType() == "RUTextbox") && (!cGfx->CTRLPressed) &&
-		(!cGfx->ALTPressed))
+	if (cGfx->getFocusedItem()->isTextInput() && (!cGfx->isCTRLPressed()) &&
+		(!cGfx->isALTPressed()))
 	{
-		((RUTextComponent*)(cGfx->focusedItem))
-			->onKeyHelper(cGfx, cGfx->focusedPanel, keyPressed, keyModPressed);
-		eventsStatus->keyReleased = true;
+		((RUTextComponent*)(cGfx->getFocusedItem()))
+			->onKeyHelper(cGfx, cGfx->getFocusedPanel(), keyPressed, keyModPressed);
+		eventsStatus->keyPressed = true;
 	}
 
 	eventsStatus->keyPressed = true;

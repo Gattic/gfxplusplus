@@ -496,7 +496,7 @@ void RUBackgroundComponent::drawVerticalGradient(GfxRenderer* renderer, GfxRect 
 		if (xStart > xEnd)
 			continue;
 
-		SDL_Rect lineRect;
+		GfxRect lineRect;
 		lineRect.x = xStart;
 		lineRect.y = y;
 		lineRect.w = (xEnd - xStart + 1);

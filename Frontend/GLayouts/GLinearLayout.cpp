@@ -25,7 +25,7 @@
 GLinearLayout::GLinearLayout(shmea::GString layoutName, int newOrientation)
 {
 	name = layoutName;
-	layoutType = 1; // 0 = Relative; 1 = Linear
+	layoutType = LAYOUT_LINEAR;
 	orientation = newOrientation;
 	horizontalAlign = ALIGN_LEFT;
 }
@@ -150,25 +150,7 @@ void GLinearLayout::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus
 	if (!visible)
 		return;
 
-	// Linear layout coordinates
-	for (unsigned int i = 0; i < subitems.size(); ++i)
-	{
-		GItem* cItem = subitems[i];
-		if (cItem == NULL)
-			continue;
-
-		//
-		EventTracker* subEventsStatus =
-			cItem->processEvents(cGfx, parentPanel, event, mouseX, mouseY);
-		if (subEventsStatus->hovered)
-			eventsStatus->hovered = true;
-
-		if (subEventsStatus->downClicked)
-		{
-			eventsStatus->downClicked = true;
-			clickedSubItems.insert(std::pair<int, GItem*>(subitems[i]->getID(), subitems[i]));
-		}
-	}
+	dispatchSubItemEvents(cGfx, eventsStatus, parentPanel, event, mouseX, mouseY);
 }
 
 void GLinearLayout::updateBackgroundHelper(gfxpp* cGfx)

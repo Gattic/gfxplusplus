@@ -23,6 +23,10 @@ set(GFX_src_files
 	graphics.h
 	GfxRenderer.cpp
 	GfxRenderer.h
+	InputState.cpp
+	InputState.h
+	FontManager.cpp
+	FontManager.h
 )
 
 if(ENABLE_SDL2)
@@ -33,7 +37,9 @@ endif()
 if(ENABLE_OPENGL)
 	list(APPEND GFX_src_files
 		GfxRendererGLFW.h
-		GfxRendererGLFW.cpp)
+		GfxRendererGLFW.cpp
+		GlfwEventBridge.h
+		GlfwEventBridge.cpp)
 	# When SDL2 is disabled, provide OpenGL texture wrappers (FBO render targets, etc.)
 	if(NOT ENABLE_SDL2)
 		list(APPEND GFX_src_files

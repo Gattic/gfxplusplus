@@ -82,7 +82,8 @@ void DrawNeuralNet::setActivation(shmea::GList activations)
     {
 	if(activations[i].getType() == shmea::GType::FLOAT_TYPE)
 	{
-	    layerInfoList[layer]->setActivation(neuron, activations.getFloat(i));
+	    if (layer < layers && neuron < layerInfoList[layer]->getNeurons())
+		layerInfoList[layer]->setActivation(neuron, activations.getFloat(i));
 	    ++neuron;
 	} else if (activations[i].getType() == shmea::GType::STRING_TYPE)
 	{
@@ -107,7 +108,8 @@ void DrawNeuralNet::setWeights(shmea::GList weights)
 	{
 	    if(weights.getString(i) == ",")
 	    {
-		layerInfoList[layer]->setWeights(neuron, newWeights);
+		if (layer < layers && neuron < layerInfoList[layer]->getNeurons())
+		    layerInfoList[layer]->setWeights(neuron, newWeights);
 		++neuron;
 		newWeights.clear();
 	    } else if (weights.getString(i) == ";")
@@ -117,7 +119,7 @@ void DrawNeuralNet::setWeights(shmea::GList weights)
 	    } else if (weights.getString(i) == "B") {
             ++i;
             for (int j = 1; j < layer; ++j, ++i) {
-                if (j < layerInfoList.size() && i < weights.size()) {
+                if (j < (int)layerInfoList.size() && i < weights.size()) {
                     layerInfoList[j]->setBiasWeight(weights.getFloat(i));
                 }
             }
@@ -125,7 +127,7 @@ void DrawNeuralNet::setWeights(shmea::GList weights)
         }
 	}
     }
-	
+
 }
 
 int DrawNeuralNet::getLayersCount()

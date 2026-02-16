@@ -26,6 +26,7 @@ RUMouseMotion::RUMouseMotion()
 	unhovered = false;
 	hoverState = false;
 	cursor = GFX_SYSTEM_CURSOR_ARROW;
+	cursorPtr = NULL;
 	customCursor = false;
 }
 
@@ -36,6 +37,11 @@ RUMouseMotion::~RUMouseMotion()
 	unhovered = false;
 	hoverState = false;
 	cursor = GFX_SYSTEM_CURSOR_ARROW;
+	if (cursorPtr)
+	{
+		GFX_FreeCursor(cursorPtr);
+		cursorPtr = NULL;
+	}
 	customCursor = false;
 }
 
@@ -48,6 +54,8 @@ void RUMouseMotion::setCursor(GfxSystemCursor newCursor)
 {
 	cursor = newCursor;
 	customCursor = true;
+	if (cursorPtr)
+		GFX_FreeCursor(cursorPtr);
 	cursorPtr = GFX_CreateSystemCursor(cursor);
 }
 

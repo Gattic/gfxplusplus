@@ -41,6 +41,9 @@ RUListbox::~RUListbox()
 	optionsShown = 0;
 	itemsSelected.clear();
 
+	// Clear subitems first to avoid dangling pointers during manual deletion
+	subitems.clear();
+
 	// delete the scrollbar
 	if (scrollbar)
 		delete scrollbar;
@@ -94,15 +97,10 @@ void RUListbox::setWidth(int newWidth)
 
 	// Some basic scrollbar width behavior
 	if (getWidth() <= DEFAULT_SCROLLBAR_WIDTH * 2)
-	{
 		scrollbar->setWidth(getWidth() / 15);
-		scrollbar->setMarginX(getWidth() - scrollbar->getWidth());
-	}
 	else
-	{
 		scrollbar->setWidth(DEFAULT_SCROLLBAR_WIDTH);
-		scrollbar->setMarginX(getWidth() - scrollbar->getWidth());
-	}
+	scrollbar->setMarginX(getWidth() - scrollbar->getWidth());
 
 	drawUpdate = true;
 }
@@ -113,29 +111,8 @@ void RUListbox::setHeight(int newHeight)
 		return;
 
 	height = newHeight;
-
-	// update the labels
-	for (unsigned int i = 0; i < items.size(); ++i)
-	{
-		if (optionsShown > 0)
-		{
-			int labelHeight = getHeight() / optionsShown;
-			items[i]->setMarginY(i * labelHeight);
-			items[i]->setHeight(labelHeight);
-			// items[i]->setFontSize(labelHeight / 2);
-		}
-		else
-		{
-			items[i]->setMarginY(0);
-			items[i]->setHeight(0);
-			// items[i]->setFontSize(0);
-		}
-	}
-
-	// update the scrollbar
 	scrollbar->setHeight(getHeight());
-
-	drawUpdate = true;
+	updateLabels();
 }
 
 void RUListbox::setMultiSelect(bool newMultiSelectEnabled)
@@ -155,55 +132,24 @@ void RUListbox::setOptionsShown(unsigned int newOptionsShown)
 
 void RUListbox::addOption(shmea::GString newItemText)
 {
-	int newLabelWidth = getWidth();
-	if (items.size() + 1 > optionsShown)
-	{
-		//
-		newLabelWidth -= scrollbar->getWidth();
-		for (unsigned int i = 0; i < items.size(); ++i)
-			items[i]->setWidth(newLabelWidth);
-	}
-
-	// create the new item label
 	RULabel* newLabel = new RULabel(newItemText);
 	newLabel->setAutoWidthToText(false);
-	newLabel->setMarginX(0);
-	newLabel->setWidth(newLabelWidth);
 	newLabel->setCursor(GFX_SYSTEM_CURSOR_HAND);
 	newLabel->setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 	newLabel->toggleBG(true);
 	newLabel->toggleBorder(true);
-	if (optionsShown > 0)
-	{
-		unsigned int cIndex = scrollbar->getValue();
-		int labelHeight = getHeight() / optionsShown;
-		newLabel->setMarginY(items.size() * labelHeight);
-		newLabel->setHeight(labelHeight);
-		// newLabel->setFontSize(labelHeight / 2);
-		newLabel->setVisible((items.size() >= cIndex) && (items.size() - cIndex < optionsShown));
-	}
-	else
-	{
-		newLabel->setMarginY(0);
-		newLabel->setHeight(0);
-		// newLabel->setFontSize(0);
-		newLabel->setVisible(false);
-	}
 
-	// add the label
 	items.push_back(newLabel);
 	addSubItem(newLabel);
+
 	scrollbar->setMaxValue(items.size());
-	if (items.size() > optionsShown)
-		scrollbar->setVisible(true);
-	else
-		scrollbar->setVisible(false);
+	scrollbar->setVisible(items.size() > optionsShown);
 
 	// single select
 	if ((!multiSelectEnabled) && (itemsSelected.size() == 1))
 		itemsSelected.push_back(0);
 
-	drawUpdate = true;
+	updateLabels();
 }
 
 void RUListbox::addSelection(unsigned int newIndex)
@@ -221,10 +167,11 @@ void RUListbox::addSelection(unsigned int newIndex)
 	{
 		if (itemsSelected[i] == newIndex)
 		{
+			int erasedIndex = itemsSelected[i];
 			itemsSelected.erase(itemsSelected.begin() + i);
 			itemFound = true;
 			// unhighlight label
-			items[itemsSelected[i]]->setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
+			items[erasedIndex]->setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 			break;
 		}
 		else if (itemsSelected[i] > newIndex)
@@ -249,16 +196,6 @@ void RUListbox::clearSelections()
 	drawUpdate = true;
 }
 
-/*void RUListbox::clear()
-{
-	clearSelections();
-	clearOptions();
-	clearItems();
-	scrollbar->setVisible(false);
-	addSubItem(scrollbar);
-	drawUpdate = true;
-}*/
-
 /*!
  * @brief remove all items
  * @details clear all labels from the list
@@ -282,9 +219,8 @@ void RUListbox::clearOptions()
 	// reset the scrollbar position
 	scrollbar->setValue(0);
 	scrollbar->setMaxValue(0);
-	updateLabels();
 	itemsSelected.clear();
-	clearItems(1);
+	updateLabels();
 	drawUpdate = true;
 }
 
@@ -325,21 +261,25 @@ void RUListbox::updateBackground(gfxpp* cGfx)
 void RUListbox::updateLabels()
 {
 	unsigned int cIndex = scrollbar->getValue();
+	int labelHeight = (optionsShown > 0) ? getHeight() / optionsShown : 0;
+	int labelWidth = getWidth();
+	if (items.size() > optionsShown && scrollbar->isVisible())
+		labelWidth -= scrollbar->getWidth();
+
 	for (unsigned int i = 0; i < items.size(); ++i)
 	{
 		if (optionsShown > 0)
 		{
-			int labelHeight = getHeight() / optionsShown;
-			items[i]->setMarginY((i - cIndex) * labelHeight);
+			items[i]->setMarginY((int)(i - cIndex) * labelHeight);
 			items[i]->setHeight(labelHeight);
-			// items[i]->setFontSize(labelHeight / 2);
+			items[i]->setWidth(labelWidth);
 			items[i]->setVisible((i >= cIndex) && (i - cIndex < optionsShown));
 		}
 		else
 		{
 			items[i]->setMarginY(0);
 			items[i]->setHeight(0);
-			// items[i]->setFontSize(0);
+			items[i]->setWidth(labelWidth);
 			items[i]->setVisible(false);
 		}
 	}
@@ -387,36 +327,7 @@ void RUListbox::onMouseDown(gfxpp* cGfx, GPanel* cPanel, int eventX, int eventY)
 		if (itemClicked >= items.size())
 			return;
 
-		// single select
-		if ((!multiSelectEnabled) && (itemsSelected.size() > 0))
-			clearSelections();
-
-		bool itemFound = false;
-		unsigned int insertIndex = itemsSelected.size();
-		for (unsigned int i = 0; i < itemsSelected.size(); ++i)
-		{
-			if (itemsSelected[i] == itemClicked)
-			{
-				itemsSelected.erase(itemsSelected.begin() + i);
-				itemFound = true;
-				// unhighlight label here
-				items[itemClicked]->setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
-				break;
-			}
-			else if (itemsSelected[i] > itemClicked)
-			{
-				insertIndex = i;
-				break;
-			}
-		}
-
-		// insert the item
-		if (!itemFound)
-		{
-			itemsSelected.insert(itemsSelected.begin() + insertIndex, itemClicked);
-			// highlight label here
-			items[itemClicked]->setBGColor(RUColors::DEFAULT_BUTTON_HOVER_BLUE);
-		}
+		addSelection(itemClicked);
 	}
 
 	updateLabels();

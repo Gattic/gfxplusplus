@@ -32,6 +32,12 @@ RUComponent::RUComponent()
 	lastMouseMotionSubItem = NULL;
 }
 
+void RUComponent::clearItems(unsigned int numToSave)
+{
+	lastMouseMotionSubItem = NULL;
+	GItem::clearItems(numToSave);
+}
+
 void RUComponent::calculateSubItemPositions(std::pair<int, int> parentOffset)
 {
 	// Default layout coordinates
@@ -65,12 +71,11 @@ void RUComponent::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, 
 	if (!((width > 0) && (height > 0)))
 		return;
 
-	// Pass on the event to the subcomps
-	clickedSubItems.clear();
-
 	// Optimize mouse motion: only process the previously-hovered child and the current target.
 	if (event.type == GFX_MOUSEMOTION)
 	{
+		clickedSubItems.clear();
+
 		GItem* candidate = NULL;
 		for (unsigned int i = 0; i < subitems.size(); ++i)
 		{
@@ -104,19 +109,7 @@ void RUComponent::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, 
 		return;
 	}
 
-	for (unsigned int i = 0; i < subitems.size(); ++i)
-	{
-		EventTracker* subEventsStatus =
-			subitems[i]->processEvents(cGfx, parentPanel, event, mouseX, mouseY);
-		if (subEventsStatus->hovered)
-			eventsStatus->hovered = true;
-
-		if (subEventsStatus->downClicked)
-		{
-			eventsStatus->downClicked = true;
-			clickedSubItems.insert(std::pair<int, GItem*>(subitems[i]->getID(), subitems[i]));
-		}
-	}
+	dispatchSubItemEvents(cGfx, eventsStatus, parentPanel, event, mouseX, mouseY);
 }
 
 void RUComponent::updateBackgroundHelper(gfxpp* cGfx)
@@ -130,65 +123,16 @@ void RUComponent::updateBackgroundHelper(gfxpp* cGfx)
 	if (!((width > 0) && (height > 0)))
 		return;
 
-	if (getDrawUpdateRequired())
+	// Rebuild the offscreen texture if needed
+	bool hasTexture = rebuildTexture(cGfx);
+	if (hasTexture)
 	{
-		drawUpdate = false;
-
-		// Drop any cached background texture and rebuild it.
-		if (background)
-			GFX_DestroyTexture(background);
-		background = NULL;
-
-		// Preferred path (SDL + OpenGL-with-FBO): render component once into an offscreen texture.
-		background = cGfx->getDraw()->createRenderTargetTexture(width, height);
-		if (background)
-		{
-			cGfx->getDraw()->setTargetTexture(background);
-			cGfx->getDraw()->setTextureBlendMode(background, GFX_BLENDMODE_BLEND);
-			cGfx->getDraw()->setDrawColor(0, 0, 0, 0);
-			cGfx->getDraw()->clear();
-
-			updateBGBackground(cGfx);
-			updateBackground(cGfx);
-			updateBorderBackground(cGfx);
-
-			cGfx->getDraw()->resetTarget();
-		}
-		else
-		{
-			// Fallback: draw directly when render targets are unavailable.
-			if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
-			{
-#ifdef GFX_HAVE_OPENGL
-				glPushMatrix();
-				glTranslatef((float)getX(), (float)getY(), 0.0f);
-				updateBGBackground(cGfx);
-				updateBackground(cGfx);
-				updateBorderBackground(cGfx);
-				glPopMatrix();
-#endif
-			}
-		}
+		blitTexture(cGfx);
 	}
-
-	// set the background rect
-	GfxRect fullRect;
-	fullRect.x = 0;
-	fullRect.y = 0;
-	fullRect.w = width;
-	fullRect.h = height;
-
-	// draw the background
-	GfxRect dRect = getLocationRect();
-	dRect.x = getX();
-	dRect.y = getY();
-	GfxTexture* geBackground = getBackground();
-	if (geBackground && cGfx->getDraw())
-		cGfx->getDraw()->copyTexture(geBackground, NULL, &dRect);
 	else if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
 	{
+		// Fallback: draw directly when render targets are unavailable.
 #ifdef GFX_HAVE_OPENGL
-		// No cached texture available: draw directly.
 		glPushMatrix();
 		glTranslatef((float)getX(), (float)getY(), 0.0f);
 		updateBGBackground(cGfx);
@@ -198,7 +142,8 @@ void RUComponent::updateBackgroundHelper(gfxpp* cGfx)
 #endif
 	}
 
-	for (unsigned int i = 0; i < subitems.size(); ++i)
+	// Go backwards for consistent z-order with panels and layouts
+	for (int i = subitems.size() - 1; i >= 0; --i)
 		subitems[i]->updateBackgroundHelper(cGfx);
 }
 

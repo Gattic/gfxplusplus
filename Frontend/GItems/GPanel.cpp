@@ -40,21 +40,18 @@ GPanel::GPanel(const shmea::GString& newName, int newWidth, int newHeight)
 	setBGColor(RUColors::DEFAULT_COLOR_BACKGROUND);
 	lastMouseMotionItem = NULL;
 
-	qMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(qMutex, NULL);
+	qMutex = shmea::GPointer<shmea::GMutex>(new shmea::GMutex());
 }
 
 GPanel::~GPanel()
 {
-	pthread_mutex_destroy(qMutex);
-	if (qMutex)
-		free(qMutex);
+	//
 }
 
 void GPanel::onShow(gfxpp* cGfx)
 {
 	focus = true;
-	cGfx->focusedPanel = this;
+	cGfx->setFocusedPanel(this);
 }
 
 void GPanel::onHide(gfxpp* cGfx)
@@ -119,6 +116,12 @@ void GPanel::addSubItem(GItem* newItem, unsigned int newZIndex)
 	drawUpdate = true;
 }
 
+void GPanel::clearItems(unsigned int numToSave)
+{
+	lastMouseMotionItem = NULL;
+	GItem::clearItems(numToSave);
+}
+
 void GPanel::calculateSubItemPositions(std::pair<int, int> parentOffset)
 {
 	// We just pass in manual X/Y on subitem creation
@@ -129,8 +132,7 @@ void GPanel::calculateSubItemPositions(std::pair<int, int> parentOffset)
 			continue;
 
 		// If a layout has no explicit size, default it to fill the panel.
-		shmea::GString t = cItem->getType();
-		if ((t == "GRelativeLayout" || t == "GLinearLayout") &&
+		if (cItem->wantsAutoSize() &&
 			(cItem->getWidth() <= 0 || cItem->getHeight() <= 0))
 		{
 			cItem->setWidth(width);
@@ -211,8 +213,8 @@ void GPanel::processSubItemEvents(gfxpp* cGfx, EventTracker* eventsStatus, GPane
 		if (!cItem)
 			continue;
 
-		EventTracker* eventsStatus = cItem->processEvents(cGfx, this, event, mouseX, mouseY);
-		if (eventsStatus->hovered)
+		EventTracker* subEventsStatus = cItem->processEvents(cGfx, this, event, mouseX, mouseY);
+		if (subEventsStatus->hovered)
 			hovered = true;
 	}
 
@@ -238,20 +240,21 @@ void GPanel::processQ(gfxpp* cGfx)
 
 void GPanel::addToQ(const shmea::ServiceData* cData)
 {
-	pthread_mutex_lock(qMutex);
+    shmea::GMutexLock lock(qMutex.get());
 	updateQueue.push(cData);
-	pthread_mutex_unlock(qMutex);
 }
 
 void GPanel::popQ()
 {
 	const shmea::ServiceData* cData;
-	pthread_mutex_lock(qMutex);
-	cData = updateQueue.front();
-	updateQueue.pop();
-	pthread_mutex_unlock(qMutex);
+	{
+        shmea::GMutexLock lock(qMutex.get());
+		cData = updateQueue.front();
+		updateQueue.pop();
+	}
 
 	updateFromQ(cData);
+	delete cData;
 }
 
 void GPanel::updateFromQ(const shmea::ServiceData* cData)
@@ -279,63 +282,16 @@ void GPanel::updateBackgroundHelper(gfxpp* cGfx)
 	// Update the GUI based on a message queue
 	processQ(cGfx);
 
-	// Do we want to redraw the panel
-	if (getDrawUpdateRequired())
+	// Rebuild the offscreen texture if needed
+	bool hasTexture = rebuildTexture(cGfx);
+	if (hasTexture)
 	{
-		drawUpdate = false;
-
-		// Drop any cached background texture and rebuild it.
-		if (background)
-			GFX_DestroyTexture(background);
-		background = NULL;
-
-		// Preferred path (SDL + OpenGL-with-FBO): render panel once into an offscreen texture.
-		background = cGfx->getDraw()->createRenderTargetTexture(width, height);
-		if (background)
-		{
-			cGfx->getDraw()->setTargetTexture(background);
-			cGfx->getDraw()->setTextureBlendMode(background, GFX_BLENDMODE_BLEND);
-			cGfx->getDraw()->setDrawColor(0, 0, 0, 0);
-			cGfx->getDraw()->clear();
-
-			updateBGBackground(cGfx);
-			updateBackground(cGfx);
-			updateBorderBackground(cGfx);
-
-			cGfx->getDraw()->resetTarget();
-		}
-		else
-		{
-			// Fallback path: draw directly when render targets are unavailable.
-			if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
-			{
-#ifdef GFX_HAVE_OPENGL
-				glPushMatrix();
-				glLoadIdentity();
-				glTranslatef((float)getX(), (float)getY(), 0.0f);
-				updateBGBackground(cGfx);
-				updateBackground(cGfx);
-				updateBorderBackground(cGfx);
-				for (int i = subitems.size() - 1; i >= 0; --i)
-					subitems[i]->updateBackgroundHelper(cGfx);
-				glPopMatrix();
-				return; // Skip texture blit path below
-#endif
-			}
-		}
+		blitTexture(cGfx);
 	}
-
-	// draw the background
-	GfxRect dRect = getLocationRect();
-	dRect.x = getX();
-	dRect.y = getY();
-	GfxTexture* geBackground = getBackground();
-	if (geBackground && cGfx->getDraw())
-		cGfx->getDraw()->copyTexture(geBackground, NULL, &dRect);
 	else if (cGfx->getRenderBackend() == gfxpp::RENDER_BACKEND_OPENGL)
 	{
+		// Fallback path: draw directly when render targets are unavailable.
 #ifdef GFX_HAVE_OPENGL
-		// No cached texture available: draw directly.
 		glPushMatrix();
 		glLoadIdentity();
 		glTranslatef((float)getX(), (float)getY(), 0.0f);

@@ -78,182 +78,12 @@ static void gfxpp_collect_dirty_items(GItem* item, std::vector<GItem*>& out)
 		return;
 	if (item->getDrawUpdateRequired())
 		out.push_back(item);
-	std::vector<GItem*> kids = item->getItems();
+	const std::vector<GItem*>& kids = item->getItems();
 	for (size_t i = 0; i < kids.size(); ++i)
 		gfxpp_collect_dirty_items(kids[i], out);
 }
 
-// GLFW -> SDL event translation helpers (C++98: use free functions)
-#ifdef GFX_HAVE_OPENGL
-void glfw_window_close_cb(GLFWwindow* w)
-{
-	gfxpp* self = reinterpret_cast<gfxpp*>(glfwGetWindowUserPointer(w));
-	if (!self) return;
-	// Always stop the render loop immediately on close.
-	// Some host programs may not pump our synthetic event queue, so relying on
-	// an enqueued SDL_QUIT alone can cause a "hang on close" (run() never returns).
-	self->running = false;
-#ifdef GFX_HAVE_SDL2
-	// Still enqueue SDL_QUIT so listener callbacks get consistent semantics.
-	GfxEvent e;
-	memset(&e, 0, sizeof(GfxEvent));
-	e.type = SDL_QUIT;
-	self->glfwEventQueue.push_back(e);
-#endif
-}
-
-void glfw_key_cb(GLFWwindow* w, int key, int scancode, int action, int mods)
-{
-	gfxpp* self = reinterpret_cast<gfxpp*>(glfwGetWindowUserPointer(w));
-	if (!self) return;
-	GfxEvent e; memset(&e, 0, sizeof(GfxEvent));
-	if (action == GLFW_PRESS || action == GLFW_REPEAT) e.type = SDL_KEYDOWN; else if (action == GLFW_RELEASE) e.type = SDL_KEYUP; else return;
-	int sdlk = 0;
-	switch (key)
-	{
-		// Modifiers and controls
-		case GLFW_KEY_LEFT_CONTROL: sdlk = SDLK_LCTRL; break;
-		case GLFW_KEY_RIGHT_CONTROL: sdlk = SDLK_RCTRL; break;
-		case GLFW_KEY_LEFT_ALT: sdlk = SDLK_LALT; break;
-		case GLFW_KEY_RIGHT_ALT: sdlk = SDLK_RALT; break;
-		case GLFW_KEY_SPACE: sdlk = SDLK_SPACE; break;
-		// Letters
-		case GLFW_KEY_A: sdlk = SDLK_a; break;
-		case GLFW_KEY_B: sdlk = SDLK_b; break;
-		case GLFW_KEY_C: sdlk = SDLK_c; break;
-		case GLFW_KEY_D: sdlk = SDLK_d; break;
-		case GLFW_KEY_E: sdlk = SDLK_e; break;
-		case GLFW_KEY_F: sdlk = SDLK_f; break;
-		case GLFW_KEY_G: sdlk = SDLK_g; break;
-		case GLFW_KEY_H: sdlk = SDLK_h; break;
-		case GLFW_KEY_I: sdlk = SDLK_i; break;
-		case GLFW_KEY_J: sdlk = SDLK_j; break;
-		case GLFW_KEY_K: sdlk = SDLK_k; break;
-		case GLFW_KEY_L: sdlk = SDLK_l; break;
-		case GLFW_KEY_M: sdlk = SDLK_m; break;
-		case GLFW_KEY_N: sdlk = SDLK_n; break;
-		case GLFW_KEY_O: sdlk = SDLK_o; break;
-		case GLFW_KEY_P: sdlk = SDLK_p; break;
-		case GLFW_KEY_Q: sdlk = SDLK_q; break;
-		case GLFW_KEY_R: sdlk = SDLK_r; break;
-		case GLFW_KEY_S: sdlk = SDLK_s; break;
-		case GLFW_KEY_T: sdlk = SDLK_t; break;
-		case GLFW_KEY_U: sdlk = SDLK_u; break;
-		case GLFW_KEY_V: sdlk = SDLK_v; break;
-		case GLFW_KEY_W: sdlk = SDLK_w; break;
-		case GLFW_KEY_X: sdlk = SDLK_x; break;
-		case GLFW_KEY_Y: sdlk = SDLK_y; break;
-		case GLFW_KEY_Z: sdlk = SDLK_z; break;
-		// Numbers
-		case GLFW_KEY_0: sdlk = SDLK_0; break;
-		case GLFW_KEY_1: sdlk = SDLK_1; break;
-		case GLFW_KEY_2: sdlk = SDLK_2; break;
-		case GLFW_KEY_3: sdlk = SDLK_3; break;
-		case GLFW_KEY_4: sdlk = SDLK_4; break;
-		case GLFW_KEY_5: sdlk = SDLK_5; break;
-		case GLFW_KEY_6: sdlk = SDLK_6; break;
-		case GLFW_KEY_7: sdlk = SDLK_7; break;
-		case GLFW_KEY_8: sdlk = SDLK_8; break;
-		case GLFW_KEY_9: sdlk = SDLK_9; break;
-		// Navigation
-		case GLFW_KEY_UP: sdlk = SDLK_UP; break;
-		case GLFW_KEY_DOWN: sdlk = SDLK_DOWN; break;
-		case GLFW_KEY_LEFT: sdlk = SDLK_LEFT; break;
-		case GLFW_KEY_RIGHT: sdlk = SDLK_RIGHT; break;
-		case GLFW_KEY_HOME: sdlk = SDLK_HOME; break;
-		case GLFW_KEY_END: sdlk = SDLK_END; break;
-		case GLFW_KEY_BACKSPACE: sdlk = SDLK_BACKSPACE; break;
-		case GLFW_KEY_DELETE: sdlk = SDLK_DELETE; break;
-		case GLFW_KEY_ESCAPE: sdlk = SDLK_ESCAPE; break;
-		// Symbols (common US layout)
-		case GLFW_KEY_MINUS: sdlk = SDLK_MINUS; break;
-		case GLFW_KEY_EQUAL: sdlk = SDLK_EQUALS; break;
-		case GLFW_KEY_LEFT_BRACKET: sdlk = SDLK_LEFTBRACKET; break;
-		case GLFW_KEY_RIGHT_BRACKET: sdlk = SDLK_RIGHTBRACKET; break;
-		case GLFW_KEY_BACKSLASH: sdlk = SDLK_BACKSLASH; break;
-		case GLFW_KEY_SEMICOLON: sdlk = SDLK_SEMICOLON; break;
-		case GLFW_KEY_APOSTROPHE: sdlk = SDLK_QUOTE; break;
-		case GLFW_KEY_GRAVE_ACCENT: sdlk = SDLK_BACKQUOTE; break;
-		case GLFW_KEY_COMMA: sdlk = SDLK_COMMA; break;
-		case GLFW_KEY_PERIOD: sdlk = SDLK_PERIOD; break;
-		case GLFW_KEY_SLASH: sdlk = SDLK_SLASH; break;
-		case GLFW_KEY_TAB: sdlk = SDLK_TAB; break;
-		default: return;
-	}
-	e.key.keysym.sym = (SDL_Keycode)sdlk;
-	// Modifiers
-	Uint16 keymods = 0;
-	if (mods & GLFW_MOD_SHIFT) keymods |= KMOD_SHIFT;
-	if (mods & GLFW_MOD_CONTROL) keymods |= KMOD_CTRL;
-	if (mods & GLFW_MOD_ALT) keymods |= KMOD_ALT;
-#ifdef GLFW_MOD_CAPS_LOCK
-	if (mods & GLFW_MOD_CAPS_LOCK) keymods |= KMOD_CAPS;
-#endif
-	e.key.keysym.mod = keymods;
-	self->glfwEventQueue.push_back(e);
-}
-
-void glfw_mouse_button_cb(GLFWwindow* w, int button, int action, int mods)
-{
-	gfxpp* self = reinterpret_cast<gfxpp*>(glfwGetWindowUserPointer(w));
-	if (!self) return;
-	double cx=0, cy=0; glfwGetCursorPos(w, &cx, &cy);
-	int winW=0, winH=0; glfwGetWindowSize(w, &winW, &winH);
-	if (winW <= 0) winW = 1;
-	if (winH <= 0) winH = 1;
-	double sx = (double)self->getWidth() / (double)winW;
-	double sy = (double)self->getHeight() / (double)winH;
-	GfxEvent e; memset(&e, 0, sizeof(GfxEvent));
-	if (action == GLFW_PRESS) e.type = SDL_MOUSEBUTTONDOWN; else if (action == GLFW_RELEASE) e.type = SDL_MOUSEBUTTONUP; else return;
-	e.button.x = (int)(cx * sx); e.button.y = (int)(cy * sy);
-	switch (button)
-	{
-		case GLFW_MOUSE_BUTTON_LEFT: e.button.button = SDL_BUTTON_LEFT; break;
-		case GLFW_MOUSE_BUTTON_RIGHT: e.button.button = SDL_BUTTON_RIGHT; break;
-		case GLFW_MOUSE_BUTTON_MIDDLE: e.button.button = SDL_BUTTON_MIDDLE; break;
-		default: e.button.button = 0; break;
-	}
-	self->glfwEventQueue.push_back(e);
-}
-
-void glfw_cursor_pos_cb(GLFWwindow* w, double x, double y)
-{
-	gfxpp* self = reinterpret_cast<gfxpp*>(glfwGetWindowUserPointer(w));
-	if (!self) return;
-	int winW=0, winH=0; glfwGetWindowSize(w, &winW, &winH);
-	if (winW <= 0) winW = 1;
-	if (winH <= 0) winH = 1;
-	double sx = (double)self->getWidth() / (double)winW;
-	double sy = (double)self->getHeight() / (double)winH;
-	GfxEvent e; memset(&e, 0, sizeof(GfxEvent));
-	e.type = SDL_MOUSEMOTION; e.motion.x = (int)(x * sx); e.motion.y = (int)(y * sy);
-	// Coalesce high-frequency mouse motion events to avoid queue blowups.
-	if (!self->glfwEventQueue.empty() && self->glfwEventQueue.back().type == SDL_MOUSEMOTION)
-		self->glfwEventQueue.back() = e;
-	else
-		self->glfwEventQueue.push_back(e);
-}
-
-void glfw_scroll_cb(GLFWwindow* w, double xoffset, double yoffset)
-{
-	gfxpp* self = reinterpret_cast<gfxpp*>(glfwGetWindowUserPointer(w));
-	if (!self) return;
-	GfxEvent e; memset(&e, 0, sizeof(GfxEvent));
-	e.type = SDL_MOUSEWHEEL;
-	// Cast offsets to integer steps consistent with SDL semantics
-	e.wheel.x = (int)(xoffset);
-	e.wheel.y = (int)(yoffset);
-	e.wheel.direction = SDL_MOUSEWHEEL_NORMAL;
-	self->glfwEventQueue.push_back(e);
-}
-
-void glfw_framebuffer_size_cb(GLFWwindow* w, int ww, int hh)
-{
-	gfxpp* self = reinterpret_cast<gfxpp*>(glfwGetWindowUserPointer(w));
-	if (!self) return;
-	(void)w; (void)ww; (void)hh; // Keep logical size; viewport is adjusted via setLogicalSize
-}
-#endif
+// GLFW callbacks are now in GlfwEventBridge.cpp
 
 // Backend selection: change this variable to switch rendering backends
 static gfxpp::RenderBackend gRenderBackend =
@@ -366,53 +196,59 @@ static void gfxpp_glfw_release()
 // 60fps improves perceived input responsiveness (hover, caret, drag).
 const float gfxpp::MAX_FRAMES_PER_SECOND = 60.0f;
 
-gfxpp::gfxpp()
+void gfxpp::initFonts(GfxNativeRenderer* sdlRenderer)
 {
-	#ifdef GFX_HAVE_SDL2
-	systemCursor = NULL;
-	#endif
+	fontManager.initSDL(sdlRenderer);
+}
+
+void gfxpp::initMembers()
+{
+	errorFlag = 0;
+	running = false;
 	width = 800;
 	height = 600;
 
+	frames = 0;
+	fps = 0;
+	rotate = false;
+	move = false;
+	now = 0;
+	then = 0;
+
+	input.reset();
+
 	#ifdef GFX_HAVE_SDL2
+	window = NULL;
+	systemCursor = NULL;
 	context = NULL;
 	renderer = NULL;
 	#endif
 	glfwWindow = NULL;
 	glfwInitialized = false;
+#ifdef GFX_HAVE_OPENGL
+	glfwBridge = NULL;
+#endif
 	renderBackend = gRenderBackend;
-	this->draw = NULL;
 	ttfReady = false;
 	finalized = false;
-#ifdef GFX_HAVE_OPENGL
-	glTextCache.clear();
-#endif
+	ownsWindow = true;
 
+	nextItemID = 1;
+	focusedItem = NULL;
+	focusedPanel = NULL;
+}
+
+gfxpp::gfxpp()
+{
+	initMembers();
 	errorFlag = initHelper(false, "gfxplusplus", true);
 }
 
 gfxpp::gfxpp(shmea::GString newTitle, int newRenderStatus, bool fullScreenMode, bool compatMode, int newWidth, int newHeight)
 {
-	#ifdef GFX_HAVE_SDL2
-	systemCursor = NULL;
-	#endif
+	initMembers();
 	width = newWidth;
 	height = newHeight;
-
-	#ifdef GFX_HAVE_SDL2
-	context = NULL;
-	renderer = NULL;
-	#endif
-	glfwWindow = NULL;
-	glfwInitialized = false;
-	renderBackend = gRenderBackend;
-	this->draw = NULL;
-	ttfReady = false;
-	finalized = false;
-#ifdef GFX_HAVE_OPENGL
-	glTextCache.clear();
-#endif
-
 	errorFlag = initHelper(fullScreenMode, newTitle, compatMode);
 }
 
@@ -420,53 +256,11 @@ gfxpp::gfxpp(shmea::GString newTitle, int newRenderStatus, bool fullScreenMode, 
 #ifdef GFX_HAVE_OPENGL
 gfxpp::gfxpp(GLFWwindow* externalWindow, int newWidth, int newHeight)
 {
-	#ifdef GFX_HAVE_SDL2
-	systemCursor = NULL;
-	#endif
+	initMembers();
+	ownsWindow = false;
 	width = newWidth;
 	height = newHeight;
-
-	#ifdef GFX_HAVE_SDL2
-	context = NULL;
-	renderer = NULL;
-	#endif
 	glfwWindow = externalWindow;
-	glfwInitialized = false; // not owned
-	renderBackend = gRenderBackend;
-	this->draw = NULL;
-	ttfReady = false;
-	finalized = false;
-	glTextCache.clear();
-
-	// Initialize runtime state
-	running = false;
-	hunterZolomon = 1.0f;
-	frames = 0;
-	rotate = false;
-	move = false;
-	now = 0;
-	then = 0;
-	mouseX = 0;
-	mouseY = 0;
-	CTRLPressed = false;
-	ALTPressed = false;
-	spacePressed = false;
-	fPressed = false;
-	uPressed = false;
-	qPressed = false;
-	gPressed = false;
-	rPressed = false;
-	lPressed = false;
-	upPressed = false;
-	downPressed = false;
-	leftPressed = false;
-	rightPressed = false;
-	#ifdef GFX_HAVE_SDL2
-	window = NULL;
-	#endif
-	focusedItem = NULL;
-	focusedPanel = NULL;
-	fps = 0;
 
 	// Skip creating window; set backend to OpenGL and init
 	if (!glfwWindow)
@@ -479,16 +273,11 @@ gfxpp::gfxpp(GLFWwindow* externalWindow, int newWidth, int newHeight)
 	// Minimal init
 	int err = init2D(true);
 	if (err < 0) { errorFlag = err; return; }
-	this->draw = GfxRenderer::createOpenGL(glfwWindow);
+	this->draw = shmea::GPointer<GfxRenderer>(GfxRenderer::createOpenGL(glfwWindow));
 
-	// Hook GLFW callbacks for translating events to our queue
-	glfwSetWindowUserPointer(glfwWindow, this);
-	glfwSetWindowCloseCallback(glfwWindow, glfw_window_close_cb);
-	glfwSetKeyCallback(glfwWindow, glfw_key_cb);
-	glfwSetMouseButtonCallback(glfwWindow, glfw_mouse_button_cb);
-	glfwSetCursorPosCallback(glfwWindow, glfw_cursor_pos_cb);
-	glfwSetScrollCallback(glfwWindow, glfw_scroll_cb);
-	glfwSetFramebufferSizeCallback(glfwWindow, glfw_framebuffer_size_cb);
+	// Hook GLFW callbacks via bridge
+	glfwBridge = new GlfwEventBridge();
+	glfwBridge->attach(glfwWindow, width, height);
 	then = (int32_t)(glfwGetTime() * 1000.0);
 	errorFlag = 0;
 }
@@ -498,48 +287,11 @@ gfxpp::gfxpp(GLFWwindow* externalWindow, int newWidth, int newHeight)
 #ifdef GFX_HAVE_SDL2
 gfxpp::gfxpp(SDL_Window* externalWindow, SDL_Renderer* externalRenderer, int newWidth, int newHeight)
 {
-	systemCursor = NULL;
+	initMembers();
+	ownsWindow = false;
 	width = newWidth;
 	height = newHeight;
-
-	context = NULL;
 	renderer = externalRenderer;
-	glfwWindow = NULL;
-	glfwInitialized = false;
-	renderBackend = gRenderBackend;
-	this->draw = NULL;
-	ttfReady = false;
-	finalized = false;
-#ifdef GFX_HAVE_OPENGL
-	glTextCache.clear();
-#endif
-
-	// Initialize runtime state
-	running = false;
-	hunterZolomon = 1.0f;
-	frames = 0;
-	rotate = false;
-	move = false;
-	now = 0;
-	then = 0;
-	mouseX = 0;
-	mouseY = 0;
-	CTRLPressed = false;
-	ALTPressed = false;
-	spacePressed = false;
-	fPressed = false;
-	uPressed = false;
-	qPressed = false;
-	gPressed = false;
-	rPressed = false;
-	lPressed = false;
-	upPressed = false;
-	downPressed = false;
-	leftPressed = false;
-	rightPressed = false;
-	focusedItem = NULL;
-	focusedPanel = NULL;
-	fps = 0;
 
 	if (!externalWindow || !externalRenderer)
 	{
@@ -550,7 +302,7 @@ gfxpp::gfxpp(SDL_Window* externalWindow, SDL_Renderer* externalRenderer, int new
 	renderBackend = RENDER_BACKEND_SDL2;
 	int err = init2D(true);
 	if (err < 0) { errorFlag = err; return; }
-	this->draw = GfxRenderer::createSDL(renderer, window);
+	this->draw = shmea::GPointer<GfxRenderer>(GfxRenderer::createSDL(renderer, window));
 	then = SDL_GetTicks();
 	errorFlag = 0;
 }
@@ -570,46 +322,7 @@ SDL_Renderer* gfxpp::getRenderer()
 
 int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode)
 {
-	running = false;
-	hunterZolomon = 1.0f;
-
-	frames = 0;
-	rotate = false;
-	move = false;
-	now = 0;
-	// initialize time base later after backend is initialized
-	then = 0;
-
-	// for mouse
-	mouseX = 0;
-	mouseY = 0;
-
-	// for key presses
-	CTRLPressed = false;
-	ALTPressed = false;
-	spacePressed = false;
-	fPressed = false;
-	uPressed = false;
-	qPressed = false;
-	gPressed = false;
-	rPressed = false;
-	lPressed = false;
-	upPressed = false;
-	downPressed = false;
-	leftPressed = false;
-	rightPressed = false;
-
-	#ifdef GFX_HAVE_SDL2
-	#ifdef GFX_HAVE_SDL2
-	window = NULL;
-	renderer = NULL;
-	#endif
-	#endif
-
-	focusedItem = NULL;
-	focusedPanel = NULL;
-
-	fps = 0;
+	// Member variables already initialized by initMembers() in each constructor.
 
 	if (renderBackend == RENDER_BACKEND_OPENGL)
 	{
@@ -651,14 +364,9 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode
 		glfwMakeContextCurrent(glfwWindow);
 		glfwSwapInterval(1);
 
-		// Set user pointer and callbacks to translate events
-		glfwSetWindowUserPointer(glfwWindow, this);
-		glfwSetWindowCloseCallback(glfwWindow, glfw_window_close_cb);
-		glfwSetKeyCallback(glfwWindow, glfw_key_cb);
-		glfwSetMouseButtonCallback(glfwWindow, glfw_mouse_button_cb);
-		glfwSetCursorPosCallback(glfwWindow, glfw_cursor_pos_cb);
-		glfwSetScrollCallback(glfwWindow, glfw_scroll_cb);
-		glfwSetFramebufferSizeCallback(glfwWindow, glfw_framebuffer_size_cb);
+		// Hook GLFW callbacks via bridge
+		glfwBridge = new GlfwEventBridge();
+		glfwBridge->attach(glfwWindow, width, height);
 
 		// Set initial time base
 		then = (int32_t)(glfwGetTime() * 1000.0);
@@ -725,13 +433,11 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode
 	{
 #ifdef GFX_HAVE_OPENGL
 		if (glfwWindow)
-			this->draw = GfxRenderer::createOpenGL(glfwWindow);
+			this->draw = shmea::GPointer<GfxRenderer>(GfxRenderer::createOpenGL(glfwWindow));
 		else
 		{
 #ifdef GFX_HAVE_SDL2
-			this->draw = GfxRenderer::createOpenGL(window, context);
-#else
-			this->draw = NULL;
+			this->draw = shmea::GPointer<GfxRenderer>(GfxRenderer::createOpenGL(window, context));
 #endif
 		}
 #endif
@@ -739,9 +445,7 @@ int gfxpp::initHelper(bool fullscreenMode, shmea::GString title, bool compatMode
 	else
 	{
 #ifdef GFX_HAVE_SDL2
-		this->draw = GfxRenderer::createSDL(renderer, window);
-#else
-		this->draw = NULL;
+		this->draw = shmea::GPointer<GfxRenderer>(GfxRenderer::createSDL(renderer, window));
 #endif
 	}
 
@@ -793,16 +497,7 @@ int gfxpp::init2D(bool compatMode)
 	}
 	#endif
 
-	cFont = new GFont(renderer);
-	graphicsFonts.insert(std::pair<int, GFont*>(0, cFont));
-
-	GFont* fontGreen = new GFont(renderer);
-	fontGreen->setTextColor(RUColors::TEXT_COLOR_GREEN);
-	graphicsFonts.insert(std::pair<int, GFont*>(1, fontGreen));
-
-	GFont* fontRed = new GFont(renderer);
-	fontRed->setTextColor(RUColors::TEXT_COLOR_RED);
-	graphicsFonts.insert(std::pair<int, GFont*>(2, fontRed));
+	initFonts(renderer);
 
 	// Load support for the PNG, TIF, and JPG image formats
 	#ifdef GFX_HAVE_SDL2
@@ -866,21 +561,17 @@ int gfxpp::initOpenGL()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Initialize font wrappers for GL path (no SDL_ttf needed here)
-	cFont = new GFont();
-	graphicsFonts.insert(std::pair<int, GFont*>(0, cFont));
-
-	GFont* fontGreen = new GFont();
-	fontGreen->setTextColor(RUColors::TEXT_COLOR_GREEN);
-	graphicsFonts.insert(std::pair<int, GFont*>(1, fontGreen));
-
-	GFont* fontRed = new GFont();
-	fontRed->setTextColor(RUColors::TEXT_COLOR_RED);
-	graphicsFonts.insert(std::pair<int, GFont*>(2, fontRed));
+	fontManager.initOpenGL();
 
 	return 0;
 #else
 	return -1;
 #endif
+}
+
+bool gfxpp::updateKeyState(int eventType, GfxKeycode key)
+{
+	return input.handleKeyEvent(eventType, key);
 }
 
 void gfxpp::run()
@@ -915,24 +606,7 @@ void gfxpp::display()
 	#endif
 	}
 
-	// for mouse
-	mouseX = 0;
-	mouseY = 0;
-
-	// for key presses
-	CTRLPressed = false;
-	ALTPressed = false;
-	spacePressed = false;
-	fPressed = false;
-	uPressed = false;
-	qPressed = false;
-	gPressed = false;
-	rPressed = false;
-	lPressed = false;
-	upPressed = false;
-	downPressed = false;
-	leftPressed = false;
-	rightPressed = false;
+	input.reset();
 
 	// Pre-layout warmup: stabilize auto-sized components (labels, buttons, textboxes)
 	// so their final sizes are known before the first visible frame is presented.
@@ -978,89 +652,28 @@ void gfxpp::display()
 		#ifdef GFX_HAVE_OPENGL
 		if (renderBackend == RENDER_BACKEND_OPENGL && glfwWindow)
 			glfwPollEvents();
-		if (renderBackend == RENDER_BACKEND_OPENGL && glfwWindow)
+		if (renderBackend == RENDER_BACKEND_OPENGL && glfwBridge)
 		{
 			const int64_t pumpStartUs = uiProfile ? gfxpp_now_us(this) : 0;
-			// Pump synthetic events immediately without requiring SDL loop
-			// Avoid O(n^2) erase-at-begin by iterating and clearing once.
-			for (size_t qi = 0; qi < glfwEventQueue.size(); ++qi)
+			if (glfwBridge->isCloseRequested())
+				running = false;
+			std::vector<GfxEvent> glfwEvents;
+			glfwBridge->drainEvents(glfwEvents);
+			for (size_t qi = 0; qi < glfwEvents.size(); ++qi)
 			{
-				GfxEvent e2 = glfwEventQueue[qi];
-				// update mouse position for motion or button events
-				if (e2.type == SDL_MOUSEMOTION) { mouseX = e2.motion.x; mouseY = e2.motion.y; }
-				else if (e2.type == SDL_MOUSEBUTTONDOWN || e2.type == SDL_MOUSEBUTTONUP) { mouseX = e2.button.x; mouseY = e2.button.y; }
-				// handle key events similar to SDL path
+				GfxEvent e2 = glfwEvents[qi];
+				if (e2.type == SDL_MOUSEMOTION) { input.mouseX = e2.motion.x; input.mouseY = e2.motion.y; }
+				else if (e2.type == SDL_MOUSEBUTTONDOWN || e2.type == SDL_MOUSEBUTTONUP) { input.mouseX = e2.button.x; input.mouseY = e2.button.y; }
 				if (e2.type == SDL_KEYUP || e2.type == SDL_KEYDOWN)
 				{
-					SDL_Keycode keyPressed = e2.key.keysym.sym;
-					if (keyPressed == SDLK_LCTRL || keyPressed == SDLK_RCTRL)
-					{
-						if (e2.type == SDL_KEYUP) CTRLPressed = false; else CTRLPressed = true;
-					}
-					else if (keyPressed == SDLK_LALT || keyPressed == SDLK_RALT)
-					{
-						if (e2.type == SDL_KEYUP) ALTPressed = false; else ALTPressed = true;
-					}
-					else if (keyPressed == SDLK_SPACE)
-					{
-						if (e2.type == SDL_KEYUP) spacePressed = false; else spacePressed = true;
-					}
-					else if (keyPressed == SDLK_f)
-					{
-						if (e2.type == SDL_KEYUP) fPressed = false; else fPressed = true;
-					}
-					else if (keyPressed == SDLK_u)
-					{
-						if (e2.type == SDL_KEYUP) uPressed = false; else uPressed = true;
-					}
-					else if (keyPressed == SDLK_q)
-					{
-						if (e2.type == SDL_KEYUP) qPressed = false; else qPressed = true;
-					}
-					else if (keyPressed == SDLK_g)
-					{
-						if (e2.type == SDL_KEYUP) gPressed = false; else gPressed = true;
-					}
-					else if (keyPressed == SDLK_r)
-					{
-						if (e2.type == SDL_KEYUP) rPressed = false; else rPressed = true;
-					}
-					else if (keyPressed == SDLK_l)
-					{
-						if (e2.type == SDL_KEYUP) lPressed = false; else lPressed = true;
-					}
-					else if (keyPressed == SDLK_UP)
-					{
-						if (e2.type == SDL_KEYUP) upPressed = false; else upPressed = true;
-					}
-					else if (keyPressed == SDLK_DOWN)
-					{
-						if (e2.type == SDL_KEYUP) downPressed = false; else downPressed = true;
-					}
-					else if (keyPressed == SDLK_LEFT)
-					{
-						if (e2.type == SDL_KEYUP) leftPressed = false; else leftPressed = true;
-					}
-					else if (keyPressed == SDLK_RIGHT)
-					{
-						if (e2.type == SDL_KEYUP) rightPressed = false; else rightPressed = true;
-					}
-
-					if (CTRLPressed)
-					{
-						if (qPressed) running = false;
-						if (gPressed) running = false;
-						if (lPressed) system("clear");
-					}
-
-					if (keyPressed == SDLK_ESCAPE)
+					if (updateKeyState(e2.type, e2.key.keysym.sym))
 						running = false;
 				}
 				if (e2.type == SDL_QUIT) running = false;
 				if (focusedPanel)
 				{
 					const int64_t dispatchStartUs = uiProfile ? gfxpp_now_us(this) : 0;
-					focusedPanel->processSubItemEvents(this, NULL, NULL, e2, mouseX, mouseY);
+					focusedPanel->processSubItemEvents(this, NULL, NULL, e2, input.mouseX, input.mouseY);
 					if (uiProfile)
 					{
 						const int64_t dt = gfxpp_now_us(this) - dispatchStartUs;
@@ -1078,142 +691,36 @@ void gfxpp::display()
 					else if (e2.type == SDL_KEYDOWN || e2.type == SDL_KEYUP) ++profKeyEvents;
 				}
 			}
-			glfwEventQueue.clear();
 			if (uiProfile) profEventPumpUs += (gfxpp_now_us(this) - pumpStartUs);
 		}
 		#endif
 
 		#ifdef GFX_HAVE_SDL2
+		if (renderBackend == RENDER_BACKEND_SDL2)
+		{
 		SDL_Event event;
-		#ifdef GFX_HAVE_OPENGL
-		// already handled above for GLFW path
-		#endif
 		while (SDL_PollEvent(&event))
 		{
 			const int64_t pumpStartUs = uiProfile ? gfxpp_now_us(this) : 0;
 			if (event.type == SDL_QUIT)
 				running = false;
 
-			SDL_Keycode keyPressed = 0x00;
 			if ((event.type == SDL_KEYUP) || (event.type == SDL_KEYDOWN))
 			{
-				keyPressed = event.key.keysym.sym;
-				if ((keyPressed == SDLK_LCTRL) || (keyPressed == SDLK_RCTRL))
-				{
-					if (event.type == SDL_KEYUP)
-						CTRLPressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						CTRLPressed = true;
-				}
-				else if ((keyPressed == SDLK_LALT) || (keyPressed == SDLK_RALT))
-				{
-					if (event.type == SDL_KEYUP)
-						ALTPressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						ALTPressed = true;
-				}
-				else if (keyPressed == SDLK_SPACE)
-				{
-					if (event.type == SDL_KEYUP)
-						spacePressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						spacePressed = true;
-				}
-				else if (keyPressed == SDLK_f)
-				{
-					if (event.type == SDL_KEYUP)
-						fPressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						fPressed = true;
-				}
-				else if (keyPressed == SDLK_u)
-				{
-					if (event.type == SDL_KEYUP)
-						uPressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						uPressed = true;
-				}
-				else if (keyPressed == SDLK_q)
-				{
-					if (event.type == SDL_KEYUP)
-						qPressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						qPressed = true;
-				}
-				else if (keyPressed == SDLK_g)
-				{
-					if (event.type == SDL_KEYUP)
-						gPressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						gPressed = true;
-				}
-				else if (keyPressed == SDLK_r)
-				{
-					if (event.type == SDL_KEYUP)
-						rPressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						rPressed = true;
-				}
-				else if (keyPressed == SDLK_l)
-				{
-					if (event.type == SDL_KEYUP)
-						lPressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						lPressed = true;
-				}
-				else if (keyPressed == SDLK_UP)
-				{
-					if (event.type == SDL_KEYUP)
-						upPressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						upPressed = true;
-				}
-				else if (keyPressed == SDLK_DOWN)
-				{
-					if (event.type == SDL_KEYUP)
-						downPressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						downPressed = true;
-				}
-				else if (keyPressed == SDLK_LEFT)
-				{
-					if (event.type == SDL_KEYUP)
-						leftPressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						leftPressed = true;
-				}
-				else if (keyPressed == SDLK_RIGHT)
-				{
-					if (event.type == SDL_KEYUP)
-						rightPressed = false;
-					else if (event.type == SDL_KEYDOWN)
-						rightPressed = true;
-				}
-
-				if (CTRLPressed)
-				{
-					if (qPressed)
-						running = false;
-					if (gPressed)
-						running = false;
-					if (lPressed)
-						system("clear");
-				}
-
-				if (keyPressed == SDLK_ESCAPE)
+				if (updateKeyState(event.type, event.key.keysym.sym))
 					running = false;
 			}
 
 			if ((event.type == SDL_MOUSEBUTTONDOWN) || (event.type == SDL_MOUSEBUTTONUP) || (event.type == SDL_MOUSEMOTION))
 			{
-				mouseX = event.button.x;
-				mouseY = event.button.y;
+				input.mouseX = event.button.x;
+				input.mouseY = event.button.y;
 			}
 
 			if (focusedPanel)
 			{
 				const int64_t dispatchStartUs = uiProfile ? gfxpp_now_us(this) : 0;
-				focusedPanel->processSubItemEvents(this, NULL, NULL, event, mouseX, mouseY);
+				focusedPanel->processSubItemEvents(this, NULL, NULL, event, input.mouseX, input.mouseY);
 				if (uiProfile)
 				{
 					const int64_t dt = gfxpp_now_us(this) - dispatchStartUs;
@@ -1233,6 +740,7 @@ void gfxpp::display()
 				profEventPumpUs += (gfxpp_now_us(this) - pumpStartUs);
 			}
 		}
+		} // if (renderBackend == RENDER_BACKEND_SDL2)
 		#endif
 
 		// If a quit was requested (window close, ESC, etc.), stop immediately.
@@ -1447,30 +955,7 @@ void gfxpp::clean2D()
 	}
 	#endif
 
-	if (cFont)
-		delete cFont;
-	cFont = NULL;
-
-	// Iterate GFonts in graphicsFonts
-	/*std::map<int, GFont*>::iterator itr = graphicsFonts.begin();
-	for (; itr != graphicsFonts.end(); ++itr)
-	{
-		if (itr->second)
-			delete itr->second;
-		itr->second = NULL;
-	}*/
-
-	// Free GL text cache (OpenGL backend only)
-#ifdef GFX_HAVE_OPENGL
-	if (renderBackend == RENDER_BACKEND_OPENGL)
-	{
-		for (std::map<std::string, GLTextRenderer*>::iterator it = glTextCache.begin(); it != glTextCache.end(); ++it)
-		{
-			delete it->second;
-		}
-		//glTextCache.clear();
-	}
-#endif
+	fontManager.cleanup(renderBackend == RENDER_BACKEND_OPENGL);
 }
 
 void gfxpp::finish()
@@ -1482,27 +967,20 @@ void gfxpp::finish()
 	focusedPanel = NULL;
 	clean2D();
 
-	if (this->draw)
-	{
-		delete this->draw;
-		this->draw = NULL;
-	}
+	this->draw.reset();
 
 #ifdef GFX_HAVE_OPENGL
 	if (renderBackend == RENDER_BACKEND_OPENGL)
 	{
 		// Destroy only if we own the GLFW lifecycle (created internally)
-		if (glfwWindow && glfwInitialized)
+		if (glfwBridge)
 		{
-			// Detach callbacks/user pointer to avoid any late callback using freed gfxpp.
-			glfwSetWindowUserPointer(glfwWindow, NULL);
-			glfwSetWindowCloseCallback(glfwWindow, NULL);
-			glfwSetKeyCallback(glfwWindow, NULL);
-			glfwSetMouseButtonCallback(glfwWindow, NULL);
-			glfwSetCursorPosCallback(glfwWindow, NULL);
-			glfwSetScrollCallback(glfwWindow, NULL);
-			glfwSetFramebufferSizeCallback(glfwWindow, NULL);
-
+			glfwBridge->detach(glfwWindow);
+			delete glfwBridge;
+			glfwBridge = NULL;
+		}
+		if (glfwWindow && glfwInitialized && ownsWindow)
+		{
 			// Clear current context before destroy to avoid dangling current context.
 			glfwMakeContextCurrent(NULL);
 			glfwDestroyWindow(glfwWindow);
@@ -1525,7 +1003,7 @@ void gfxpp::finish()
 
 	// Destroy SDL window only if we created it
 	#ifdef GFX_HAVE_SDL2
-	if (window && (renderBackend == RENDER_BACKEND_SDL2))
+	if (window && (renderBackend == RENDER_BACKEND_SDL2) && ownsWindow)
 	{
 		SDL_DestroyWindow(window);
 		window = NULL;
@@ -1533,6 +1011,11 @@ void gfxpp::finish()
 	#endif
 
 #ifdef GFX_HAVE_SDL2
+	if (systemCursor)
+	{
+		SDL_FreeCursor(systemCursor);
+		systemCursor = NULL;
+	}
 	if (ttfReady)
 		TTF_Quit();
 	ttfReady = false;
@@ -1549,33 +1032,6 @@ gfxpp::~gfxpp()
 {
 	finish();
 }
-
-#ifdef GFX_HAVE_OPENGL
-GLTextRenderer* gfxpp::getGLText(const std::string& fontPath, int pixelHeight)
-{
-	if (renderBackend != RENDER_BACKEND_OPENGL)
-		return NULL;
-
-	char keyBuf[1024];
-	keyBuf[0] = '\0';
-	// Key by path + size for reuse
-	snprintf(keyBuf, sizeof(keyBuf)-1, "%s|%d", fontPath.c_str(), pixelHeight);
-	std::string key(keyBuf);
-
-	std::map<std::string, GLTextRenderer*>::iterator it = glTextCache.find(key);
-	if (it != glTextCache.end())
-		return it->second;
-
-	GLTextRenderer* renderer = new GLTextRenderer();
-	if (!renderer->init(fontPath, pixelHeight))
-	{
-		delete renderer;
-		return NULL;
-	}
-	glTextCache.insert(std::make_pair(key, renderer));
-	return renderer;
-}
-#endif
 
 bool gfxpp::getRunning() const
 {
@@ -1630,36 +1086,13 @@ GfxCursor* gfxpp::getSystemCursor()
 #endif
 }
 
-void gfxpp::addGradient(int x, int y, int size)
+void gfxpp::setCursor(GfxCursor* newCursor)
 {
 #ifdef GFX_HAVE_SDL2
-	// check the renderer
-	if (!renderer)
-	{
-		printf("[GFX] Renderer error: %s\n", SDL_GetError());
-		return;
-	}
-
-	/*for (int i = (-(size / 2)); i < size / 2; ++i)
-	{
-		for (int j = (-(size / 2)); j < size / 2; ++j)
-		{
-			// calculate the hue
-			double hue = ((double)((i * i) + (j * j))) / ((double)(size * size));
-
-			// get the color
-			int8_t redMask = 0;
-			int8_t greenMask = 0;
-			int8_t blueMask = 0;
-			unsigned int colorMask = RGBfromHue(hue, &redMask, &greenMask, &blueMask);
-
-			// set the color and draw the point
-			SDL_SetRenderDrawColor(renderer, redMask, greenMask, blueMask, SDL_ALPHA_OPAQUE);
-			SDL_RenderDrawPoint(renderer, x + i, y + j);
-		}
-	}*/
+	if (newCursor)
+		SDL_SetCursor(newCursor);
 #else
-	(void)x; (void)y; (void)size;
+	(void)newCursor;
 #endif
 }
 
@@ -1668,27 +1101,7 @@ void gfxpp::addItem(GItem* newItem)
 	if (!newItem)
 		return;
 
-	const shmea::GString options = "0123456789";
-	const int keyLength = 6;
-	shmea::GString newItemID = "";
-	int itemID = 0;
-
-	do
-	{
-		newItemID = "";
-		for (int i = 0; i < keyLength; ++i)
-		{
-			int newIndex = rand() % options.length();
-			char newChar = options[newIndex];
-			newItemID += newChar;
-		}
-
-		itemID = atoi(newItemID.c_str());
-
-	} while (getItemByID(itemID)); // Generate new item id if already used
-
-	// Assign same id to object of GItem and add it
-	newItem->setID(itemID);
+	newItem->setID(nextItemID++);
 	guiElements.push_back(newItem);
 }
 
@@ -1702,7 +1115,11 @@ void gfxpp::removeItem(int itemID)
 	{
 		if (guiElements[i]->getID() == itemID)
 		{
+			GItem* removed = guiElements[i];
+			if (focusedItem == removed)
+				focusedItem = NULL;
 			guiElements.erase(guiElements.begin() + i);
+			delete removed;
 			break;
 		}
 	}

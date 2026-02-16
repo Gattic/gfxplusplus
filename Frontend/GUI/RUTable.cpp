@@ -158,26 +158,16 @@ void RUTable::updateLabels()
 	if (maxRows > numberOfRows())
 		maxRows = numberOfRows();
 
-	// Trim the rows
+	// Delete all old labels
 	subitems.clear();
 	for (unsigned int row = 0; row < textLabels.size(); ++row)
 	{
-		int toggleVis = 0;
-		if (row >= numberOfRows())
-			++toggleVis;
-
-		// Trim the cols
 		for (unsigned int col = 0; col < textLabels[row].size(); ++col)
 		{
-			if ((col >= textLabels[row].size()) || (toggleVis > 0))
-			{
-				RULabel* cLabel = textLabels[row][col];
-				if (!cLabel)
-					continue;
-
-				cLabel->setVisible(false);
-				delete cLabel;
-			}
+			RULabel* cLabel = textLabels[row][col];
+			if (!cLabel)
+				continue;
+			delete cLabel;
 		}
 	}
 	textLabels.clear();
@@ -200,22 +190,15 @@ void RUTable::updateLabels()
 	}
 
 	// Put the scrollbar back
-	int newMaxValue = numberOfRows();
-	if (newMaxValue < 0)
-	{
-		newMaxValue = numberOfRows();
-		scrollbar->setVisible(false);
-	}
-	else
-		scrollbar->setVisible(true);
-	scrollbar->setMaxValue(newMaxValue);
+	scrollbar->setMaxValue(numberOfRows());
+	scrollbar->setVisible(numberOfRows() > rowsShown);
 
 	// update the labels
 	int cellHeight = height / rowsShown;
 	int cellWidth = width / numberOfCols();
 	if (scrollbar->isVisible())
 		cellWidth = (width - scrollbar->getWidth()) / numberOfCols();
-	for (unsigned int row = 0; row < maxRows; ++row)
+	for (unsigned int row = cIndex; row < maxRows; ++row)
 	{
 		std::vector<RULabel*> newRow;
 		for (unsigned int col = 0; col < numberOfCols(); ++col)
@@ -224,19 +207,15 @@ void RUTable::updateLabels()
 			newItem->setAutoWidthToText(false);
 			newItem->setText(getCell(row, col));
 			newItem->setMarginX(col * cellWidth);
-			newItem->setMarginY(row * cellHeight);
+			newItem->setMarginY((row - cIndex) * cellHeight);
 			newItem->setWidth(cellWidth);
 			newItem->setHeight(cellHeight);
-			// newItem->setFontSize(cellHeight / 2);
 			newItem->toggleBorder(true);
 			newRow.push_back(newItem);
 			addSubItem(newItem);
 		}
 		textLabels.push_back(newRow);
 	}
-
-	// Refresh the text in the labels
-	refreshLabels();
 
 	std::pair<int, int> offset(0, 0);
 	calculateSubItemPositions(offset);
