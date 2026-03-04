@@ -354,7 +354,7 @@ shmea::GString RUListbox::getType() const
 	return "RUListbox";
 }
 
-void RUListbox::unhover()
+void RUListbox::unhover(gfxpp*)
 {
 	if (itemHovered != (unsigned int)-1)
 	{

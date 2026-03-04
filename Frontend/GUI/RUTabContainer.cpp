@@ -390,7 +390,7 @@ void RUTabContainer::updateLabels()
 	drawUpdate = true;
 }
 
-void RUTabContainer::unhover()
+void RUTabContainer::unhover(gfxpp*)
 {
 	if (itemHovered != (unsigned int)-1)
 	{
