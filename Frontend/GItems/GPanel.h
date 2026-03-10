@@ -18,7 +18,7 @@
 #define _GPANEL
 
 #include "GItem.h"
-#include "Backend/Database/GMutex.h"
+#include "Backend/Core/GMutex.h"
 #include "Backend/Database/ServiceData.h"
 #include "Backend/Database/GString.h"
 #include "Backend/Database/GPointer.h"

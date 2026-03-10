@@ -18,6 +18,10 @@
 #include "point2.h"
 //#include "../Graphics/graphics.h"
 
+#ifdef _MSC_VER
+double ActionBubble::AB_DEFAULT_RADIUS = 20.0;
+#endif
+
 ActionBubble::ActionBubble()
 {
 	radius = AB_DEFAULT_RADIUS;

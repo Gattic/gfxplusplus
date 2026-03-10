@@ -2,31 +2,41 @@ if(NOT (${CMAKE_BINARY_DIR} STREQUAL "${CMAKE_SOURCE_DIR}/build"))
 	message(FATAL_ERROR "Must be in \"build\" directory")
 endif()
 
-set (CMAKE_INSTALL_PREFIX "$ENV{HOME}/.local" CACHE PATH "default install path" FORCE)
+if(WIN32)
+    set(CMAKE_INSTALL_PREFIX "$ENV{USERPROFILE}/gfxplusplus" CACHE PATH "default install path" FORCE)
+else()
+    set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/.local" CACHE PATH "default install path" FORCE)
+endif()
 file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/include)
 
 #Init
 cmake_minimum_required(VERSION 3.5.1)
+cmake_policy(SET CMP0091 NEW)
 set(CMAKE_CXX_STANDARD 98)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 #Compiler Flags
-#set(DEFAULT_BUILD_TYPE "Release")
-set(CMAKE_BUILD_TYPE Release) # -O3 -g
-
-if(WIN32)
-	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
-else()
-	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC") # its set below
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-variable -Wno-unused-parameter")
-endif()
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g")
+set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 #Project
 project(gfxplusplus)
 set(G_VERSION_MAJOR 0)
 set(G_VERSION_MINOR 58)
+
+# Compiler flags must come after project() so MSVC variable is available
+if(MSVC)
+    add_compile_options(/W3 /wd4101 /wd4100)
+    add_compile_definitions(NOMINMAX _CRT_SECURE_NO_WARNINGS)
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+elseif(WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g")
+else()
+    set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-variable -Wno-unused-parameter")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g")
+endif()
 
 # Backend build options
 option(ENABLE_SDL2 "Build with SDL2 backend" OFF)
@@ -50,11 +60,14 @@ endif()
 #Import libs
 find_package(shmea REQUIRED)
 
+# Make shmea headers available to all sub-libraries
+get_target_property(SHMEA_INCLUDE_DIRS shmea INTERFACE_INCLUDE_DIRECTORIES)
+include_directories(${SHMEA_INCLUDE_DIRS})
+
 include(GNUInstallDirs)
 
 #Subdirectories
 include_directories(${CMAKE_SOURCE_DIR})
-include_directories("include")
 include_directories("services")
 add_subdirectory("Frontend/GFXUtilities")
 add_subdirectory("Frontend/Graphics")
@@ -72,19 +85,7 @@ add_library(${PROJECT_NAME} SHARED ${MAIN_SRC_FILES})
 
 #Link libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
-	GFX GU GUI TextC GLayout GraphGUI GFXItem GNet DB)
-
-#target_include_directories(gfxplusplus PUBLIC "include")
-#target_include_directories(gfxplusplus PUBLIC "Frontend")
-target_include_directories(gfxplusplus PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>  # <prefix>/include
-)
-
-#target_include_directories(${PROJECT_NAME} PUBLIC
-#    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#    $<INSTALL_INTERFACE:include>
-#    PRIVATE Frontend)
+	GFX GU GUI TextC GLayout GraphGUI GFXItem shmea)
 
 install(TARGETS ${PROJECT_NAME} EXPORT gfxplusplusConfig
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
@@ -96,11 +97,15 @@ install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
 
 export(TARGETS ${PROJECT_NAME} FILE gfxplusplusConfig.cmake)
 
+if(NOT WIN32)
+
 #make fmt
 add_custom_target(fmt
 	COMMAND ./clang-format-all
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
+
+endif()
 
 #make fullscreen
 add_custom_target(fullscreen
@@ -115,6 +120,8 @@ add_custom_target(nogui
 	DEPENDS ${PROJECT_NAME}
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
+
+if(NOT WIN32)
 
 #make debug
 add_custom_target(debug
@@ -142,3 +149,5 @@ add_custom_target(debug
 	COMMAND xargs rm < ./build/install_manifest.txt
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
+
+endif()

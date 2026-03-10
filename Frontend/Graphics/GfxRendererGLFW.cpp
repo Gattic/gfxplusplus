@@ -5,9 +5,14 @@
 
 #if !defined(GFX_HAVE_SDL2)
 #include "GfxTextureGL.h"
+#ifndef _WIN32
 #include <GL/glext.h>
+#endif
 
 // Fallback constants if headers don't provide them (common without GLEW).
+#ifndef GL_CLAMP_TO_EDGE
+#define GL_CLAMP_TO_EDGE 0x812F
+#endif
 #ifndef GL_FRAMEBUFFER
 #define GL_FRAMEBUFFER 0x8D40
 #endif

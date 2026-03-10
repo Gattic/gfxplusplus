@@ -18,7 +18,6 @@
 #define _GRAPHABLEATTR_H
 
 #include "../Graphics/GfxTypes.h"
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>

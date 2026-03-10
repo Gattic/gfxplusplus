@@ -17,7 +17,6 @@
 #ifndef _GRAPHABLE_H
 #define _GRAPHABLE_H
 
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>

@@ -20,7 +20,6 @@
 #include "RUGraph.h"
 #include "../Graphics/GfxTypes.h"
 #include <map>
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>

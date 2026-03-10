@@ -177,7 +177,7 @@ public:
 	bool getRunning() const;
 
 	// Event listeners (available for both SDL2 and OpenGL builds)
-	void addEventListener(EventListenerFn fn, void* userData) { if(fn) listeners.push_back((EventListener){fn, userData}); }
+	void addEventListener(EventListenerFn fn, void* userData) { if(fn) { EventListener el; el.fn = fn; el.userData = userData; listeners.push_back(el); } }
 };
 
 #endif

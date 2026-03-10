@@ -21,7 +21,7 @@
 #include "../GItems/RUComponent.h"
 #include "GeneralGraphable.h"
 #include <map>
-#include <pthread.h>
+#include "Backend/Core/GThread.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>

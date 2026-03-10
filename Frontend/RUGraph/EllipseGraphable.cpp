@@ -19,8 +19,11 @@
 #include "../GFXUtilities/Ellipse.h"
 #include "../Graphics/GfxRenderer.h"
 
+// On Windows, wingdi.h declares an Ellipse() function that hides our Ellipse class.
+// Use elaborated type specifier "class Ellipse" to refer to the class unambiguously.
+
 template <>
-void Graphable<Ellipse>::computeAxisRanges(bool additionOptimization)
+void Graphable<class Ellipse>::computeAxisRanges(bool additionOptimization)
 {
 	if (!parent)
 		return;
@@ -38,7 +41,7 @@ void Graphable<Ellipse>::computeAxisRanges(bool additionOptimization)
 	unsigned int i = 0;
 	for (; i < points.size(); ++i)
 	{
-		Ellipse* pt = points[i];
+		class Ellipse* pt = points[i];
 		const Point2* f = pt->getFocalPoint(0);
 		if (!f)
 			continue;
@@ -63,7 +66,7 @@ void Graphable<Ellipse>::computeAxisRanges(bool additionOptimization)
 }
 
 template <>
-void Graphable<Ellipse>::draw(gfxpp* cGfx)
+void Graphable<class Ellipse>::draw(gfxpp* cGfx)
 {
 	if (!parent)
 		return;
@@ -74,7 +77,7 @@ void Graphable<Ellipse>::draw(gfxpp* cGfx)
 
 	for (unsigned int p = 0; p < normalizedPoints.size(); ++p)
 	{
-		Ellipse* pt = normalizedPoints[p];
+		class Ellipse* pt = normalizedPoints[p];
 		if (!pt)
 			continue;
 

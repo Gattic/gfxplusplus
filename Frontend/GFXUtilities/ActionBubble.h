@@ -19,7 +19,6 @@
 
 // removed SDL includes; this header should be backend-agnostic
 #include <map>
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -40,7 +39,11 @@ protected:
 
 public:
 
+#ifdef _MSC_VER
+	static double AB_DEFAULT_RADIUS;
+#else
 	const static double AB_DEFAULT_RADIUS = 20.0f;
+#endif
 
 	const static int ACTION_BUY = 0;
 	const static int ACTION_SELL = 1;

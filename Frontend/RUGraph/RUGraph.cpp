@@ -441,10 +441,9 @@ shmea::GString RUGraph::getType() const
 void RUGraph::update()
 {
 	// launch a new thread as to not block the graph
-	pthread_t* cThread = (pthread_t*)malloc(sizeof(pthread_t));
-	pthread_create(cThread, NULL, &computeGraph, (void*)this);
-	if (cThread)
-		pthread_detach(*cThread);
+	shmea::GThread* cThread = new shmea::GThread();
+	if (cThread->start(&computeGraph, (void*)this))
+		cThread->detach();
 }
 
 void* RUGraph::computeGraph(void* y)

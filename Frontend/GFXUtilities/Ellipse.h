@@ -19,7 +19,6 @@
 
 // removed SDL includes; this header should be backend-agnostic
 #include <map>
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>

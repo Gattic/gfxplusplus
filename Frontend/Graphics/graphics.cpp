@@ -29,9 +29,13 @@
 #ifdef GFX_HAVE_OPENGL
 #include <GLFW/glfw3.h>
 #endif
-#include <unistd.h>
 #include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
 #include <sys/time.h>
+#endif
 
 // Monotonic-ish time in milliseconds for both backends.
 // (C++98: helper free function)
@@ -61,9 +65,16 @@ static int64_t gfxpp_now_us(const gfxpp* g)
 		return (int64_t)(glfwGetTime() * 1000000.0);
 #endif
 	// Fallback: wall-clock microseconds.
+#ifdef _WIN32
+	LARGE_INTEGER freq, cnt;
+	QueryPerformanceFrequency(&freq);
+	QueryPerformanceCounter(&cnt);
+	return (int64_t)(cnt.QuadPart * 1000000LL / freq.QuadPart);
+#else
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return (int64_t)tv.tv_sec * 1000000LL + (int64_t)tv.tv_usec;
+#endif
 }
 
 static bool gfxpp_ui_profile_enabled()
@@ -910,7 +921,11 @@ void gfxpp::display()
 					SDL_Delay((Uint32)sleepMs);
 				else
 #endif
+#ifdef _WIN32
+					Sleep((DWORD)sleepMs);
+#else
 					usleep((useconds_t)(sleepMs * 1000));
+#endif
 
 				frameEndMs = gfxpp_now_ms(this);
 				frameMs = frameEndMs - frameStartMs;
