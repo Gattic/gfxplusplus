@@ -10,3 +10,4 @@ alpaca.key
 *.vim
 docs/
 .vscode/
+include/

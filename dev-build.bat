@@ -1,25 +1,23 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Usage: build-and-install.bat [VS_VERSION] [sdl2]
+:: Usage: dev-build.bat [VS_VERSION]
 :: Examples:
-::   build-and-install.bat              (VS 2022, OpenGL backend)
-::   build-and-install.bat 2022 sdl2    (VS 2022, SDL2 backend)
+::   dev-build.bat              (VS 2022)
+::   dev-build.bat 2019         (VS 2019)
+::
+:: Dev mode copies shmea headers from ../ShmeaDB into include/
+:: so they stay in sync with the source tree.
 
 set "VS_VER=2022"
 if not "%~1"=="" set "VS_VER=%~1"
 
-set "CMAKE_PRESET=windows-release"
-set "BACKEND=OpenGL"
-if /i "%~2"=="sdl2" (
-    set "CMAKE_PRESET=windows-sdl2"
-    set "BACKEND=SDL2"
-)
+set "CMAKE_PRESET=windows-dev"
 
 echo ============================================
-echo  gfxplusplus - Build and Install (Windows)
+echo  gfxplusplus - Dev Build (Windows)
 echo  Visual Studio version: !VS_VER!
-echo  Graphics backend: !BACKEND!
+echo  DEV_MODE: copying shmea headers from ..\ShmeaDB
 echo ============================================
 echo.
 
@@ -82,7 +80,6 @@ echo         Install it with: vcpkg install freetype:x64-windows
 exit /b 1
 
 :freetype_ok
-:: If VCPKG_ROOT was reset, clear any stale CMake cache that points to the old path
 if exist "build\CMakeCache.txt" (
     echo [FIX] Clearing stale CMake cache...
     rmdir /s /q build >nul 2>&1
@@ -91,14 +88,21 @@ if exist "build\CMakeCache.txt" (
 echo [OK] VCPKG_ROOT = !VCPKG_ROOT!
 
 :: --------------------------------------------------
-:: 3. Verify ShmeaDB is installed
+:: 3. Verify ShmeaDB source and installed lib
 :: --------------------------------------------------
-if not exist "%USERPROFILE%\shmea\bin\shmea.dll" (
-    echo [ERROR] shmea.dll not found at %USERPROFILE%\shmea\bin\shmea.dll
-    echo         Build and install ShmeaDB first.
+if not exist "..\ShmeaDB\Backend" (
+    echo [ERROR] ShmeaDB source not found at ..\ShmeaDB
+    echo         DEV_MODE needs the ShmeaDB source tree as a sibling directory.
     exit /b 1
 )
-echo [OK] ShmeaDB installation found at %USERPROFILE%\shmea
+echo [OK] ShmeaDB source found at ..\ShmeaDB
+
+if not exist "!USERPROFILE!\shmea\bin\shmea.dll" (
+    echo [ERROR] shmea.dll not found at !USERPROFILE!\shmea\bin\shmea.dll
+    echo         Build and install ShmeaDB first, needed for linking.
+    exit /b 1
+)
+echo [OK] ShmeaDB installation found at !USERPROFILE!\shmea
 
 :: --------------------------------------------------
 :: 4. Verify prerequisites
@@ -120,16 +124,7 @@ echo [OK] ninja found.
 echo.
 
 :: --------------------------------------------------
-:: 5. Clean dev-mode include/ to ensure prod headers
-:: --------------------------------------------------
-if exist "include\Backend" (
-    echo [CLEAN] Removing dev-mode include/ to use installed shmea headers...
-    rmdir /s /q "include" >nul 2>&1
-    echo [OK] Dev include/ removed.
-)
-
-:: --------------------------------------------------
-:: 6. Configure
+:: 5. Configure
 :: --------------------------------------------------
 echo [STEP] Configuring with CMake preset '!CMAKE_PRESET!'...
 cmake --preset !CMAKE_PRESET!
@@ -165,7 +160,8 @@ echo [OK] Installed to %USERPROFILE%\gfxplusplus
 echo.
 
 echo ============================================
-echo  Done! gfxplusplus installed to %USERPROFILE%\gfxplusplus
+echo  Done! gfxplusplus dev build installed to %USERPROFILE%\gfxplusplus
+echo  Shmea headers copied to include\Backend\
 echo ============================================
 
 endlocal
