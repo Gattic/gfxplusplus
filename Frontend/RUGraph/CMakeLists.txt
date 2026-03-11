@@ -17,11 +17,10 @@ set(GraphGUI_src_files
 )
 add_library(GraphGUI ${GraphGUI_src_files})
 
-install(TARGETS GraphGUI EXPORT gfxplusplusConfig
+install(TARGETS GraphGUI EXPORT gfxplusplusTargets
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
+install(EXPORT gfxplusplusTargets DESTINATION share/gfxplusplus/cmake)
 
-export(TARGETS GraphGUI FILE gfxplusplusConfig.cmake)

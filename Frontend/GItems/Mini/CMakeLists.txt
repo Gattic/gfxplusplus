@@ -44,11 +44,10 @@ else()
 endif()
 endif()
 
-install(TARGETS MiniC EXPORT gfxplusplusConfig
+install(TARGETS MiniC EXPORT gfxplusplusTargets
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
+install(EXPORT gfxplusplusTargets DESTINATION share/gfxplusplus/cmake)
 
-export(TARGETS MiniC FILE gfxplusplusConfig.cmake)

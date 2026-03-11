@@ -71,11 +71,10 @@ else()
 endif()
 endif()
 
-install(TARGETS GFX EXPORT gfxplusplusConfig
+install(TARGETS GFX EXPORT gfxplusplusTargets
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
+install(EXPORT gfxplusplusTargets DESTINATION share/gfxplusplus/cmake)
 
-export(TARGETS GFX FILE gfxplusplusConfig.cmake)

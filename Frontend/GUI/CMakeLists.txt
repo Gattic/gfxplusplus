@@ -57,11 +57,10 @@ if(ENABLE_OPENGL)
     target_link_libraries(GUI ${OPENGL_LIBRARIES})
 endif()
 
-install(TARGETS GUI EXPORT gfxplusplusConfig
+install(TARGETS GUI EXPORT gfxplusplusTargets
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
+install(EXPORT gfxplusplusTargets DESTINATION share/gfxplusplus/cmake)
 
-export(TARGETS GUI FILE gfxplusplusConfig.cmake)

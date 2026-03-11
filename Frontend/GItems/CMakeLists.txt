@@ -29,11 +29,10 @@ if(ENABLE_OPENGL)
     target_link_libraries(GFXItem PUBLIC ${OPENGL_LIBRARIES})
 endif()
 
-install(TARGETS GFXItem EXPORT gfxplusplusConfig
+install(TARGETS GFXItem EXPORT gfxplusplusTargets
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
+install(EXPORT gfxplusplusTargets DESTINATION share/gfxplusplus/cmake)
 
-export(TARGETS GFXItem FILE gfxplusplusConfig.cmake)

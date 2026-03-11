@@ -240,8 +240,14 @@ void GPanel::processQ(gfxpp* cGfx)
 
 void GPanel::addToQ(const shmea::ServiceData* cData)
 {
+	if (!cData)
+		return;
+
+	// Copy the data so the queue owns its own instance.
+	// The networking layer frees the original after execute() returns.
+	const shmea::ServiceData* copy = new shmea::ServiceData(*cData);
     shmea::GMutexLock lock(qMutex.get());
-	updateQueue.push(cData);
+	updateQueue.push(copy);
 }
 
 void GPanel::popQ()

@@ -21,7 +21,11 @@
 
 GFont::GFont()
 {
+#ifdef _WIN32
+	fontPath = "C:/Windows/Fonts/segoeui.ttf";
+#else
 	fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+#endif
 	fontSize = DEFAULT_FONT_SIZE;
 	font = NULL;
 	ownsTTF = false;
@@ -32,9 +36,16 @@ GFont::GFont()
 		if (!font)
 		{
 			const char* sysFonts[] = {
+#ifdef _WIN32
+				"C:/Windows/Fonts/arial.ttf",
+				"C:/Windows/Fonts/verdana.ttf",
+				"C:/Windows/Fonts/tahoma.ttf",
+				"C:/Windows/Fonts/consola.ttf",
+#else
 				"/usr/share/fonts/truetype/freefont/FreeSans.ttf",
 				"/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
 				"/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+#endif
 				"resources/fonts/osaka-re.ttf",
 				"resources/fonts/Open_Sans/OpenSans-SemiBold.ttf"
 			};
@@ -69,7 +80,13 @@ GFont::GFont(GfxNativeRenderer* newRenderer, shmea::GString newFontPath)
 	cRenderer = newRenderer;
 	fontPath = newFontPath;
 	if (fontPath.length() == 0)
+	{
+#ifdef _WIN32
+		fontPath = "C:/Windows/Fonts/segoeui.ttf";
+#else
 		fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+#endif
+	}
 
 	fontSize = DEFAULT_FONT_SIZE;
 	font = NULL;
@@ -81,10 +98,17 @@ GFont::GFont(GfxNativeRenderer* newRenderer, shmea::GString newFontPath)
 		if (!font)
 		{
 			const char* sysFonts[] = {
+#ifdef _WIN32
+				"C:/Windows/Fonts/segoeui.ttf",
+				"C:/Windows/Fonts/arial.ttf",
+				"C:/Windows/Fonts/verdana.ttf",
+				"C:/Windows/Fonts/consola.ttf",
+#else
 				"/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
 				"/usr/share/fonts/truetype/freefont/FreeSans.ttf",
 				"/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
 				"/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+#endif
 				"resources/fonts/osaka-re.ttf",
 				"resources/fonts/Open_Sans/OpenSans-SemiBold.ttf"
 			};

@@ -667,7 +667,10 @@ void gfxpp::display()
 		{
 			const int64_t pumpStartUs = uiProfile ? gfxpp_now_us(this) : 0;
 			if (glfwBridge->isCloseRequested())
+			{
+				printf("[GFX] exit: glfwBridge close requested (frame %d)\n", frames);
 				running = false;
+			}
 			std::vector<GfxEvent> glfwEvents;
 			glfwBridge->drainEvents(glfwEvents);
 			for (size_t qi = 0; qi < glfwEvents.size(); ++qi)
@@ -678,9 +681,12 @@ void gfxpp::display()
 				if (e2.type == SDL_KEYUP || e2.type == SDL_KEYDOWN)
 				{
 					if (updateKeyState(e2.type, e2.key.keysym.sym))
+					{
+						printf("[GFX] exit: key quit (frame %d, key=%d)\n", frames, (int)e2.key.keysym.sym);
 						running = false;
+					}
 				}
-				if (e2.type == SDL_QUIT) running = false;
+				if (e2.type == SDL_QUIT) { printf("[GFX] exit: SDL_QUIT event (frame %d)\n", frames); running = false; }
 				if (focusedPanel)
 				{
 					const int64_t dispatchStartUs = uiProfile ? gfxpp_now_us(this) : 0;
@@ -763,7 +769,10 @@ void gfxpp::display()
 			// Backup: in case a close callback is not installed/triggered, honor the
 			// native close request directly.
 			if (glfwWindowShouldClose(glfwWindow))
+			{
+				printf("[GFX] exit: glfwWindowShouldClose (frame %d)\n", frames);
 				running = false;
+			}
 		}
 		#endif
 		if (!running)

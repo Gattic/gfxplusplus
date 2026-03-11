@@ -47,11 +47,10 @@ if(ENABLE_OPENGL AND ENABLE_SDL2)
 	target_link_libraries(TextC PUBLIC ${OPENGL_LIBRARIES})
 endif()
 
-install(TARGETS TextC EXPORT gfxplusplusConfig
+install(TARGETS TextC EXPORT gfxplusplusTargets
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(EXPORT gfxplusplusConfig DESTINATION share/gfxplusplus/cmake)
+install(EXPORT gfxplusplusTargets DESTINATION share/gfxplusplus/cmake)
 
-export(TARGETS TextC FILE gfxplusplusConfig.cmake)

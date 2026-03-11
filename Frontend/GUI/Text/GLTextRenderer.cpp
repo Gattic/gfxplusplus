@@ -35,11 +35,19 @@ bool GLTextRenderer::init(const std::string& fontPath, int pixelHeight)
 	std::vector<std::string> candidates;
 	candidates.push_back(fontPath);
 	candidates.push_back("./" + fontPath);
+#ifdef _WIN32
+	candidates.push_back("C:/Windows/Fonts/segoeui.ttf");
+	candidates.push_back("C:/Windows/Fonts/arial.ttf");
+	candidates.push_back("C:/Windows/Fonts/verdana.ttf");
+	candidates.push_back("C:/Windows/Fonts/tahoma.ttf");
+	candidates.push_back("C:/Windows/Fonts/consola.ttf");
+#else
 	candidates.push_back("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
 	candidates.push_back("/usr/share/fonts/truetype/freefont/FreeSans.ttf");
 	candidates.push_back("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf");
 	candidates.push_back("/usr/share/fonts/open-sans/OpenSans-Regular.ttf");
 	candidates.push_back("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf");
+#endif
 	candidates.push_back("resources/fonts/osaka-re.ttf");
 	candidates.push_back("resources/fonts/Open_Sans/OpenSans-SemiBold.ttf");
 	bool faceOk = false;
@@ -49,7 +57,10 @@ bool GLTextRenderer::init(const std::string& fontPath, int pixelHeight)
 			faceOk = true;
 	}
 	if (!faceOk)
+	{
+		printf("[GFX] GLTextRenderer: failed to load any font\n");
 		return false;
+	}
 	FT_Set_Pixel_Sizes(face, 0, pixelHeight);
 
 	// Prepare OpenGL state
@@ -120,10 +131,18 @@ bool GLTextRenderer::initOrUpdate(const std::string& fontPath, int pixelHeight)
     std::vector<std::string> candidates;
     candidates.push_back(fontPath);
     candidates.push_back("./" + fontPath);
+#ifdef _WIN32
+    candidates.push_back("C:/Windows/Fonts/segoeui.ttf");
+    candidates.push_back("C:/Windows/Fonts/arial.ttf");
+    candidates.push_back("C:/Windows/Fonts/verdana.ttf");
+    candidates.push_back("C:/Windows/Fonts/tahoma.ttf");
+    candidates.push_back("C:/Windows/Fonts/consola.ttf");
+#else
     candidates.push_back("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
     candidates.push_back("/usr/share/fonts/truetype/freefont/FreeSans.ttf");
     candidates.push_back("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf");
     candidates.push_back("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf");
+#endif
     candidates.push_back("resources/fonts/osaka-re.ttf");
     candidates.push_back("resources/fonts/Open_Sans/OpenSans-SemiBold.ttf");
     bool faceOk = false;

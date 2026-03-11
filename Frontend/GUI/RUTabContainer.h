@@ -18,6 +18,7 @@
 #define _RUTABCONTAINER
 
 #include "../GItems/RUComponent.h"
+#include "../GItems/GPanel.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
