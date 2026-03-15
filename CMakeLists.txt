@@ -113,7 +113,7 @@ add_library(${PROJECT_NAME} SHARED ${MAIN_SRC_FILES})
 
 #Link libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC
-	GFX GU GUI TextC GLayout GraphGUI GFXItem shmea)
+	GFX GU GUI TextC GLayout GraphGUI GFXItem shmea ${FREETYPE_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME} EXPORT gfxplusplusTargets
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
