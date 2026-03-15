@@ -61,6 +61,7 @@ endif()
 #Import libs
 if(NOT WIN32)
     list(APPEND CMAKE_PREFIX_PATH "$ENV{HOME}/.local")
+    link_directories("$ENV{HOME}/.local/lib")
 endif()
 find_package(shmea REQUIRED)
 if(DEV_MODE)
