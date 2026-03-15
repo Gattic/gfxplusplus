@@ -59,6 +59,9 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 #Import libs
+if(NOT WIN32)
+    list(APPEND CMAKE_PREFIX_PATH "$ENV{HOME}/.local")
+endif()
 find_package(shmea REQUIRED)
 if(DEV_MODE)
     # Dev mode: copy shmea headers from source tree into include/
